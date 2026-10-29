@@ -225,7 +225,7 @@ La suite cubre:
 - compatibilidad con `fullscreen`;
 - advertencias de configuración inválida;
 - política de formatos;
-- nombres de exportación y no sobrescritura;
+- nombres de exportación y no sobrescritura atómica;
 - códecs WebP/JPG/PNG/AVIF/JPEG XL;
 - orientación EXIF 1, 3, 6 y 8;
 - transparencia PNG/JPEG XL y aplanado JPG;

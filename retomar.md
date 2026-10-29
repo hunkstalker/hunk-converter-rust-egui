@@ -28,7 +28,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
 - Pie con enlace directo a `github.com/hunkstalker/hunk-converter`, abierto en el navegador.
-- Exportación directa a `export/`, sin sobrescribir y con nombres saneados.
+- Exportación directa a `export/`, sin sobrescribir, con nombres saneados y creación atómica.
 - Procesamiento en hilo aparte con debounce y descarte de resultados obsoletos.
 - Reinicio, atajos y avisos de error.
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
@@ -122,12 +122,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `todo.md` (t-18, t-22 y t-34).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-19, t-20, t-21, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32 y t-33).
+- Pendientes: `todo.md` (t-22 y t-34).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32 y t-33).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente tarea recomendada: **t-34 — optimizar el CI para 1.1.0**. Quedan t-18 y t-22.
+Siguiente tarea recomendada: **t-34 — optimizar el CI para 1.1.0**. Queda t-22.
 
 ## 7. Benchmarks y límites
 
@@ -142,7 +142,6 @@ El informe completo está en `docs/benchmark-2026-10-28.md`.
 Pendientes conocidos:
 
 - Accesibilidad completa (`t-22`).
-- Selector de carpeta de salida (`t-18`).
 - Firma y notarización de macOS descartada; la build universal se distribuye sin firmar.
 - Optimización del CI y caché (`t-34`).
 

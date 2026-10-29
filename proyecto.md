@@ -104,6 +104,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 - Guardado directo en la carpeta **`export/`** situada junto al ejecutable.
 - La carpeta se crea si no existe.
 - El nombre base se conserva; si el destino ya existe se añaden `-2`, `-3`, etc.
+- La creación es atómica: nunca se sobrescribe un archivo, aunque aparezca entre la comprobación y la escritura.
 - El nombre se sanea para Windows.
 - Los errores de permisos o escritura se comunican mediante aviso.
 - La build portable incluye una carpeta `export/` vacía junto al ejecutable.

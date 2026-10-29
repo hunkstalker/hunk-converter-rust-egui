@@ -206,3 +206,10 @@
 
 **Completada:** 2026-10-29
 **Resultado:** Navegación con rueda, pinza, paneo con clic derecho y atajos (`0`/`F` ajustar, `1` tamaño real, `+`/`-` pasos de zoom), sin botones en la cabecera. La imagen se abre al 100 %. El divisor llega a los bordes superior e inferior y el porcentaje de zoom queda centrado con “Vista previa”. La posición y el tamaño de la ventana se persisten en `config.ini`. Suite ampliada a 31 pruebas y capturas de documentación regeneradas.
+
+## t-18 — Exportación segura a `export/`
+
+**Descripción:** Mantener `export/` junto al ejecutable como destino fijo, sin selector de ubicación. Evitar sobrescrituras mediante creación atómica de archivos nuevos con sufijos `-2`, `-3`, etc., y avisar si la carpeta no se puede crear o escribir.
+
+**Completada:** 2026-10-29
+**Resultado:** Exportación fija a `export/`, sin selector de carpeta. El archivo se crea con `OpenOptions::create_new(true)`, de modo que comprobación y creación son atómicas; ante una colisión se prueban `nombre-2.ext`, `nombre-3.ext`, etc. Si la escritura falla, se elimina el archivo parcial. Validado con una exportación real que dejó intacto un `demo.webp` preexistente y creó `demo-2.webp`.

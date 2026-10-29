@@ -114,7 +114,7 @@ cargo run --release
 5. Activa el cuentagotas si necesitas extraer colores.
 6. Pulsa **Exportar** o `Ctrl+E`.
 
-El archivo aparece en `export/`, junto a la aplicación. Si el nombre existe, se añade `-2`, `-3`, etc.
+El archivo aparece en `export/`, junto a la aplicación. Si el nombre existe, se añade `-2`, `-3`, etc. La creación es atómica, sin ventana de carrera entre comprobar y escribir.
 
 ### Atajos
 
