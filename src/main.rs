@@ -6,6 +6,7 @@ use hunk_converter::settings;
 
 fn main() -> eframe::Result {
     let icon = window_icon();
+    let mut settings = settings::Settings::load();
     let inner_size = std::env::var("HUNK_SIZE")
         .ok()
         .and_then(|value| {
@@ -15,21 +16,26 @@ fn main() -> eframe::Result {
                 height.trim().parse::<f32>().ok()?,
             ])
         })
-        .unwrap_or([1280.0, 800.0]);
-    let mut settings = settings::Settings::load();
+        .unwrap_or([settings.window.width, settings.window.height]);
     let windowed = std::env::var_os("HUNK_WINDOWED").is_some();
     let maximized = settings.maximized && !windowed;
     settings.maximized = maximized;
 
+    let mut viewport = egui::ViewportBuilder::default()
+        .with_title("HUNK Converter · Image Toolbox")
+        .with_inner_size(inner_size)
+        .with_min_inner_size([1024.0, 800.0])
+        .with_maximized(maximized)
+        .with_icon(icon);
+    let has_position = settings.window.x.is_some() && settings.window.y.is_some();
+    if let (Some(x), Some(y)) = (settings.window.x, settings.window.y) {
+        viewport = viewport.with_position([x, y]);
+    }
+
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_title("HUNK Converter · Image Toolbox")
-            .with_inner_size(inner_size)
-            .with_min_inner_size([1024.0, 800.0])
-            .with_maximized(maximized)
-            .with_icon(icon),
+        viewport,
         renderer: eframe::Renderer::Glow,
-        centered: true,
+        centered: !has_position,
         ..Default::default()
     };
 

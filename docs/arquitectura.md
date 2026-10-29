@@ -190,6 +190,12 @@ guardado se registran en `stderr`.
 language=es
 maximized=1
 
+[window]
+x=120
+y=80
+width=1280
+height=800
+
 [history]
 count=2
 color1=#7C7E78FF|1
@@ -203,6 +209,9 @@ Decisiones:
 - Al llenarse el historial se sustituye el color libre más antiguo.
 - `maximized` sustituye al antiguo `fullscreen`; el valor antiguo se acepta
   para no romper configuraciones existentes.
+- `[window]` guarda posición y tamaño de la ventana cuando no está maximizada.
+  Al restaurar se usa la posición guardada; el sistema operativo la corrige si
+  el monitor ya no existe.
 - El parser devuelve advertencias con número de línea para entradas inválidas,
   en lugar de ignorarlas en silencio.
 - La persistencia de bloqueos está cubierta por pruebas de ida y vuelta.
@@ -212,7 +221,7 @@ Decisiones:
 La suite cubre:
 
 - reglas del historial y bloqueos;
-- ida y vuelta de `config.ini`, incluidos colores fijados;
+- ida y vuelta de `config.ini`, incluidos colores fijados y geometría de ventana;
 - compatibilidad con `fullscreen`;
 - advertencias de configuración inválida;
 - política de formatos;
@@ -224,7 +233,7 @@ La suite cubre:
 - estructura ICO;
 - códigos de color.
 
-Estado actual: **29 pruebas**, `cargo fmt --check` y
+Estado actual: **31 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 7. Decisiones deliberadamente descartadas

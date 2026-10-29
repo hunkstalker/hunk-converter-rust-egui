@@ -10,7 +10,7 @@ use crate::i18n;
 use super::HunkApp;
 use super::state::{SourceImage, SourceInput};
 use super::ui::widgets::{resized_for_ui, upload_texture};
-use super::{MIN_ZOOM, UI_PREVIEW_MAX};
+use super::{FIT_ZOOM, UI_PREVIEW_MAX};
 
 impl HunkApp {
     pub(crate) fn set_source(&mut self, input: SourceInput, ctx: &egui::Context) {
@@ -33,8 +33,11 @@ impl HunkApp {
         self.sampled_position = None;
         self.sample_pending_history = false;
         self.split = 0.5;
-        self.zoom = MIN_ZOOM;
+        self.zoom = FIT_ZOOM;
         self.pan = egui::Vec2::ZERO;
+        self.actual_size = true;
+        self.pending_zoom = None;
+        self.fit_scale = 1.0;
         self.screenshot_at = None;
         self.screenshot_requested = false;
         self.request_encode(ctx, None);
@@ -167,8 +170,11 @@ impl HunkApp {
         self.quality = 82;
         self.ico_selected = [true; 6];
         self.split = 0.5;
-        self.zoom = MIN_ZOOM;
+        self.zoom = FIT_ZOOM;
         self.pan = egui::Vec2::ZERO;
+        self.actual_size = true;
+        self.pending_zoom = None;
+        self.fit_scale = 1.0;
         self.eyedropper_active = false;
         self.sampled_color = None;
         self.sampled_position = None;

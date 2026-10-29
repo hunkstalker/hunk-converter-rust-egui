@@ -44,8 +44,9 @@ CÓMO USAR
 Las imágenes se guardan en la carpeta "export/" que está junto a este
 programa. No se sobrescriben: si el nombre ya existe se añade -2, -3, etc.
 
-El idioma, el historial de colores, sus bloqueos y el estado de la ventana
-maximizada se guardan en config.ini, también junto al programa. Puedes cambiar
+El idioma, el historial de colores, sus bloqueos, el estado maximizado y la
+posición/tamaño de la ventana se guardan en config.ini, también junto al
+programa. Puedes cambiar
 entre español, catalán e inglés desde la cabecera.
 
 - La aplicación no necesita instalación ni conexión a internet.

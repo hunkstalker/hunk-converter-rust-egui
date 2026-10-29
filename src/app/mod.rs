@@ -22,8 +22,9 @@ use state::{EncodeJobResult, RenderedResult, SourceImage, Toast};
 
 pub const ENCODE_DELAY_MS: u64 = 160;
 pub const UI_PREVIEW_MAX: u32 = 2048;
-pub const MIN_ZOOM: f32 = 1.0;
-pub const MAX_ZOOM: f32 = 8.0;
+pub const FIT_ZOOM: f32 = 1.0;
+pub const MIN_ZOOM: f32 = 0.05;
+pub const MAX_ZOOM: f32 = 32.0;
 
 pub struct HunkApp {
     source: Option<SourceImage>,
@@ -44,6 +45,14 @@ pub struct HunkApp {
     split: f32,
     zoom: f32,
     pan: egui::Vec2,
+    actual_size: bool,
+    pending_zoom: Option<f32>,
+    fit_scale: f32,
+    window_x: Option<f32>,
+    window_y: Option<f32>,
+    window_width: f32,
+    window_height: f32,
+    geometry_dirty_at: Option<Instant>,
     revision: u64,
     pending_since: Option<Instant>,
     worker: Option<Receiver<EncodeJobResult>>,
@@ -91,8 +100,16 @@ impl HunkApp {
             sampled_color: None,
             sampled_position: None,
             split: 0.5,
-            zoom: MIN_ZOOM,
+            zoom: FIT_ZOOM,
             pan: egui::Vec2::ZERO,
+            actual_size: false,
+            pending_zoom: None,
+            fit_scale: 1.0,
+            window_x: settings.window.x,
+            window_y: settings.window.y,
+            window_width: settings.window.width,
+            window_height: settings.window.height,
+            geometry_dirty_at: None,
             revision: 0,
             pending_since: None,
             worker: None,
@@ -135,10 +152,63 @@ impl HunkApp {
             language: self.language,
             history: self.history.clone(),
             maximized: self.maximized,
+            window: settings::WindowState {
+                x: self.window_x,
+                y: self.window_y,
+                width: self.window_width,
+                height: self.window_height,
+            },
         })
         .save()
         {
             eprintln!("[config] {error}");
+        }
+    }
+
+    fn sync_window_geometry(&mut self, ctx: &egui::Context) {
+        if self.maximized {
+            return;
+        }
+        let viewport = ctx.input(|input| input.viewport().clone());
+        if viewport.minimized == Some(true) {
+            return;
+        }
+        let Some(inner) = viewport.inner_rect else {
+            return;
+        };
+        if inner.width() < 1.0 || inner.height() < 1.0 {
+            return;
+        }
+
+        let mut changed = false;
+        if (inner.width() - self.window_width).abs() > 1.0 {
+            self.window_width = inner.width();
+            changed = true;
+        }
+        if (inner.height() - self.window_height).abs() > 1.0 {
+            self.window_height = inner.height();
+            changed = true;
+        }
+        if let Some(outer) = viewport.outer_rect {
+            if self.window_x.is_none_or(|x| (x - outer.min.x).abs() > 1.0) {
+                self.window_x = Some(outer.min.x);
+                changed = true;
+            }
+            if self.window_y.is_none_or(|y| (y - outer.min.y).abs() > 1.0) {
+                self.window_y = Some(outer.min.y);
+                changed = true;
+            }
+        }
+        if changed {
+            self.geometry_dirty_at = Some(Instant::now());
+            ctx.request_repaint_after(Duration::from_millis(500));
+        }
+        if self
+            .geometry_dirty_at
+            .is_some_and(|since| since.elapsed() >= Duration::from_millis(500))
+        {
+            self.save_settings();
+            self.geometry_dirty_at = None;
         }
     }
 
@@ -274,6 +344,7 @@ impl eframe::App for HunkApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
         self.sync_native_maximized(&ctx);
+        self.sync_window_geometry(&ctx);
 
         let dropped = ctx.input(|input| {
             input
@@ -313,6 +384,35 @@ impl eframe::App for HunkApp {
             self.open_file_dialog(&ctx);
         }
 
+        if self.source.is_some() && self.format != OutputFormat::Ico {
+            let (fit, actual, zoom_in, zoom_out) = ctx.input(|input| {
+                let navigation = !input.modifiers.command && !input.modifiers.alt;
+                let plain = navigation && !input.modifiers.shift;
+                (
+                    plain
+                        && (input.key_pressed(egui::Key::Num0) || input.key_pressed(egui::Key::F)),
+                    plain && input.key_pressed(egui::Key::Num1),
+                    navigation
+                        && (input.key_pressed(egui::Key::Plus)
+                            || input.key_pressed(egui::Key::Equals)),
+                    navigation && input.key_pressed(egui::Key::Minus),
+                )
+            });
+            if fit {
+                self.fit_view();
+                ctx.request_repaint();
+            } else if actual {
+                self.actual_size_view();
+                ctx.request_repaint();
+            } else if zoom_in {
+                self.pending_zoom = Some(1.25);
+                ctx.request_repaint();
+            } else if zoom_out {
+                self.pending_zoom = Some(0.8);
+                ctx.request_repaint();
+            }
+        }
+
         self.poll_worker(&ctx);
         self.maybe_start_worker(&ctx);
 
@@ -332,5 +432,9 @@ impl eframe::App for HunkApp {
 
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
         T::BG.to_normalized_gamma_f32()
+    }
+
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        self.save_settings();
     }
 }

@@ -66,14 +66,16 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 
 - Selector **ES / CA / EN** en la cabecera.
 - En el primer arranque se detecta el idioma del sistema.
-- El idioma elegido, el historial, los bloqueos y el estado maximizado se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
+- El idioma, el historial, los bloqueos, el estado maximizado y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
 - Si no se puede escribir el archivo, la aplicación sigue funcionando sin persistencia.
 
 ## Zoom y navegación
 
-- **Rueda del ratón** sobre la imagen: acerca y aleja manteniendo el punto bajo el cursor.
+- **La imagen se abre al 100 %.**
+- **Rueda o pinza** sobre la imagen: acerca y aleja manteniendo el punto bajo el cursor.
+- **Atajos:** `+`/`-` ajustan el zoom por pasos; `1` activa el tamaño real 1:1 y `0`/`F` vuelve al encuadre completo.
 - **Clic derecho y arrastra**: desplaza la imagen cuando está ampliada.
-- El porcentaje de zoom aparece en la cabecera de la vista previa; pulsa sobre él para volver al ajuste inicial.
+- El porcentaje de zoom refleja la escala real de la imagen. La cabecera no tiene botones de zoom: se controla con teclado, rueda o pinza.
 - El divisor y el cuentagotas siguen funcionando con cualquier zoom.
 
 ![Zoom y paneo de HUNK Converter](docs/hunk-converter-zoom.png)
@@ -122,6 +124,9 @@ El archivo aparece en `export/`, junto a la aplicación. Si el nombre existe, se
 | `Ctrl+V` | Pegar una imagen del portapapeles |
 | `Ctrl+E` | Exportar |
 | `Ctrl+R` | Reiniciar la aplicación |
+| `0` / `F` | Ajustar imagen a la ventana |
+| `1` | Tamaño real 1:1 |
+| `+` / `-` | Aumentar o reducir zoom |
 | `←` / `→` | Mover el divisor del comparador |
 | `Inicio` / `Fin` | Llevar el divisor a un extremo |
 
@@ -183,7 +188,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 29 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación y rutas portables. También se ejecuta en GitHub Actions.
+La suite cubre 31 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables y geometría de ventana. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 

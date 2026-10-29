@@ -8,7 +8,7 @@ use crate::theme as T;
 
 use super::super::HunkApp;
 use super::super::actions::AppAction;
-use super::super::{MAX_ZOOM, MIN_ZOOM};
+use super::super::{FIT_ZOOM, MAX_ZOOM, MIN_ZOOM};
 use super::widgets::{Badge, fit_rect, paint_badge, paint_checker};
 
 pub(super) struct CanvasContext<'a> {
@@ -19,45 +19,87 @@ pub(super) struct CanvasContext<'a> {
 }
 
 pub(super) struct ZoomInput {
-    pub scroll_y: f32,
+    pub factor: f32,
     pub pointer: egui::Pos2,
+    pub source_size: Vec2,
     pub fit_rect: Rect,
     pub area: Rect,
 }
 
 impl HunkApp {
-    fn view_rect(&self, fit_rect: Rect, area: Rect) -> Rect {
-        Rect::from_center_size(area.center() + self.pan, fit_rect.size() * self.zoom)
+    fn image_size(&self, source_size: Vec2, fit_rect: Rect) -> Vec2 {
+        if self.actual_size {
+            source_size
+        } else {
+            fit_rect.size() * self.zoom
+        }
     }
-    fn clamp_pan(&mut self, fit_rect: Rect, area: Rect) {
-        if self.zoom <= MIN_ZOOM + f32::EPSILON {
-            self.zoom = MIN_ZOOM;
+
+    fn view_rect(&self, source_size: Vec2, fit_rect: Rect, area: Rect) -> Rect {
+        Rect::from_center_size(
+            area.center() + self.pan,
+            self.image_size(source_size, fit_rect),
+        )
+    }
+
+    fn clamp_pan(&mut self, image_size: Vec2, area: Rect) {
+        if !self.actual_size && (self.zoom - FIT_ZOOM).abs() < f32::EPSILON {
             self.pan = Vec2::ZERO;
             return;
         }
-        let size = fit_rect.size() * self.zoom;
-        let max_x = ((size.x - area.width()) * 0.5).max(0.0);
-        let max_y = ((size.y - area.height()) * 0.5).max(0.0);
+        let max_x = ((image_size.x - area.width()) * 0.5).max(0.0);
+        let max_y = ((image_size.y - area.height()) * 0.5).max(0.0);
         self.pan.x = self.pan.x.clamp(-max_x, max_x);
         self.pan.y = self.pan.y.clamp(-max_y, max_y);
     }
-    fn zoom_at(&mut self, input: ZoomInput) {
+
+    pub(crate) fn fit_view(&mut self) {
+        self.actual_size = false;
+        self.zoom = FIT_ZOOM;
+        self.pan = Vec2::ZERO;
+        self.pending_zoom = None;
+    }
+
+    pub(crate) fn actual_size_view(&mut self) {
+        self.actual_size = true;
+        self.pan = Vec2::ZERO;
+        self.pending_zoom = None;
+    }
+
+    fn zoom_by(&mut self, input: ZoomInput) {
         let ZoomInput {
-            scroll_y,
+            factor,
             pointer,
+            source_size,
             fit_rect,
             area,
         } = input;
-        let factor = (scroll_y * 0.0025).exp();
-        let new_zoom = (self.zoom * factor).clamp(MIN_ZOOM, MAX_ZOOM);
-        if (new_zoom - self.zoom).abs() < f32::EPSILON {
+        if source_size.x <= 0.0 || source_size.y <= 0.0 || (factor - 1.0).abs() < f32::EPSILON {
             return;
         }
 
-        let old_rect = self.view_rect(fit_rect, area);
+        let old_rect = self.view_rect(source_size, fit_rect, area);
         if old_rect.width() <= 0.0 || old_rect.height() <= 0.0 {
             return;
         }
+
+        let new_zoom = if self.actual_size {
+            let fit_scale = (fit_rect.width() / source_size.x).max(f32::EPSILON);
+            let relative = factor / fit_scale;
+            if relative < MIN_ZOOM {
+                self.fit_view();
+                return;
+            }
+            self.actual_size = false;
+            relative.clamp(MIN_ZOOM, MAX_ZOOM)
+        } else {
+            let zoom = (self.zoom * factor).clamp(MIN_ZOOM, MAX_ZOOM);
+            if (zoom - self.zoom).abs() < f32::EPSILON {
+                return;
+            }
+            zoom
+        };
+
         let normalized = vec2(
             ((pointer.x - old_rect.left()) / old_rect.width()).clamp(0.0, 1.0),
             ((pointer.y - old_rect.top()) / old_rect.height()).clamp(0.0, 1.0),
@@ -67,7 +109,7 @@ impl HunkApp {
 
         self.zoom = new_zoom;
         self.pan = new_center - area.center();
-        self.clamp_pan(fit_rect, area);
+        self.clamp_pan(new_size, area);
     }
     pub(super) fn paint_canvas(&mut self, context: CanvasContext<'_>) -> Vec<AppAction> {
         let CanvasContext {
@@ -127,8 +169,20 @@ impl HunkApp {
         }
 
         let fit_rect = fit_rect(source_size, area);
-        self.clamp_pan(fit_rect, area);
-        let mut image_rect = self.view_rect(fit_rect, area);
+        self.fit_scale = (fit_rect.width() / source_size.x).max(f32::EPSILON);
+        self.clamp_pan(self.image_size(source_size, fit_rect), area);
+        let mut image_rect = self.view_rect(source_size, fit_rect, area);
+
+        if let Some(factor) = self.pending_zoom.take() {
+            self.zoom_by(ZoomInput {
+                factor,
+                pointer: area.center(),
+                source_size,
+                fit_rect,
+                area,
+            });
+            image_rect = self.view_rect(source_size, fit_rect, area);
+        }
 
         let pointer = ctx.input(|input| input.pointer.hover_pos());
         let right_clicked =
@@ -142,25 +196,32 @@ impl HunkApp {
             && let Some(position) = pointer
             && image_rect.contains(position)
         {
-            let scroll = ctx.input(|input| input.smooth_scroll_delta.y);
-            if scroll.abs() > f32::EPSILON {
-                self.zoom_at(ZoomInput {
-                    scroll_y: scroll,
+            let (scroll, pinch) =
+                ctx.input(|input| (input.smooth_scroll_delta.y, input.zoom_delta()));
+            let factor = if (pinch - 1.0).abs() > f32::EPSILON {
+                pinch
+            } else {
+                (scroll * 0.0025).exp()
+            };
+            if (factor - 1.0).abs() > f32::EPSILON {
+                self.zoom_by(ZoomInput {
+                    factor,
                     pointer: position,
+                    source_size,
                     fit_rect,
                     area,
                 });
-                image_rect = self.view_rect(fit_rect, area);
+                image_rect = self.view_rect(source_size, fit_rect, area);
             }
         }
         if !deactivated_eyedropper
             && response.dragged_by(egui::PointerButton::Secondary)
-            && self.zoom > MIN_ZOOM
+            && (self.actual_size || self.zoom > FIT_ZOOM)
         {
             let delta = ctx.input(|input| input.pointer.delta());
             self.pan += delta;
-            self.clamp_pan(fit_rect, area);
-            image_rect = self.view_rect(fit_rect, area);
+            self.clamp_pan(self.image_size(source_size, fit_rect), area);
+            image_rect = self.view_rect(source_size, fit_rect, area);
         }
 
         let view_rect = image_rect.intersect(area);
@@ -212,7 +273,7 @@ impl HunkApp {
             }
             if response.hovered() && over_handle {
                 ctx.set_cursor_icon(CursorIcon::ResizeHorizontal);
-            } else if self.zoom > MIN_ZOOM
+            } else if (self.actual_size || self.zoom > FIT_ZOOM)
                 && (response.hovered() || response.dragged_by(egui::PointerButton::Secondary))
             {
                 ctx.set_cursor_icon(if response.dragged_by(egui::PointerButton::Secondary) {
@@ -252,15 +313,15 @@ impl HunkApp {
                 let line_color = Color32::from_rgba_unmultiplied(255, 255, 255, 210);
                 canvas.line_segment(
                     [
-                        pos2(split_x, view_rect.top() + 8.0),
-                        pos2(split_x, view_rect.bottom() - 8.0),
+                        pos2(split_x, view_rect.top()),
+                        pos2(split_x, view_rect.bottom()),
                     ],
                     Stroke::new(3.0, Color32::from_black_alpha(80)),
                 );
                 canvas.line_segment(
                     [
-                        pos2(split_x, view_rect.top() + 8.0),
-                        pos2(split_x, view_rect.bottom() - 8.0),
+                        pos2(split_x, view_rect.top()),
+                        pos2(split_x, view_rect.bottom()),
                     ],
                     Stroke::new(1.2, line_color),
                 );

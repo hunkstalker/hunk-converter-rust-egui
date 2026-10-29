@@ -4,7 +4,7 @@ use crate::domain::color::parse_hex_rgba;
 use crate::domain::history::{HISTORY_LIMIT, HistoryEntry};
 use crate::i18n::Lang;
 
-use super::{ConfigLoad, ConfigWarning, Settings};
+use super::{ConfigLoad, ConfigWarning, Settings, WindowState};
 
 pub(super) fn read(path: &Path) -> Result<ConfigLoad, crate::domain::ConfigError> {
     let text =
@@ -20,6 +20,7 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
         language: Lang::detect(),
         history: Vec::new(),
         maximized: true,
+        window: WindowState::default(),
     };
     let mut warnings = Vec::new();
     let mut section = String::new();
@@ -55,6 +56,37 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
             maximized_seen = true;
         } else if section == "general" && key == "fullscreen" && !maximized_seen {
             settings.maximized = parse_bool(value);
+        } else if section == "window" {
+            match key.as_str() {
+                "x" | "y" => {
+                    let parsed = parse_coordinate(value);
+                    if parsed.is_none() {
+                        warnings.push(ConfigWarning::new(
+                            line_number,
+                            format!("coordenada de ventana no válida: {value}"),
+                        ));
+                    } else if key == "x" {
+                        settings.window.x = parsed;
+                    } else {
+                        settings.window.y = parsed;
+                    }
+                }
+                "width" | "height" => {
+                    let Some(parsed) = parse_size(value) else {
+                        warnings.push(ConfigWarning::new(
+                            line_number,
+                            format!("tamaño de ventana no válido: {value}"),
+                        ));
+                        continue;
+                    };
+                    if key == "width" {
+                        settings.window.width = parsed;
+                    } else {
+                        settings.window.height = parsed;
+                    }
+                }
+                _ => {}
+            }
         } else if section == "history" && key.starts_with("color") {
             let Some(index) = key
                 .strip_prefix("color")
@@ -108,9 +140,20 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
 pub(super) fn serialize(settings: &Settings) -> String {
     let mut text = String::from("[general]\n");
     text.push_str(&format!(
-        "language={}\nmaximized={}\n\n[history]\ncount={}\n",
+        "language={}\nmaximized={}\n\n[window]\n",
         settings.language.code(),
-        u8::from(settings.maximized),
+        u8::from(settings.maximized)
+    ));
+    if let Some(x) = settings.window.x {
+        text.push_str(&format!("x={x}\n"));
+    }
+    if let Some(y) = settings.window.y {
+        text.push_str(&format!("y={y}\n"));
+    }
+    text.push_str(&format!(
+        "width={}\nheight={}\n\n[history]\ncount={}\n",
+        settings.window.width,
+        settings.window.height,
         settings.history.len()
     ));
     for (index, entry) in settings.history.iter().take(HISTORY_LIMIT).enumerate() {
@@ -126,6 +169,14 @@ pub(super) fn serialize(settings: &Settings) -> String {
 
 fn parse_bool(value: &str) -> bool {
     !matches!(value.to_ascii_lowercase().as_str(), "0" | "false" | "no")
+}
+
+fn parse_coordinate(value: &str) -> Option<f32> {
+    value.parse::<f32>().ok().filter(|value| value.is_finite())
+}
+
+fn parse_size(value: &str) -> Option<f32> {
+    parse_coordinate(value).filter(|value| *value > 0.0)
 }
 
 fn parse_history_entry(value: &str) -> Option<HistoryEntry> {
@@ -150,6 +201,24 @@ mod tests {
 
         let round_trip = parse(&serialize(&loaded.settings));
         assert_eq!(round_trip.settings.history, loaded.settings.history);
+    }
+
+    #[test]
+    fn parses_window_position_and_size() {
+        let loaded = parse("[window]\nx=-20\ny=30\nwidth=1000\nheight=700\n");
+        assert_eq!(loaded.settings.window.x, Some(-20.0));
+        assert_eq!(loaded.settings.window.y, Some(30.0));
+        assert_eq!(loaded.settings.window.width, 1000.0);
+        assert_eq!(loaded.settings.window.height, 700.0);
+        assert!(loaded.warnings.is_empty());
+    }
+
+    #[test]
+    fn rejects_invalid_window_size_with_warning() {
+        let loaded = parse("[window]\nwidth=0\nheight=no\n");
+        assert_eq!(loaded.settings.window.width, 1280.0);
+        assert_eq!(loaded.settings.window.height, 800.0);
+        assert_eq!(loaded.warnings.len(), 2);
     }
 
     #[test]

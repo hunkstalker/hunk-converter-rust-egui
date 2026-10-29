@@ -68,10 +68,11 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 - La imagen resultante se obtiene decodificando el archivo codificado real.
 - Damero para transparencia.
 - Modo ICO: se oculta el divisor y se muestra el icono generado, con recuento de tamaños.
-- El lienzo se adapta al tamaño de la ventana conservando la proporción.
-- **Zoom con la rueda** sobre la imagen, de 100 % a 800 %, anclado al punto bajo el cursor.
+- La imagen se abre al 100 %; `0`/`F` la ajusta a la ventana conservando la proporción.
+- **Zoom continuo** con rueda o pinza, anclado al cursor, y atajos de teclado.
+- **Modo 1:1** con `1` para ver la imagen a escala real; `0`/`F` vuelve al encuadre completo.
 - **Paneo con clic derecho** cuando la imagen está ampliada, con límites para no perderla de vista.
-- El porcentaje de zoom aparece en la cabecera; al pulsarlo se vuelve al ajuste inicial.
+- El porcentaje de zoom refleja la escala real. No hay botones de zoom en la cabecera: se controla con teclado, rueda o pinza.
 - El divisor, su círculo y el cuentagotas se adaptan al zoom y al desplazamiento.
 - La vista previa se limita a 2048 px de lado; la exportación conserva la resolución completa.
 
@@ -94,7 +95,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 
 - Selector **ES / CA / EN** junto al botón de reinicio.
 - En el primer arranque se detecta el idioma del sistema con `sys-locale`.
-- La preferencia, el historial, los bloqueos y el estado maximizado se guardan en `config.ini`, junto al ejecutable.
+- La preferencia, el historial, los bloqueos, el estado maximizado y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
 - Si el archivo no es escribible, la app sigue funcionando sin persistencia.
 
 ### 3.6 Exportación
@@ -115,6 +116,9 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 | `Ctrl+V` | Pegar una imagen del portapapeles |
 | `Ctrl+E` | Exportar |
 | `Ctrl+R` | Reiniciar la sesión |
+| `0` / `F` | Ajustar a la ventana |
+| `1` | Tamaño real 1:1 |
+| `+` / `-` | Zoom por pasos |
 | `←` / `→` | Mover el divisor |
 | `Inicio` / `Fin` | Extremos del divisor |
 
@@ -135,7 +139,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 
 ### Ventana y distribución
 
-- La aplicación se abre con la ventana maximizada. Los controles nativos permiten maximizar o restaurar; el estado se guarda en `config.ini`.
+- La aplicación se abre con la ventana maximizada. Los controles nativos permiten maximizar o restaurar; el estado, la posición y el tamaño se guardan en `config.ini`.
 - Tamaño de ventana por defecto 1280 × 800; mínimo 1024 × 800.
 - Cabecera con marca, selector de idioma y botón de reinicio. Los controles de ventana son los nativos.
 - La barra lateral tiene scroll vertical cuando los ajustes no caben; la tarjeta del cuentagotas y el botón de exportar quedan fijos abajo con altura estable.
@@ -281,7 +285,7 @@ Archivo local
 
 - En una build: `<carpeta del ejecutable>/export/`.
 - En desarrollo: `target/release/export/`.
-- `config.ini` se crea junto al ejecutable y guarda idioma, historial y estado maximizado.
+- `config.ini` se crea junto al ejecutable y guarda idioma, historial, estado maximizado, posición y tamaño de la ventana.
 - Los nombres no se sobrescriben.
 
 ### Estructura de la build
@@ -321,9 +325,8 @@ Resumen del contexto de referencia:
 ## 8. Límites conocidos
 
 - No se conservan metadatos, pero la orientación EXIF se aplica a los píxeles al cargar.
-- No hay redimensionado ni recorte, ni procesamiento por lotes (`t-11`, `t-12`).
-- El modo 1:1, los botones/gestos de zoom y los atajos de encuadre siguen pendientes (`t-16`).
-- HEIC no está soportado; AVIF y JPEG XL sí están disponibles como salida (`t-15`).
+- Sin redimensionado, recorte ni procesamiento por lotes: fuera del alcance del producto.
+- HEIC no está soportado; queda fuera del alcance. AVIF y JPEG XL sí están disponibles como salida.
 - No se conservan perfiles ICC.
 - La accesibilidad nativa completa y el uso con lector de pantalla están pendientes (`t-22`).
 - La build macOS universal se genera en CI, pero no está firmada ni notarizada; la firma se descartó por falta de presupuesto.
@@ -331,7 +334,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **29 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables y zona de agarre del comparador.
+- **31 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

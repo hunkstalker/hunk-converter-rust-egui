@@ -1,13 +1,13 @@
 use eframe::egui::{
-    self, Align, CornerRadius, Frame, Layout, Margin, RichText, Sense, Stroke, Vec2, vec2,
+    self, Align, CornerRadius, Frame, Layout, Margin, RichText, Sense, Stroke, vec2,
 };
 
 use crate::codec::OutputFormat;
 use crate::i18n::{self, K};
 use crate::theme as T;
 
+use super::super::FIT_ZOOM;
 use super::super::HunkApp;
-use super::super::MIN_ZOOM;
 use super::super::actions::AppAction;
 use super::canvas::CanvasContext;
 
@@ -40,23 +40,32 @@ impl HunkApp {
                     ui.label(RichText::new(self.t(K::Preview)).size(17.0).color(T::TEXT));
                     ui.add_space(4.0);
                     if self.format != OutputFormat::Ico {
-                        ui.add_space(2.0);
-                        let zoom_percent = (self.zoom * 100.0).round() as u32;
-                        if self.zoom > MIN_ZOOM + 0.001 {
-                            let reset = egui::Button::new(
-                                RichText::new(format!("Zoom {zoom_percent} %"))
-                                    .size(9.5)
-                                    .color(T::ACCENT),
-                            )
-                            .frame(false);
-                            if ui.add(reset).on_hover_text(self.t(K::ResetZoom)).clicked() {
-                                self.zoom = MIN_ZOOM;
-                                self.pan = Vec2::ZERO;
-                                ctx.request_repaint();
-                            }
+                        ui.add_space(6.0);
+                        let actual_percent = if self.actual_size {
+                            100.0
                         } else {
-                            ui.label(RichText::new("Zoom 100 %").size(9.5).color(T::TEXT_FAINT));
-                        }
+                            self.zoom * self.fit_scale * 100.0
+                        };
+                        let zoom_color = if self.actual_size || (self.zoom - FIT_ZOOM).abs() > 0.001
+                        {
+                            T::ACCENT
+                        } else {
+                            T::TEXT_FAINT
+                        };
+                        ui.allocate_ui_with_layout(
+                            vec2(76.0, 22.0),
+                            Layout::top_down(Align::Min),
+                            |ui| {
+                                // Caja de altura fija y desplazamiento óptico para que el
+                                // porcentaje quede centrado con el título de 17 px.
+                                ui.add_space(7.0);
+                                ui.label(
+                                    RichText::new(format!("Zoom {actual_percent:.0} %"))
+                                        .size(9.5)
+                                        .color(zoom_color),
+                                );
+                            },
+                        );
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if self.busy() {
@@ -78,7 +87,7 @@ impl HunkApp {
                                     .size(9.5)
                                     .color(T::TEXT_FAINT),
                             );
-                        } else if self.zoom > MIN_ZOOM + 0.001 {
+                        } else if self.actual_size || (self.zoom - FIT_ZOOM).abs() > 0.001 {
                             ui.label(
                                 RichText::new(self.t(K::PanZoomHint))
                                     .size(9.5)

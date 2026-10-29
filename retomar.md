@@ -1,7 +1,7 @@
 # Retomar HUNK Converter
 
 > Punto de entrada para nuevas sesiones. Última actualización: **2026-10-29**.
-> Versión: **1.0.0** · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
+> Versión: **1.0.0** publicada · **1.1.0** en preparación · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
 
 ## 1. Qué es este proyecto
 
@@ -20,12 +20,11 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Entrada: PNG, JPG, WebP, BMP, TGA y SVG. La orientación EXIF de JPG/WebP se aplica al cargar.
 - Salida: WebP, AVIF, JPG, PNG, JPEG XL e ICO.
 - Calidad 1–100 para WebP/JPG/AVIF; PNG y JPEG XL sin pérdida; JPG aplanado sobre blanco.
-- Comparador visual con divisor, damero, zoom con rueda y paneo con clic derecho.
-- Zoom de 100 % a 800 % anclado al cursor; clic en el porcentaje para volver al ajuste.
+- Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %.
 - Cuentagotas con muestra del píxel original, coordenadas, códigos HEX/RGB/RGBA/HSL, botones de copia y aviso de confirmación. La tarjeta reserva el espacio de coordenadas y códigos para no cambiar de altura.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
 - Arquitectura modular: dominio puro, acciones explícitas, errores tipados y UI dividida por componentes. Ver `docs/arquitectura.md`.
-- Idioma, historial, bloqueos y estado maximizado se guardan en `config.ini`, junto al ejecutable.
+- Idioma, historial, bloqueos, estado maximizado, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
 - Pie con enlace directo a `github.com/hunkstalker/hunk-converter`, abierto en el navegador.
@@ -34,7 +33,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Reinicio, atajos y avisos de error.
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **29 pruebas Rust**, clippy y formato limpios.
+- **31 pruebas Rust**, clippy y formato limpios.
 - CI de Rust en GitHub Actions, con builds multiplataforma y release automática al empujar un tag.
 - Versión **1.0.0** publicada; release validada en Windows 10/11.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
@@ -73,7 +72,7 @@ Builds portables:
 ## 4. Decisiones que no se deben romper
 
 - **Portapapeles:** `Ctrl+V` intenta leer una imagen del portapapeles y sustituye la imagen actual; si no hay imagen, no hace nada.
-- **Idioma:** `config.ini` guarda el idioma (es/ca/en), el historial y el estado maximizado; en el primer arranque se detecta el idioma del sistema.
+- **Idioma:** `config.ini` guarda el idioma (es/ca/en), el historial, el estado maximizado y la geometría de la ventana; en el primer arranque se detecta el idioma del sistema.
 - **Historial:** 21 colores máximo; al llenarse se sustituye el no fijado más antiguo. Los fijados nunca se reemplazan. Si todos están fijados, el color nuevo no se guarda y se avisa. El bloqueo se persiste en `config.ini` con `colorN=#RRGGBBAA|1`.
 - **Arquitectura:** `domain` no conoce egui ni ficheros; `ui` devuelve `AppAction` para los efectos de aplicación; `app` es el único que toca disco, workers y configuración. No introducir Clean Architecture completa ni un trait por códec.
 - **Errores:** usar enums tipados y `i18n::present_error`; no volver a `Result<_, String>` ni a comparar mensajes en español.
@@ -123,12 +122,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `todo.md` (t-11, t-12, t-15, t-16, t-18, t-22 y t-34).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-19, t-20, t-21, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32 y t-33).
+- Pendientes: `todo.md` (t-18, t-22 y t-34).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-19, t-20, t-21, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32 y t-33).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente tarea recomendada: **t-34 — optimizar el CI para 1.1.0**. Después, t-11 (redimensionado) y t-22 (accesibilidad).
+Siguiente tarea recomendada: **t-34 — optimizar el CI para 1.1.0**. Quedan t-18 y t-22.
 
 ## 7. Benchmarks y límites
 
@@ -142,9 +141,6 @@ El informe completo está en `docs/benchmark-2026-10-28.md`.
 
 Pendientes conocidos:
 
-- Redimensión y lotes (`t-11`, `t-12`).
-- Modo 1:1, botones/gestos de zoom y atajos de encuadre (`t-16`).
-- HEIC (`t-15`); AVIF y JPEG XL ya están integrados como salida.
 - Accesibilidad completa (`t-22`).
 - Selector de carpeta de salida (`t-18`).
 - Firma y notarización de macOS descartada; la build universal se distribuye sin firmar.

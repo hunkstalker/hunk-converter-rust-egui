@@ -6,11 +6,31 @@ use crate::i18n::Lang;
 
 mod ini;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Settings {
     pub language: Lang,
     pub history: Vec<HistoryEntry>,
     pub maximized: bool,
+    pub window: WindowState,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct WindowState {
+    pub x: Option<f32>,
+    pub y: Option<f32>,
+    pub width: f32,
+    pub height: f32,
+}
+
+impl Default for WindowState {
+    fn default() -> Self {
+        Self {
+            x: None,
+            y: None,
+            width: 1280.0,
+            height: 800.0,
+        }
+    }
 }
 
 impl Default for Settings {
@@ -19,6 +39,7 @@ impl Default for Settings {
             language: Lang::detect(),
             history: Vec::new(),
             maximized: true,
+            window: WindowState::default(),
         }
     }
 }
@@ -156,6 +177,12 @@ mod tests {
                 HistoryEntry::new([179, 142, 117, 255], false),
             ],
             maximized: false,
+            window: WindowState {
+                x: Some(120.0),
+                y: Some(80.0),
+                width: 1280.0,
+                height: 800.0,
+            },
         };
         let outcome = ini::parse(&ini::serialize(&settings));
         assert_eq!(outcome.settings, settings);

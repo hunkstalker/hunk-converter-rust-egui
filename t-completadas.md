@@ -187,3 +187,22 @@
 ### t-24 — Verificación visual del icono Windows (absorbida por t-23)
 
 **Motivo:** el icono ya se incrusta en la build MSVC y la comprobación visual forma parte de la validación completa de Windows de `t-23`. No se mantiene como tarea independiente.
+
+### t-11 — Redimensionado y encuadre (descartada)
+
+**Motivo:** fuera del alcance del producto. HUNK Converter está orientado a conversión, compresión y comparación de una imagen, no a edición geométrica.
+
+### t-12 — Conversión por lotes (descartada)
+
+**Motivo:** incompatible con el flujo principal de comparación y control de calidad por imagen. Procesar lotes con una calidad común ignora la inspección individual que define la aplicación.
+
+### t-15 — Entrada HEIC y códecs opcionales (descartada)
+
+**Motivo:** HEIC no es un objetivo del producto, orientado a desarrollo web. Añadir un decodificador HEVC implicaría dependencias pesadas, problemas de portabilidad y riesgo de patentes, sin aportar valor al flujo actual.
+
+## t-16 — Navegación avanzada del lienzo
+
+**Descripción:** Completar la navegación con un modo 1:1, zoom mediante rueda, pinza y atajos de encuadre (ajustar, restablecer). El divisor, su círculo y el cuentagotas ya funcionan a cualquier zoom; el encuadre debe conservarse al cambiar de formato.
+
+**Completada:** 2026-10-29
+**Resultado:** Navegación con rueda, pinza, paneo con clic derecho y atajos (`0`/`F` ajustar, `1` tamaño real, `+`/`-` pasos de zoom), sin botones en la cabecera. La imagen se abre al 100 %. El divisor llega a los bordes superior e inferior y el porcentaje de zoom queda centrado con “Vista previa”. La posición y el tamaño de la ventana se persisten en `config.ini`. Suite ampliada a 31 pruebas y capturas de documentación regeneradas.
