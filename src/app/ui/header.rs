@@ -1,6 +1,6 @@
 use eframe::egui::{self, Align, Color32, CornerRadius, Layout, Margin, RichText, Stroke, vec2};
 
-use crate::i18n::{K, Lang};
+use crate::i18n::{self, K, Lang};
 use crate::theme as T;
 
 use super::super::HunkApp;
@@ -36,6 +36,19 @@ impl HunkApp {
 
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if self.source.is_some() {
+                            let reset_width = Lang::ALL
+                                .iter()
+                                .map(|lang| {
+                                    ui.painter()
+                                        .layout_no_wrap(
+                                            i18n::t(*lang, K::Reset).to_owned(),
+                                            egui::FontId::proportional(11.5),
+                                            T::TEXT_MUTED,
+                                        )
+                                        .size()
+                                        .x
+                                })
+                                .fold(0.0_f32, f32::max);
                             let reset = egui::Button::new(
                                 RichText::new(self.t(K::Reset))
                                     .size(11.5)
@@ -44,7 +57,7 @@ impl HunkApp {
                             .fill(Color32::TRANSPARENT)
                             .stroke(Stroke::new(1.0, T::BORDER))
                             .corner_radius(CornerRadius::same(10))
-                            .min_size(vec2(0.0, 32.0));
+                            .min_size(vec2(reset_width + 28.0, 32.0));
                             if ui.add(reset).clicked() {
                                 actions.push(AppAction::Reset);
                             }
@@ -60,7 +73,13 @@ impl HunkApp {
                             .width(64.0)
                             .show_ui(ui, |ui| {
                                 for option in Lang::ALL {
-                                    ui.selectable_value(&mut language, option, option.name());
+                                    let selected = language == option;
+                                    let text = RichText::new(option.name()).color(if selected {
+                                        T::ACCENT_INK
+                                    } else {
+                                        T::TEXT
+                                    });
+                                    ui.selectable_value(&mut language, option, text);
                                 }
                             })
                             .response
