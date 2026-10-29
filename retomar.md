@@ -36,7 +36,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
 - **29 pruebas Rust**, clippy y formato limpios.
 - CI de Rust en GitHub Actions, con builds multiplataforma y release automática al empujar un tag.
-- Versión **1.0.0** preparada para la release; tag local `v1.0.0` sobre el commit final.
+- Versión **1.0.0** publicada; release validada en Windows 10/11.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
 
 ## 3. Comandos
@@ -68,7 +68,7 @@ Builds portables:
 - Linux usa las bibliotecas gráficas del sistema (X11/OpenGL).
 - Windows se compila con MSVC en CI y por defecto con `x86_64-pc-windows-gnu` en local; requiere toolchain/linker de Windows.
 - macOS produce un binario universal `arm64 + x86_64`; no está firmado ni notarizado.
-- La build Windows de la release aún no se ha validado en un Windows real (`t-23`); las versiones anteriores sí se ejecutaron allí.
+- La build Windows de la release está validada en Windows 10/11, con icono correcto en Explorer y barra de tareas.
 
 ## 4. Decisiones que no se deben romper
 
@@ -123,12 +123,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `todo.md` (t-11 a t-13, t-15, t-16, t-18, t-22 y t-23).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-14, t-19, t-20, t-21, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32 y t-33).
+- Pendientes: `todo.md` (t-11, t-12, t-15, t-16, t-18, t-22 y t-34).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-19, t-20, t-21, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32 y t-33).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente tarea recomendada: **validar la release (t-13) y la build Windows (t-23)**. Después, t-11 (redimensionado) y t-22 (accesibilidad).
+Siguiente tarea recomendada: **t-34 — optimizar el CI para 1.1.0**. Después, t-11 (redimensionado) y t-22 (accesibilidad).
 
 ## 7. Benchmarks y límites
 
@@ -142,13 +142,13 @@ El informe completo está en `docs/benchmark-2026-10-28.md`.
 
 Pendientes conocidos:
 
-- EXIF y metadatos (`t-10`).
 - Redimensión y lotes (`t-11`, `t-12`).
 - Modo 1:1, botones/gestos de zoom y atajos de encuadre (`t-16`).
 - HEIC (`t-15`); AVIF y JPEG XL ya están integrados como salida.
 - Accesibilidad completa (`t-22`).
-- Validación visual Windows (`t-23`) y comprobación del icono embebido (`t-24`).
-- Firma y notarización de macOS (`t-17`); la build universal ya se genera en CI.
+- Selector de carpeta de salida (`t-18`).
+- Firma y notarización de macOS descartada; la build universal se distribuye sin firmar.
+- Optimización del CI y caché (`t-34`).
 
 ## 8. Flujo de trabajo para la próxima sesión
 

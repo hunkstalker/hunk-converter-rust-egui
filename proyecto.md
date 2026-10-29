@@ -303,7 +303,7 @@ hunk-converter-1.0.0-windows-x86_64/
 - La build de Linux depende de las bibliotecas gráficas del sistema (X11/OpenGL), como cualquier app nativa.
 - Compilar en x86/x86_64 requiere NASM por el decodificador AVIF `rav1d`.
 - La build Windows importa únicamente DLLs del sistema; no necesita DLLs de MinGW.
-- La build Windows no se ha ejecutado todavía en un Windows real (t-23).
+- La release [v1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0) está publicada y validada en Windows 10/11, con icono en Explorer y barra de tareas.
 - El CI de GitHub compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal al empujar un tag `*.*.*` o `v*.*.*`.
 
 ## 7. Rendimiento y recursos
@@ -317,7 +317,6 @@ Resumen del contexto de referencia:
 - La interfaz no consume CPU de render en reposo: repinta bajo demanda.
 - WebP, JPG, PNG e ICO son más rápidos en la versión Rust; AVIF y JPEG XL se añaden como códecs nuevos.
 - Las cifras absolutas de CPU en reposo de Godot están infladas por usar llvmpipe sin VSync; no representan vatios reales en una GPU.
-- Windows está pendiente de validación en hardware real.
 
 ## 8. Límites conocidos
 
@@ -327,9 +326,7 @@ Resumen del contexto de referencia:
 - HEIC no está soportado; AVIF y JPEG XL sí están disponibles como salida (`t-15`).
 - No se conservan perfiles ICC.
 - La accesibilidad nativa completa y el uso con lector de pantalla están pendientes (`t-22`).
-- La build Windows se genera, pero no se ha ejecutado en Windows (`t-23`).
-- El icono del `.exe` de Windows se incrusta en la build MSVC; falta comprobarlo visualmente en un Windows real (`t-24`).
-- La build macOS universal se genera en CI, pero no está firmada ni notarizada (`t-17`).
+- La build macOS universal se genera en CI, pero no está firmada ni notarizada; la firma se descartó por falta de presupuesto.
 - El resultado ICO usa PNG dentro del contenedor, compatible con Windows moderno.
 
 ## 9. Pruebas y verificación

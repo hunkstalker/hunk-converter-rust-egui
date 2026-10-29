@@ -58,6 +58,15 @@ Las mediciones de interfaz se hicieron con las builds portables finales.
 | Carpeta Windows | 109.842.428 B | 15.496.139 B | 85,9 % |
 | `.zip` Windows | 36,9 MiB | 6,7 MiB | 81,8 % |
 
+Artefactos publicados en la release v1.0.0:
+
+| Artefacto | Tamaño |
+| --- | ---: |
+| `hunk-converter-1.0.0-linux-x86_64.tar.gz` | 7.672.600 B |
+| `hunk-converter-1.0.0-windows-x86_64.zip` | 7.094.647 B |
+| `hunk-converter-1.0.0-macos-universal.tar.gz` | 13.996.991 B |
+| `SHA256SUMS.txt` | 323 B |
+
 Dependencias:
 
 - Linux: ambos binarios enlazan solo bibliotecas base del sistema (libc/libm y

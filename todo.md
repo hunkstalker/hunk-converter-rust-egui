@@ -12,10 +12,6 @@
 
 **Descripción:** Permitir arrastrar varias imágenes y procesarlas con un mismo formato y calidad, mostrando progreso y resultados individuales. Los archivos deben guardarse en `export/` sin sobrescribir y con nombres únicos, igual que en el flujo de una sola imagen.
 
-## t-13 — Validar CI y publicación de la release
-
-**Descripción:** El workflow `.github/workflows/release.yml` ya compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, genera checksums y publica la GitHub Release al empujar un tag. Falta validar el primer release real y cerrar la tarea.
-
 ## t-15 — Entrada HEIC y códecs opcionales
 
 **Descripción:** Evaluar HEIC como formato de entrada manteniendo la portabilidad y sin introducir llamadas de red. AVIF y JPEG XL ya están integrados como salida (`t-26`); queda valorar si los códecs pesados deben poder excluirse mediante features de Cargo y documentar el impacto en tamaño y compilación.
@@ -32,6 +28,6 @@
 
 **Descripción:** Incorporar soporte de accesibilidad nativa de egui/AccessKit, orden de foco explícito, nombres y descripciones para lector de pantalla, navegación completa sin ratón y pruebas de contraste y escalado de fuente. El cuentagotas y el comparador deben poder usarse con teclado.
 
-## t-23 — Validar la build Windows 10/11 de la release
+## t-34 — Optimizar el CI para 1.1.0
 
-**Descripción:** Ejecutar el `.zip` portable de la release en Windows 10 y 11 y comprobar arranque, high DPI, carga por arrastre, diálogo nativo, exportación a `export/`, cierre limpio e imports del sistema. Incluye la verificación visual del icono en Explorer, barra de tareas y accesos directos (absorbe la antigua `t-24`).
+**Descripción:** Limitar los builds de Linux, Windows y macOS a tags y ejecución manual, dejando `main` y las pull requests solo con pruebas. Añadir caché de Cargo (`Swatinem/rust-cache`) y evaluar `sccache` para las dependencias C/C++. Mantener el workflow único y la release automática en tags.

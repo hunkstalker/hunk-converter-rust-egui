@@ -1,6 +1,6 @@
 # HUNK Converter
 
-[Repositorio](https://github.com/hunkstalker/hunk-converter)
+[Repositorio](https://github.com/hunkstalker/hunk-converter) · [Release 1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0)
 
 **Convierte, comprime, compara, muestrea colores y exporta imágenes sin salir de tu equipo.**
 
@@ -173,7 +173,7 @@ Los resultados se generan en `dist/`:
 
 La entrega Linux incluye `hunk-converter.desktop` y `hunk-converter.png`. La entrega macOS incluye `HUNK Converter.app` con `icon.icns`.
 
-La build Windows incluye el icono embebido mediante `winresource`; falta validarla visualmente en un Windows real. La build Linux se validó bajo X11, incluyendo la exportación a su carpeta `export/`. La build macOS se empaqueta como `HUNK Converter.app` con `icon.icns`.
+La build Windows está validada en Windows 10/11, con el icono embebido mediante `winresource` visible en Explorer y barra de tareas. La build Linux se validó bajo X11, incluyendo la exportación a su carpeta `export/`. La build macOS se empaqueta como `HUNK Converter.app` con `icon.icns`.
 
 ## Pruebas
 

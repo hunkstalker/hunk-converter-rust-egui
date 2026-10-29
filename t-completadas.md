@@ -85,7 +85,7 @@
 **Descripción:** Convertir el piloto en la aplicación principal, completar la paridad imprescindible del producto, reemplazar el selector de color de fondo por el cuentagotas, añadir soporte SVG, renombrar la aplicación a hunk-converter 0.2.0, empaquetar Linux y Windows, actualizar documentación y archivar el prototipo Godot.
 
 **Completada:** 2026-10-28
-**Resultado:** Aplicación principal en Rust con egui; UI event-driven sin repintado continuo, comparador, ICO, exportación portable, cuentagotas y SVG. Suite de 13 pruebas Rust, clippy y formato limpios. Builds portables Linux y Windows generadas. El prototipo Godot queda archivado como referencia. La build Windows está generada, pero su ejecución en Windows sigue pendiente en t-23.
+**Resultado:** Aplicación principal en Rust con egui; UI event-driven sin repintado continuo, comparador, ICO, exportación portable, cuentagotas y SVG. Suite de 13 pruebas Rust, clippy y formato limpios. Builds portables Linux y Windows generadas. El prototipo Godot queda archivado como referencia. La build Windows se validó posteriormente en Windows 10/11 en t-23.
 
 ## t-25 — Zoom con rueda y paneo del lienzo
 
@@ -163,6 +163,20 @@
 
 **Completada:** 2026-10-29
 **Resultado:** `codec::decode_raster` lee la orientación con `ImageDecoder::orientation` y la aplica con `DynamicImage::apply_orientation` antes de generar el RGBA. Las dimensiones se validan después del giro, por lo que los formatos de 90° y 270° intercambian ancho y alto correctamente. Pruebas de integración con JPEG y EXIF para orientaciones 1, 3, 6 y 8. La salida sigue sin conservar metadatos, pero los píxeles ya salen orientados.
+
+## t-13 — CI y publicación de la release
+
+**Descripción:** Extender la integración continua para ejecutar la suite, compilar las builds portables y publicar artefactos con checksums al crear una etiqueta de versión. Mantener la build sin instalador y la carpeta `export/` junto al ejecutable.
+
+**Completada:** 2026-10-29
+**Resultado:** Workflow único `.github/workflows/ci.yml` con pruebas, builds Linux/Windows/macOS, checksums y GitHub Release en tags. NASM instalado en el job de pruebas y acciones actualizadas a Node 24. La release [v1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0) se publicó correctamente con los tres paquetes y `SHA256SUMS.txt`.
+
+## t-23 — Validar la build Windows 10/11 de la release
+
+**Descripción:** Ejecutar el `.zip` portable de la release en Windows 10 y 11 y comprobar arranque, high DPI, carga por arrastre, diálogo nativo, exportación a `export/`, cierre limpio e imports del sistema. Incluye la verificación visual del icono en Explorer, barra de tareas y accesos directos.
+
+**Completada:** 2026-10-29
+**Resultado:** Release validada en Windows 10/11: arranque, DPI, arrastre, diálogo nativo, exportación y cierre correctos. El ejecutable muestra el icono de HUNK Converter en Explorer y barra de tareas. La comprobación absorbe la antigua `t-24`.
 
 ## Tareas descartadas o absorbidas
 
