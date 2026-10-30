@@ -34,7 +34,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
 - **31 pruebas Rust**, clippy y formato limpios.
-- CI de Rust en GitHub Actions, con builds multiplataforma y release automática al empujar un tag.
+- CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; release validada en Windows 10/11.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
 
@@ -122,12 +122,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `todo.md` (t-22 y t-34).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32 y t-33).
+- Pendientes: `todo.md` (t-22).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33 y t-34).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente tarea recomendada: **t-34 — optimizar el CI para 1.1.0**. Queda t-22.
+Siguiente tarea recomendada: **t-22 — accesibilidad y navegación por teclado**.
 
 ## 7. Benchmarks y límites
 
@@ -143,7 +143,6 @@ Pendientes conocidos:
 
 - Accesibilidad completa (`t-22`).
 - Firma y notarización de macOS descartada; la build universal se distribuye sin firmar.
-- Optimización del CI y caché (`t-34`).
 
 ## 8. Flujo de trabajo para la próxima sesión
 

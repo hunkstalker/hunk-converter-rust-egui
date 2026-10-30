@@ -5,9 +5,9 @@
 `.github/workflows/ci.yml` concentra todo:
 
 - **Pull requests:** solo formato, clippy y pruebas.
-- **Push a `main`:** pruebas y builds de Linux, Windows y macOS, sin release.
+- **Push a `main`:** solo formato, clippy y pruebas.
 - **Tags de versión:** pruebas, builds, checksums y GitHub Release.
-- **Ejecución manual:** builds sin release.
+- **Ejecución manual:** pruebas y builds, sin release.
 
 ## Plataformas
 
@@ -21,6 +21,22 @@ La build Linux se compila en Ubuntu 22.04 y requiere glibc 2.35 o superior
 (Debian 12+, Ubuntu 22.04+). La build de macOS contiene un binario universal
 `arm64 + x86_64`; no está firmada ni notarizada. Windows se compila con MSVC y
 se distribuye como carpeta portable comprimida. La entrega Linux incluye un lanzador `.desktop` y el icono PNG; la entrega macOS es un `.app` con `icon.icns`.
+
+## Caché
+
+Los jobs de pruebas y de build usan `Swatinem/rust-cache@v2`. La clave se
+calcula por job, sistema operativo, versión de Rust y `Cargo.lock`. Se cachean el
+registro de Cargo y `target/`, incluidos los objetos generados por las
+dependencias C/C++ y los builds de cada target instalado.
+
+Se evaluó `sccache` para las dependencias C/C++ y no se añadió:
+
+- `rust-cache` ya reutiliza `target/` completo cuando la clave coincide.
+- Para persistir entre ejecuciones, `sccache` necesitaría un backend remoto o el
+  backend de GitHub Actions, con configuración y permisos adicionales.
+- NASM, usado por el decodificador AVIF, no pasa por `sccache`.
+- Se puede reconsiderar si los tiempos siguen siendo altos tras medir el efecto
+  de `rust-cache`.
 
 ## Release
 
@@ -63,6 +79,6 @@ La release [`v1.0.0`](https://github.com/hunkstalker/hunk-converter/releases/tag
 se publicó correctamente y se validó en Windows 10/11, incluido el icono del
 ejecutable.
 
-Para 1.1.0 queda pendiente `t-34`: compilar las tres plataformas solo en tags y
-ejecución manual, y añadir caché de Cargo/`sccache` para reducir tiempos y
-minutos de CI.
+`t-34` deja los builds limitados a tags y ejecución manual, con `rust-cache` en
+pruebas y builds. `sccache` se evaluó y se descartó por ahora. La próxima
+ejecución manual o el tag de 1.1.0 validarán el workflow completo.

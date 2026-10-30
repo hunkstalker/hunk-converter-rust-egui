@@ -213,3 +213,10 @@
 
 **Completada:** 2026-10-29
 **Resultado:** Exportación fija a `export/`, sin selector de carpeta. El archivo se crea con `OpenOptions::create_new(true)`, de modo que comprobación y creación son atómicas; ante una colisión se prueban `nombre-2.ext`, `nombre-3.ext`, etc. Si la escritura falla, se elimina el archivo parcial. Validado con una exportación real que dejó intacto un `demo.webp` preexistente y creó `demo-2.webp`.
+
+## t-34 — Optimizar el CI para 1.1.0
+
+**Descripción:** Limitar los builds de Linux, Windows y macOS a tags y ejecución manual, dejando `main` y las pull requests solo con pruebas. Añadir caché de Cargo (`Swatinem/rust-cache`) y evaluar `sccache` para las dependencias C/C++. Mantener el workflow único y la release automática en tags.
+
+**Completada:** 2026-10-30
+**Resultado:** Builds limitados a tags y `workflow_dispatch`; `main` y PR solo ejecutan formato, clippy y pruebas. `rust-cache` añadido a pruebas y builds. `sccache` evaluado y descartado por solapamiento con la caché de `target` y por no cubrir NASM. Workflow único y release automática en tags.

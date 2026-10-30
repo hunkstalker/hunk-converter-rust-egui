@@ -309,7 +309,7 @@ hunk-converter-1.0.0-windows-x86_64/
 - Compilar en x86/x86_64 requiere NASM por el decodificador AVIF `rav1d`.
 - La build Windows importa únicamente DLLs del sistema; no necesita DLLs de MinGW.
 - La release [v1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0) está publicada y validada en Windows 10/11, con icono en Explorer y barra de tareas.
-- El CI de GitHub compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal al empujar un tag `*.*.*` o `v*.*.*`.
+- El CI de GitHub ejecuta pruebas en `main` y PR, y compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal solo al empujar un tag `*.*.*` o `v*.*.*`, o al lanzarlo manualmente. Los jobs usan `rust-cache`; `sccache` se evaluó y se descartó por ahora.
 
 ## 7. Rendimiento y recursos
 

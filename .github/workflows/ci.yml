@@ -35,6 +35,9 @@ jobs:
       - name: Instalar NASM
         run: sudo apt-get update && sudo apt-get install -y nasm
 
+      - name: Caché de Cargo
+        uses: Swatinem/rust-cache@v2
+
       - name: Formato
         run: cargo fmt --all -- --check
 
@@ -45,7 +48,7 @@ jobs:
         run: cargo test
 
   linux:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     name: Linux Debian x86_64
     needs: test
     runs-on: ubuntu-22.04
@@ -61,6 +64,9 @@ jobs:
 
       - name: Instalar NASM
         run: sudo apt-get update && sudo apt-get install -y nasm
+
+      - name: Caché de Cargo
+        uses: Swatinem/rust-cache@v2
 
       - name: Compilar y empaquetar
         run: ./scripts/build_dist.sh linux
@@ -80,7 +86,7 @@ jobs:
           if-no-files-found: error
 
   windows:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     name: Windows 10/11 x86_64
     needs: test
     runs-on: windows-latest
@@ -99,6 +105,9 @@ jobs:
         run: |
           choco install nasm -y --no-progress
           "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Caché de Cargo
+        uses: Swatinem/rust-cache@v2
 
       - name: Compilar y empaquetar
         shell: bash
@@ -131,7 +140,7 @@ jobs:
           if-no-files-found: error
 
   macos:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     name: macOS universal
     needs: test
     runs-on: macos-14
@@ -149,6 +158,9 @@ jobs:
 
       - name: Añadir targets universales
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Caché de Cargo
+        uses: Swatinem/rust-cache@v2
 
       - name: Instalar NASM
         run: brew install nasm
