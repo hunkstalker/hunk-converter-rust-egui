@@ -9,7 +9,11 @@ use crate::theme as T;
 use super::super::HunkApp;
 use super::super::actions::AppAction;
 use super::super::{FIT_ZOOM, MAX_ZOOM, MIN_ZOOM};
-use super::widgets::{Badge, fit_rect, paint_badge, paint_checker};
+use super::widgets::{Badge, fit_rect, paint_badge, paint_checker, paint_focus_ring};
+
+pub(crate) const CANVAS_ID: &str = "hunk_preview_canvas";
+const MIN_SPLIT: f32 = 0.015;
+const MAX_SPLIT: f32 = 0.985;
 
 pub(super) struct CanvasContext<'a> {
     pub ui: &'a egui::Ui,
@@ -132,6 +136,19 @@ impl HunkApp {
         let icon_mode = self.format == OutputFormat::Ico;
 
         if icon_mode {
+            response.widget_info(|| {
+                egui::WidgetInfo::labeled(
+                    egui::Role::Image,
+                    true,
+                    format!(
+                        "{} — {} × {} px · {}",
+                        self.t(K::Preview),
+                        source_width,
+                        source_height,
+                        self.format.label()
+                    ),
+                )
+            });
             if let Some(result) = self
                 .result
                 .as_ref()
@@ -182,6 +199,154 @@ impl HunkApp {
                 area,
             });
             image_rect = self.view_rect(source_size, fit_rect, area);
+        }
+
+        let actual_percent = if self.actual_size {
+            100.0
+        } else {
+            self.zoom * self.fit_scale * 100.0
+        };
+        response.widget_info(|| {
+            egui::WidgetInfo::slider(
+                true,
+                f64::from(self.split * 100.0),
+                format!(
+                    "{} — {} × {} px · {} · {:.0} %",
+                    self.t(K::Preview),
+                    source_width,
+                    source_height,
+                    self.format.label(),
+                    actual_percent
+                ),
+            )
+        });
+        ctx.accesskit_node_builder(response.id, |builder| {
+            builder.add_action(egui::accesskit::Action::Increment);
+            builder.add_action(egui::accesskit::Action::Decrement);
+            builder.add_action(egui::accesskit::Action::SetValue);
+        });
+        let (increase, decrease, set_value) = ctx.input(|input| {
+            let increase = input
+                .num_accesskit_action_requests(response.id, egui::accesskit::Action::Increment);
+            let decrease = input
+                .num_accesskit_action_requests(response.id, egui::accesskit::Action::Decrement);
+            let set_value = input
+                .accesskit_action_requests(response.id, egui::accesskit::Action::SetValue)
+                .last()
+                .and_then(|request| match &request.data {
+                    Some(egui::accesskit::ActionData::NumericValue(value)) => Some(*value),
+                    _ => None,
+                });
+            (increase, decrease, set_value)
+        });
+        if increase > 0 {
+            self.split = nudge_split(self.split, 0.01 * increase as f32);
+        }
+        if decrease > 0 {
+            self.split = nudge_split(self.split, -0.01 * decrease as f32);
+        }
+        if let Some(value) = set_value {
+            self.split = (value as f32 / 100.0).clamp(MIN_SPLIT, MAX_SPLIT);
+        }
+
+        if response.has_focus() && !response.gained_focus() {
+            ui.memory_mut(|memory| {
+                memory.set_focus_lock_filter(
+                    response.id,
+                    egui::EventFilter {
+                        horizontal_arrows: true,
+                        vertical_arrows: true,
+                        escape: true,
+                        ..Default::default()
+                    },
+                );
+            });
+            if self.eyedropper_active {
+                let seed = self
+                    .sampled_position
+                    .unwrap_or((source_width / 2, source_height / 2));
+                let (left, right, up, down, shift, commit) = ctx.input(|input| {
+                    (
+                        input.key_pressed(egui::Key::ArrowLeft),
+                        input.key_pressed(egui::Key::ArrowRight),
+                        input.key_pressed(egui::Key::ArrowUp),
+                        input.key_pressed(egui::Key::ArrowDown),
+                        input.modifiers.shift,
+                        input.key_pressed(egui::Key::Enter) || input.key_pressed(egui::Key::Space),
+                    )
+                });
+                let step = if shift { 10 } else { 1 };
+                let next = move_sample(
+                    seed,
+                    if left {
+                        -step
+                    } else if right {
+                        step
+                    } else {
+                        0
+                    },
+                    if up {
+                        -step
+                    } else if down {
+                        step
+                    } else {
+                        0
+                    },
+                    source_width,
+                    source_height,
+                );
+                if next != seed || self.sampled_position.is_none() {
+                    self.sampled_position = Some(next);
+                    let pixel = source_pixels.get_pixel(next.0, next.1);
+                    self.sampled_color = Some(pixel.0);
+                    self.sample_pending_history = false;
+                }
+                if commit && let Some(rgba) = self.sampled_color {
+                    actions.push(AppAction::RememberColor(rgba));
+                }
+            } else {
+                let (left, right, up, down, home, end, shift) = ctx.input(|input| {
+                    (
+                        input.key_pressed(egui::Key::ArrowLeft),
+                        input.key_pressed(egui::Key::ArrowRight),
+                        input.key_pressed(egui::Key::ArrowUp),
+                        input.key_pressed(egui::Key::ArrowDown),
+                        input.key_pressed(egui::Key::Home),
+                        input.key_pressed(egui::Key::End),
+                        input.modifiers.shift,
+                    )
+                });
+                if !shift && (left || right || home || end) {
+                    if home {
+                        self.split = MIN_SPLIT;
+                    } else if end {
+                        self.split = MAX_SPLIT;
+                    } else if left {
+                        self.split = nudge_split(self.split, -0.01);
+                    } else if right {
+                        self.split = nudge_split(self.split, 0.01);
+                    }
+                } else if self.actual_size || self.zoom > FIT_ZOOM {
+                    let mut delta = Vec2::ZERO;
+                    if up {
+                        delta.y -= 24.0;
+                    }
+                    if down {
+                        delta.y += 24.0;
+                    }
+                    if shift && left {
+                        delta.x -= 24.0;
+                    }
+                    if shift && right {
+                        delta.x += 24.0;
+                    }
+                    if delta != Vec2::ZERO {
+                        self.pan += delta;
+                        self.clamp_pan(self.image_size(source_size, fit_rect), area);
+                        image_rect = self.view_rect(source_size, fit_rect, area);
+                    }
+                }
+            }
         }
 
         let pointer = ctx.input(|input| input.pointer.hover_pos());
@@ -249,7 +414,8 @@ impl HunkApp {
             if response.hovered() {
                 ctx.set_cursor_icon(CursorIcon::Crosshair);
             }
-            if (ctx.input(|input| input.pointer.primary_down()) || response.clicked())
+            if (ctx.input(|input| input.pointer.primary_down())
+                || response.clicked_by(egui::PointerButton::Primary))
                 && let Some(position) = pointer
                 && image_rect.contains(position)
                 && area.contains(position)
@@ -265,7 +431,8 @@ impl HunkApp {
             }
         } else {
             if result_texture.is_some()
-                && (response.dragged_by(egui::PointerButton::Primary) || response.clicked())
+                && (response.dragged_by(egui::PointerButton::Primary)
+                    || response.clicked_by(egui::PointerButton::Primary))
                 && let Some(position) = ctx.input(|input| input.pointer.interact_pos())
             {
                 self.split =
@@ -396,8 +563,23 @@ impl HunkApp {
                 foreground: T::TEXT,
             },
         );
+        if response.has_focus() {
+            paint_focus_ring(painter, rect.shrink(2.0), 18);
+        }
         actions
     }
+}
+
+fn nudge_split(split: f32, delta: f32) -> f32 {
+    (split + delta).clamp(MIN_SPLIT, MAX_SPLIT)
+}
+
+fn move_sample(position: (u32, u32), dx: i32, dy: i32, width: u32, height: u32) -> (u32, u32) {
+    let x =
+        (i64::from(position.0) + i64::from(dx)).clamp(0, i64::from(width.saturating_sub(1))) as u32;
+    let y = (i64::from(position.1) + i64::from(dy)).clamp(0, i64::from(height.saturating_sub(1)))
+        as u32;
+    (x, y)
 }
 
 pub(super) fn pointer_over_split(image_rect: Rect, split_x: f32, pointer: egui::Pos2) -> bool {
@@ -406,4 +588,23 @@ pub(super) fn pointer_over_split(image_rect: Rect, split_x: f32, pointer: egui::
         && pointer.y <= image_rect.bottom();
     let over_circle = pointer.distance(pos2(split_x, image_rect.center().y)) <= 20.0;
     over_line || over_circle
+}
+
+#[cfg(test)]
+mod keyboard_tests {
+    use super::*;
+
+    #[test]
+    fn split_stays_inside_the_image() {
+        assert!((nudge_split(0.5, -0.1) - 0.4).abs() < f32::EPSILON);
+        assert_eq!(nudge_split(0.01, -0.1), MIN_SPLIT);
+        assert_eq!(nudge_split(0.99, 0.1), MAX_SPLIT);
+    }
+
+    #[test]
+    fn keyboard_sample_stays_inside_the_source() {
+        assert_eq!(move_sample((0, 0), -1, -1, 10, 10), (0, 0));
+        assert_eq!(move_sample((9, 9), 1, 1, 10, 10), (9, 9));
+        assert_eq!(move_sample((5, 5), 10, -10, 10, 10), (9, 0));
+    }
 }

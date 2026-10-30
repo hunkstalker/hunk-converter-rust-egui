@@ -14,7 +14,8 @@ pub const BORDER: Color32 = Color32::from_rgb(39, 49, 59);
 pub const BORDER_STRONG: Color32 = Color32::from_rgb(55, 68, 82);
 pub const TEXT: Color32 = Color32::from_rgb(241, 245, 242);
 pub const TEXT_MUTED: Color32 = Color32::from_rgb(146, 158, 170);
-pub const TEXT_FAINT: Color32 = Color32::from_rgb(103, 115, 127);
+pub const TEXT_FAINT: Color32 = Color32::from_rgb(132, 144, 156);
+pub const TEXT_DISABLED: Color32 = Color32::from_rgb(103, 115, 127);
 pub const ACCENT: Color32 = Color32::from_rgb(200, 244, 109);
 pub const ACCENT_HOVER: Color32 = Color32::from_rgb(216, 255, 144);
 pub const ACCENT_PRESSED: Color32 = Color32::from_rgb(180, 226, 87);
@@ -183,4 +184,41 @@ pub fn section_title(text: &str) -> egui::RichText {
 pub fn bullet_separator(ui: &mut egui::Ui) {
     let (rect, _) = ui.allocate_exact_size(egui::vec2(1.0, 14.0), egui::Sense::hover());
     ui.painter().rect_filled(rect, 0.0, BORDER);
+}
+
+#[cfg(test)]
+mod contrast_tests {
+    use super::*;
+
+    fn luminance(color: Color32) -> f32 {
+        let [r, g, b, _] = color.to_normalized_gamma_f32();
+        let linear = |channel: f32| {
+            if channel <= 0.039_28 {
+                channel / 12.92
+            } else {
+                ((channel + 0.055) / 1.055).powf(2.4)
+            }
+        };
+        0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+    }
+
+    fn contrast(a: Color32, b: Color32) -> f32 {
+        let (a, b) = (luminance(a), luminance(b));
+        let (light, dark) = if a > b { (a, b) } else { (b, a) };
+        (light + 0.05) / (dark + 0.05)
+    }
+
+    #[test]
+    fn informative_text_and_focus_meet_wcag() {
+        for background in [BG, BG_SOFT, SURFACE, SURFACE_2, SURFACE_3] {
+            for foreground in [TEXT, TEXT_MUTED, TEXT_FAINT] {
+                assert!(
+                    contrast(foreground, background) >= 4.5,
+                    "contraste insuficiente: {foreground:?} sobre {background:?}"
+                );
+            }
+        }
+        assert!(contrast(ACCENT_INK, ACCENT) >= 4.5);
+        assert!(contrast(ACCENT, SURFACE_3) >= 3.0);
+    }
 }

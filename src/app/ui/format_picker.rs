@@ -54,5 +54,26 @@ pub(super) fn format_card(ui: &mut egui::Ui, card: FormatCard<'_>) -> egui::Resp
         FontId::proportional(9.5),
         if selected { T::ACCENT } else { T::TEXT_FAINT },
     );
+    response.widget_info(|| {
+        egui::WidgetInfo::selected(
+            egui::Role::RadioButton,
+            true,
+            selected,
+            format!("{} — {}", card.format.label(), card.hint),
+        )
+    });
+    if response.has_focus() {
+        ui.memory_mut(|memory| {
+            memory.set_focus_lock_filter(
+                response.id,
+                egui::EventFilter {
+                    horizontal_arrows: true,
+                    vertical_arrows: true,
+                    ..Default::default()
+                },
+            );
+        });
+        super::widgets::paint_focus_ring(ui.painter(), rect, 12);
+    }
     response.on_hover_cursor(CursorIcon::PointingHand)
 }

@@ -58,7 +58,11 @@ impl HunkApp {
                             .stroke(Stroke::new(1.0, T::BORDER))
                             .corner_radius(CornerRadius::same(10))
                             .min_size(vec2(reset_width + 28.0, 32.0));
-                            if ui.add(reset).clicked() {
+                            let response = ui.add(reset);
+                            if response.has_focus() {
+                                super::widgets::paint_focus_ring(ui.painter(), response.rect, 10);
+                            }
+                            if response.clicked() {
                                 actions.push(AppAction::Reset);
                             }
                         }
@@ -83,6 +87,11 @@ impl HunkApp {
                                 }
                             })
                             .response
+                            .accessible_name(format!(
+                                "{}: {}",
+                                self.t(K::Language),
+                                language.short()
+                            ))
                             .on_hover_text(self.t(K::Language));
                         if language != self.language {
                             self.language = language;

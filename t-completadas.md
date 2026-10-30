@@ -57,7 +57,7 @@
 **Descripción:** Añadir procesamiento en segundo plano con descarte de resultados obsoletos, manejo de errores, avisos temporales, reinicio completo y atajos de teclado.
 
 **Completada:** 2026-10-28
-**Resultado:** Procesamiento con hilos, agrupación de cambios, descarte de resultados obsoletos, avisos y reinicio. La accesibilidad completa sigue pendiente en t-22 para la versión Rust.
+**Resultado:** Procesamiento con hilos, agrupación de cambios, descarte de resultados obsoletos, avisos y reinicio. La accesibilidad completa se añadió en t-22 para la versión Rust.
 
 ## t-9 — Pruebas, documentación y builds iniciales
 
@@ -213,6 +213,13 @@
 
 **Completada:** 2026-10-29
 **Resultado:** Exportación fija a `export/`, sin selector de carpeta. El archivo se crea con `OpenOptions::create_new(true)`, de modo que comprobación y creación son atómicas; ante una colisión se prueban `nombre-2.ext`, `nombre-3.ext`, etc. Si la escritura falla, se elimina el archivo parcial. Validado con una exportación real que dejó intacto un `demo.webp` preexistente y creó `demo-2.webp`.
+
+## t-22 — Accesibilidad y navegación completa por teclado
+
+**Descripción:** Incorporar soporte de accesibilidad nativa de egui/AccessKit, orden de foco explícito, nombres y descripciones para lector de pantalla, navegación completa sin ratón y pruebas de contraste y escalado de fuente. El cuentagotas y el comparador deben poder usarse con teclado.
+
+**Completada:** 2026-10-30
+**Resultado:** AccessKit activo; roles, nombres, estados y valores en controles estándar y personalizados; avisos como alertas. Foco visible, formatos con navegación por flechas, historial con tab stop único, Enter y L, comparador como slider con flechas/Inicio/Fin y paneo, y cuentagotas por teclado con flechas/Shift/Enter/Esc. Contraste WCAG AA con prueba automática. Suite ampliada a 34 pruebas y capturas regeneradas.
 
 ## t-34 — Optimizar el CI para 1.1.0
 

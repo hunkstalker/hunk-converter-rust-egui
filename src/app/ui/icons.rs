@@ -33,7 +33,7 @@ pub(crate) fn eyedropper_button(ui: &mut egui::Ui, spec: EyedropperButton<'_>) -
         T::BORDER
     };
     let icon = if !enabled {
-        T::TEXT_FAINT
+        T::TEXT_DISABLED
     } else if active {
         T::ACCENT_INK
     } else {
@@ -49,7 +49,10 @@ pub(crate) fn eyedropper_button(ui: &mut egui::Ui, spec: EyedropperButton<'_>) -
         StrokeKind::Inside,
     );
     paint_eyedropper(painter, rect.shrink2(vec2(8.0, 6.0)), icon);
-    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, enabled, label));
+    response.widget_info(|| egui::WidgetInfo::selected(egui::Role::Switch, enabled, active, label));
+    if enabled && response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), rect, 8);
+    }
 
     if enabled {
         response.on_hover_cursor(CursorIcon::PointingHand)
@@ -109,6 +112,7 @@ pub(crate) fn icon_action_button(
     ui: &mut egui::Ui,
     action: IconAction,
     enabled: bool,
+    label: &str,
 ) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(vec2(22.0, 20.0), Sense::click());
     let hovered = enabled && response.hovered();
@@ -117,7 +121,7 @@ pub(crate) fn icon_action_button(
             .rect_filled(rect, CornerRadius::same(5), T::SURFACE_3);
     }
     let color = if !enabled {
-        T::TEXT_FAINT
+        T::TEXT_DISABLED
     } else if hovered {
         T::TEXT
     } else {
@@ -126,6 +130,11 @@ pub(crate) fn icon_action_button(
     match action {
         IconAction::Copy => paint_copy_icon(ui.painter(), rect, color),
         IconAction::Trash => paint_trash_icon(ui.painter(), rect, color),
+    }
+    response
+        .widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, enabled, label.to_owned()));
+    if enabled && response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), rect, 5);
     }
     if enabled {
         response.on_hover_cursor(CursorIcon::PointingHand)

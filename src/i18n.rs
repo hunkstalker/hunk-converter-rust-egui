@@ -182,6 +182,11 @@ catalogue! {
     ),
     Calculating => ("Calculando el resultado…", "Calculant el resultat…", "Calculating result…"),
     Preview => ("Vista previa", "Vista prèvia", "Preview"),
+    ComparatorDivider => (
+        "Divisor del comparador",
+        "Divisor del comparador",
+        "Comparison divider"
+    ),
     DividerZoomHint => (
         "Arrastra el divisor · rueda para zoom",
         "Arrossega el divisor · roda per fer zoom",

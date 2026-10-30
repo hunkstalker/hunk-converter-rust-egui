@@ -56,7 +56,11 @@ impl HunkApp {
                             .stroke(Stroke::new(1.0, T::ACCENT))
                             .corner_radius(CornerRadius::same(12))
                             .min_size(vec2(230.0, 44.0));
-                            if ui.add(choose).clicked() {
+                            let response = ui.add(choose);
+                            if response.has_focus() {
+                                super::widgets::paint_focus_ring(ui.painter(), response.rect, 12);
+                            }
+                            if response.clicked() {
                                 actions.push(AppAction::OpenFileDialog);
                             }
                             ui.add_space(16.0);

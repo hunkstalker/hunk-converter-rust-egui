@@ -133,11 +133,12 @@ impl HunkApp {
         let gap = 6.0;
         let card_width = (ui.available_width() - gap * 2.0) / 3.0;
         let mut requested_format = None;
+        let mut format_responses = Vec::new();
         for (row, formats) in OutputFormat::ALL.chunks(3).enumerate() {
             ui.horizontal(|ui| {
                 for (column, format) in formats.iter().enumerate() {
                     let hint = i18n::format_hint(self.language, *format);
-                    if format_card(
+                    let response = format_card(
                         ui,
                         FormatCard {
                             format: *format,
@@ -145,11 +146,12 @@ impl HunkApp {
                             width: card_width,
                             hint,
                         },
-                    )
-                    .clicked()
-                    {
+                    );
+                    if response.clicked() {
                         requested_format = Some(*format);
+                        response.request_focus();
                     }
+                    format_responses.push((*format, response));
                     if column + 1 < formats.len() {
                         ui.add_space(gap);
                     }
@@ -157,6 +159,36 @@ impl HunkApp {
             });
             if row + 1 < OutputFormat::ALL.len().div_ceil(3) {
                 ui.add_space(gap);
+            }
+        }
+        if let Some(index) = format_responses
+            .iter()
+            .position(|(_, response)| response.has_focus())
+        {
+            let (left, right, up, down) = ui.input(|input| {
+                (
+                    input.key_pressed(egui::Key::ArrowLeft),
+                    input.key_pressed(egui::Key::ArrowRight),
+                    input.key_pressed(egui::Key::ArrowUp),
+                    input.key_pressed(egui::Key::ArrowDown),
+                )
+            });
+            let count = format_responses.len();
+            let step = if left {
+                Some(count - 1)
+            } else if right {
+                Some(1)
+            } else if up {
+                Some(count - 3)
+            } else if down {
+                Some(3)
+            } else {
+                None
+            };
+            if let Some(step) = step {
+                let next = (index + step) % count;
+                requested_format = Some(format_responses[next].0);
+                format_responses[next].1.request_focus();
             }
         }
         if let Some(format) = requested_format
@@ -182,7 +214,7 @@ impl HunkApp {
                 .color(if enabled {
                     T::ACCENT_INK
                 } else {
-                    T::TEXT_FAINT
+                    T::TEXT_DISABLED
                 })
                 .strong(),
         )
@@ -193,7 +225,11 @@ impl HunkApp {
         ))
         .corner_radius(CornerRadius::same(12))
         .min_size(vec2(ui.available_width(), 43.0));
-        if ui.add(button).clicked() && enabled {
+        let response = ui.add(button);
+        if response.has_focus() {
+            super::widgets::paint_focus_ring(ui.painter(), response.rect, 12);
+        }
+        if response.clicked() && enabled {
             actions.push(AppAction::Export);
         }
         ui.add_space(4.0);

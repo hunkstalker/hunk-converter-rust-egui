@@ -36,7 +36,10 @@ impl HunkApp {
             let slider = egui::Slider::new(&mut self.quality, 1..=100)
                 .show_value(false)
                 .trailing_fill(true);
-            let response = ui.add(slider);
+            let response = ui.add(slider).accessible_name(self.t(K::Quality));
+            if response.has_focus() {
+                super::widgets::paint_focus_ring(ui.painter(), response.rect, 6);
+            }
             response.clone().on_hover_text(hint);
             if response.changed() {
                 actions.push(AppAction::RequestEncode(Some(Duration::from_millis(

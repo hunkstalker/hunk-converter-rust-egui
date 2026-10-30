@@ -10,6 +10,7 @@ rust-version = "1.99"
 [dependencies]
 arboard = "3.7.0"
 eframe = { version = "0.37.0", default-features = false, features = [
+    "accesskit",
     "clipboard",
     "default_fonts",
     "glow",

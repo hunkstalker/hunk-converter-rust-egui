@@ -1,8 +1,8 @@
 use std::io::Cursor;
 
 use eframe::egui::{
-    self, Align2, Color32, CornerRadius, CursorIcon, FontId, Rect, Sense, TextureHandle,
-    TextureOptions, Vec2, vec2,
+    self, Align2, Color32, CornerRadius, CursorIcon, FontId, Rect, Sense, Stroke, StrokeKind,
+    TextureHandle, TextureOptions, Vec2, vec2,
 };
 use image::{ImageFormat, RgbaImage, imageops};
 
@@ -29,11 +29,27 @@ pub(crate) fn small_text_button(ui: &mut egui::Ui, label: &str) -> egui::Respons
         galley,
         if hovered { T::TEXT } else { T::TEXT_MUTED },
     );
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label.to_owned()));
+    if response.has_focus() {
+        paint_focus_ring(ui.painter(), rect, 8);
+    }
     if hovered {
         response.on_hover_cursor(CursorIcon::PointingHand)
     } else {
         response
     }
+}
+
+pub(crate) fn paint_focus_ring(painter: &egui::Painter, rect: Rect, radius: u8) {
+    if std::env::var_os("HUNK_SCREENSHOT").is_some() {
+        return;
+    }
+    painter.rect_stroke(
+        rect.expand(2.0),
+        CornerRadius::same(radius.saturating_add(2)),
+        Stroke::new(2.0, T::ACCENT),
+        StrokeKind::Outside,
+    );
 }
 
 pub(crate) fn hline(ui: &mut egui::Ui) {

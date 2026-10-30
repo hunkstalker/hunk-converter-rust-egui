@@ -22,6 +22,9 @@ impl HunkApp {
         let sampled_position = self.sampled_position;
         let history = self.history.clone();
         let has_unlocked = history.iter().any(|entry| !entry.locked);
+        let entry_count = history.len();
+        let focus_index = self.history_focus.min(entry_count.saturating_sub(1));
+        self.history_focus = focus_index;
 
         T::soft_frame().show(ui, |ui| {
             ui.set_width(ui.available_width());
@@ -29,8 +32,10 @@ impl HunkApp {
             ui.horizontal(|ui| {
                 ui.label(T::eyebrow(self.t(K::History)));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    let response = icon_action_button(ui, IconAction::Trash, has_unlocked)
-                        .on_hover_text(self.t(K::ClearHistory));
+                    let clear_label = self.t(K::ClearHistory);
+                    let response =
+                        icon_action_button(ui, IconAction::Trash, has_unlocked, clear_label)
+                            .on_hover_text(clear_label);
                     if has_unlocked && response.clicked() {
                         actions.push(AppAction::ClearHistory);
                     }
@@ -51,8 +56,19 @@ impl HunkApp {
                     for column in 0..count {
                         let index = row * HISTORY_COLUMNS + column;
                         let entry = history.get(index);
-                        let (rect, response) =
-                            ui.allocate_exact_size(vec2(SWATCH_SIZE, SWATCH_SIZE), Sense::click());
+                        let (rect, _) =
+                            ui.allocate_exact_size(vec2(SWATCH_SIZE, SWATCH_SIZE), Sense::hover());
+                        let sense = match entry {
+                            None => Sense::hover(),
+                            Some(_) if index == focus_index => Sense::click(),
+                            Some(_) => Sense::CLICK,
+                        };
+                        let id = egui::Id::unique(("history_swatch", index));
+                        let response = ui.interact(rect, id, sense);
+                        if index == focus_index && self.history_focus_pending {
+                            response.request_focus();
+                            self.history_focus_pending = false;
+                        }
                         paint_history_swatch(
                             ui.painter(),
                             rect,
@@ -62,21 +78,83 @@ impl HunkApp {
                             },
                         );
                         if let Some(entry) = entry {
+                            let tooltip = i18n::history_tooltip(
+                                self.language,
+                                &hex_rgba(entry.rgba),
+                                entry.locked,
+                            );
+                            let selected = sample == Some(entry.rgba);
+                            response.widget_info(|| {
+                                egui::WidgetInfo::selected(
+                                    egui::Role::RadioButton,
+                                    true,
+                                    selected,
+                                    tooltip.clone(),
+                                )
+                            });
                             let response = response
                                 .on_hover_cursor(CursorIcon::PointingHand)
-                                .on_hover_text(i18n::history_tooltip(
-                                    self.language,
-                                    &hex_rgba(entry.rgba),
-                                    entry.locked,
-                                ));
+                                .on_hover_text(tooltip);
+                            if response.has_focus() {
+                                ui.memory_mut(|memory| {
+                                    memory.set_focus_lock_filter(
+                                        response.id,
+                                        egui::EventFilter {
+                                            horizontal_arrows: true,
+                                            vertical_arrows: true,
+                                            ..Default::default()
+                                        },
+                                    );
+                                });
+                                super::widgets::paint_focus_ring(ui.painter(), rect, 7);
+                            }
                             if response.clicked() {
+                                self.history_focus = index;
+                                self.history_focus_pending = true;
                                 self.sampled_color = Some(entry.rgba);
                                 self.sampled_position = None;
                                 self.eyedropper_active = false;
                                 self.sample_pending_history = false;
+                                ui.ctx().memory_mut(|memory| memory.request_focus(id));
                                 actions.push(AppAction::RequestRepaint);
                             } else if response.clicked_by(egui::PointerButton::Secondary) {
                                 actions.push(AppAction::ToggleHistoryLock(index));
+                            }
+                            if response.has_focus() {
+                                let (left, right, up, down, home, end, lock) = ui.input(|input| {
+                                    (
+                                        input.key_pressed(egui::Key::ArrowLeft),
+                                        input.key_pressed(egui::Key::ArrowRight),
+                                        input.key_pressed(egui::Key::ArrowUp),
+                                        input.key_pressed(egui::Key::ArrowDown),
+                                        input.key_pressed(egui::Key::Home),
+                                        input.key_pressed(egui::Key::End),
+                                        input.key_pressed(egui::Key::L),
+                                    )
+                                });
+                                let target = if home {
+                                    Some(0)
+                                } else if end {
+                                    Some(entry_count - 1)
+                                } else if left {
+                                    Some(index.saturating_sub(1))
+                                } else if right {
+                                    Some((index + 1).min(entry_count - 1))
+                                } else if up {
+                                    Some(index.saturating_sub(HISTORY_COLUMNS))
+                                } else if down {
+                                    Some((index + HISTORY_COLUMNS).min(entry_count - 1))
+                                } else {
+                                    None
+                                };
+                                if let Some(target) = target {
+                                    self.history_focus = target;
+                                    self.history_focus_pending = true;
+                                    ui.ctx().request_repaint();
+                                }
+                                if lock {
+                                    actions.push(AppAction::ToggleHistoryLock(index));
+                                }
                             }
                         }
                     }
@@ -119,6 +197,11 @@ impl HunkApp {
                         {
                             self.eyedropper_active = !self.eyedropper_active;
                             actions.push(AppAction::RequestRepaint);
+                        }
+                        if self.eyedropper_active {
+                            ui.ctx().memory_mut(|memory| {
+                                memory.request_focus(egui::Id::unique(super::canvas::CANVAS_ID));
+                            });
                         }
                     }
                 });
@@ -195,8 +278,10 @@ impl HunkApp {
                             .color(T::TEXT_MUTED),
                     );
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        let response = icon_action_button(ui, IconAction::Copy, sample.is_some())
-                            .on_hover_text(i18n::copy_tooltip(self.language, label));
+                        let tooltip = i18n::copy_tooltip(self.language, label);
+                        let response =
+                            icon_action_button(ui, IconAction::Copy, sample.is_some(), &tooltip)
+                                .on_hover_text(tooltip);
                         if sample.is_some() && response.clicked() {
                             actions.push(AppAction::CopyColor {
                                 label: label.to_owned(),

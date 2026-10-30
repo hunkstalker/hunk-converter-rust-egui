@@ -24,13 +24,17 @@ impl HunkApp {
                         .color(T::TEXT_FAINT),
                     );
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        ui.hyperlink_to(
-                            RichText::new("github.com/hunkstalker/hunk-converter")
-                                .size(9.5)
-                                .color(T::TEXT_MUTED),
-                            "https://github.com/hunkstalker/hunk-converter",
-                        )
-                        .on_hover_text(self.t(K::OpenRepository));
+                        let response = ui
+                            .hyperlink_to(
+                                RichText::new("github.com/hunkstalker/hunk-converter")
+                                    .size(9.5)
+                                    .color(T::TEXT_MUTED),
+                                "https://github.com/hunkstalker/hunk-converter",
+                            )
+                            .on_hover_text(self.t(K::OpenRepository));
+                        if response.has_focus() {
+                            super::widgets::paint_focus_ring(ui.painter(), response.rect, 6);
+                        }
                     });
                 });
             });

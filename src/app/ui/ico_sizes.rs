@@ -30,7 +30,11 @@ impl HunkApp {
                 ))
                 .corner_radius(CornerRadius::same(8))
                 .min_size(vec2(42.0, 26.0));
-                if ui.add(button).clicked() {
+                let response = ui.add(button);
+                if response.has_focus() {
+                    super::widgets::paint_focus_ring(ui.painter(), response.rect, 8);
+                }
+                if response.clicked() {
                     let selected_count = self.ico_selected.iter().filter(|value| **value).count();
                     if selected && selected_count == 1 {
                         self.toast(self.t(K::SelectIcoSize).to_owned(), true, 3);

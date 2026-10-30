@@ -113,7 +113,12 @@ impl HunkApp {
                 frame.show(ui, |ui| {
                     ui.set_min_size(vec2(ui.available_width(), canvas_height));
                     let size = vec2(ui.available_width(), canvas_height);
-                    let (rect, response) = ui.allocate_exact_size(size, Sense::click_and_drag());
+                    let (rect, _) = ui.allocate_exact_size(size, Sense::hover());
+                    let response = ui.interact(
+                        rect,
+                        egui::Id::unique(super::canvas::CANVAS_ID),
+                        Sense::click_and_drag(),
+                    );
                     actions.extend(self.paint_canvas(CanvasContext {
                         ui,
                         rect,

@@ -129,6 +129,30 @@ El archivo aparece en `export/`, junto a la aplicación. Si el nombre existe, se
 | `+` / `-` | Aumentar o reducir zoom |
 | `←` / `→` | Mover el divisor del comparador |
 | `Inicio` / `Fin` | Llevar el divisor a un extremo |
+| `Tab` / `Shift+Tab` | Mover el foco entre controles |
+| `Enter` / `Espacio` | Activar el control enfocado |
+| `↑` / `↓` | Desplazar la imagen verticalmente cuando está ampliada |
+| `Shift+←` / `Shift+→` | Desplazar la imagen horizontalmente cuando está ampliada |
+| `L` | Bloquear o desbloquear el color enfocado del historial |
+| `Esc` | Cancelar el cuentagotas |
+
+Con el cuentagotas activo y el lienzo enfocado, las flechas mueven el punto de
+muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.
+
+## Accesibilidad
+
+- **AccessKit** está activo. Los controles estándar y los personalizados
+  exponen rol, nombre, estado y valor; los avisos se anuncian como alertas.
+- El **comparador** se expone como un slider de 0–100 % y se controla con
+  flechas, `Inicio` y `Fin`. El cuentagotas y el historial se pueden usar con
+  teclado.
+- Todos los controles tienen **anillo de foco visible**. Los formatos funcionan
+  como grupo de radios y el historial usa un único tab stop con navegación por
+  flechas.
+- El texto informativo cumple contraste WCAG AA (4,5:1) y el foco 3:1. Hay una
+  prueba automática de contraste y pruebas de la navegación por teclado.
+- La validación manual con teclado está cubierta; AccessKit expone la interfaz
+  a los lectores de pantalla compatibles.
 
 ## Formatos
 
@@ -188,7 +212,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 31 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables y geometría de ventana. También se ejecuta en GitHub Actions.
+La suite cubre 34 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 

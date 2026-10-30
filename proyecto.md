@@ -122,6 +122,22 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 | `+` / `-` | Zoom por pasos |
 | `←` / `→` | Mover el divisor |
 | `Inicio` / `Fin` | Extremos del divisor |
+| `Tab` / `Shift+Tab` | Mover el foco |
+| `Enter` / `Espacio` | Activar el control enfocado |
+| `↑` / `↓` | Paneo vertical con la imagen ampliada |
+| `Shift+←` / `Shift+→` | Paneo horizontal con la imagen ampliada |
+| `L` | Bloquear el color enfocado del historial |
+| `Esc` | Cancelar el cuentagotas |
+
+### Accesibilidad
+
+- AccessKit activo para lectores de pantalla en Windows, macOS y Linux.
+- Roles, nombres, estados y valores en controles estándar y personalizados; avisos como alertas.
+- Foco visible en todos los controles y orden de tabulación completo.
+- Formatos como grupo de radios; historial con tab stop único y navegación por flechas.
+- Cuentagotas y comparador operables con teclado; el divisor se expone como slider.
+- Texto informativo con contraste WCAG AA y prueba automática de contraste.
+- Validación manual con teclado completada; AccessKit expone la interfaz a los lectores compatibles.
 
 - **Reiniciar** elimina la imagen, el resultado, el muestreo y el estado de exportación.
 - Restablece formato WebP, calidad 82 y todos los tamaños ICO.
@@ -329,13 +345,12 @@ Resumen del contexto de referencia:
 - Sin redimensionado, recorte ni procesamiento por lotes: fuera del alcance del producto.
 - HEIC no está soportado; queda fuera del alcance. AVIF y JPEG XL sí están disponibles como salida.
 - No se conservan perfiles ICC.
-- La accesibilidad nativa completa y el uso con lector de pantalla están pendientes (`t-22`).
 - La build macOS universal se genera en CI, pero no está firmada ni notarizada; la firma se descartó por falta de presupuesto.
 - El resultado ICO usa PNG dentro del contenedor, compatible con Windows moderno.
 
 ## 9. Pruebas y verificación
 
-- **31 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana y zona de agarre del comparador.
+- **34 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

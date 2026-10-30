@@ -181,7 +181,21 @@ guardado se registran en `stderr`.
 - La revisión (`revision`) descarta resultados obsoletos cuando el usuario
   cambia de formato o calidad mientras se codifica.
 
-## 5. Persistencia y bloqueos
+## 5. Accesibilidad
+
+- `eframe` se compila con la feature `accesskit`.
+- Los controles personalizados registran `WidgetInfo` con rol, nombre, estado y
+  valor. Los avisos usan `Role::Alert`.
+- El lienzo expone el divisor como slider (0–100 %) y responde a las acciones
+  de AccessKit de incremento, decremento y valor.
+- El foco se dibuja con un anillo de acento; formatos e historial usan
+  navegación por flechas y el historial un único tab stop.
+- El cuentagotas admite un cursor de muestra por teclado y confirma con
+  `Enter`; `Esc` lo cancela sin perder el foco del lienzo.
+- La paleta de texto informativo cumple contraste AA y una prueba automática
+  comprueba los pares de colores del tema.
+
+## 6. Persistencia y bloqueos
 
 `config.ini` se guarda junto al ejecutable:
 
@@ -216,7 +230,7 @@ Decisiones:
   en lugar de ignorarlas en silencio.
 - La persistencia de bloqueos está cubierta por pruebas de ida y vuelta.
 
-## 6. Pruebas
+## 7. Pruebas
 
 La suite cubre:
 
@@ -231,12 +245,13 @@ La suite cubre:
 - transparencia PNG/JPEG XL y aplanado JPG;
 - rasterización SVG;
 - estructura ICO;
-- códigos de color.
+- códigos de color;
+- contraste WCAG y navegación por teclado.
 
-Estado actual: **31 pruebas**, `cargo fmt --check` y
+Estado actual: **34 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
-## 7. Decisiones deliberadamente descartadas
+## 8. Decisiones deliberadamente descartadas
 
 - **Clean Architecture completa / Hexagonal estricta:** demasiados traits,
   DTOs y adaptadores para una app cerrada.
@@ -255,7 +270,7 @@ Estado actual: **31 pruebas**, `cargo fmt --check` y
 - **Reescribir la UI desde cero:** se conservó el comportamiento y se dividió
   por componentes.
 
-## 8. Mapa de migración
+## 9. Mapa de migración
 
 | Antes | Ahora |
 | --- | --- |
