@@ -111,6 +111,7 @@ fn main() {
             quality: case.quality,
             ico_sizes: Vec::new(),
             background: [255, 255, 255, 255],
+            ..EncodeOptions::default()
         };
         let mut bytes_len = 0;
         let mut timings = Vec::with_capacity(runs);

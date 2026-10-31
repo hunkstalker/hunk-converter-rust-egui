@@ -121,8 +121,12 @@ velocidad. Ningún formato del núcleo puede quedar por debajo de Squoosh en
 calidad o velocidad.
 
 Estado tras `t-39`: WebP cumple con paridad exacta, JPEG queda en paridad
-práctica (±0,5 % mediana) y PNG comprime igual o mejor. AVIF sigue pendiente de
-la segunda curva y del ajuste de velocidad/alfa.
+práctica (±0,5 % mediana) y PNG comprime igual o mejor.
+
+Estado tras `t-40`: WebP expone lossless/method/alfa y AVIF expone speed/alfa en
+el backend. Los valores por defecto no cambian el benchmark. AVIF sigue
+pendiente de una curva específica de UI; ravif se mantiene por ser nativo y
+competitivo en velocidad.
 
 ## 4. Encoders de referencia
 
@@ -150,7 +154,7 @@ Todo pertenece a la misma release. No hay una 1.2 ni un bloque sin numerar.
 ### Bloque 2 — Paridad con Squoosh
 
 - MozJPEG y OxiPNG (`t-39`, completada).
-- WebP y AVIF avanzados (`t-40`).
+- WebP y AVIF avanzados (`t-40`, completada).
 - Preprocesado: redimensionar, rotar y reducir paleta (`t-41`).
 - UI, selector web+ICO y persistencia (`t-42`).
 - Cierre, benchmark final y release (`t-43`).

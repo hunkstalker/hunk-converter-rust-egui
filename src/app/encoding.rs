@@ -52,6 +52,7 @@ impl HunkApp {
             quality: self.quality,
             ico_sizes: self.selected_ico_sizes(),
             background: [255, 255, 255, 255],
+            ..EncodeOptions::default()
         };
         let (sender, receiver) = mpsc::channel();
         let thread_ctx = ctx.clone();

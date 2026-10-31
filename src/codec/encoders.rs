@@ -1,8 +1,8 @@
 use std::io::Cursor;
 
-use image::codecs::avif::AvifEncoder;
-use image::{ExtendedColorType, ImageEncoder, ImageFormat, RgbaImage};
+use image::{ImageFormat, RgbaImage};
 use mozjpeg_rs::{Encoder as JpegEncoder, Preset as JpegPreset, Subsampling};
+use rgb::FromSlice;
 use zune_core::bit_depth::BitDepth as ZuneBitDepth;
 use zune_core::colorspace::ColorSpace;
 use zune_core::options::EncoderOptions as ZuneEncoderOptions;
@@ -14,9 +14,26 @@ use crate::domain::format::OutputFormat;
 
 use super::EncodedOutput;
 
-pub(super) fn encode_webp(source: &RgbaImage, quality: u8) -> Result<EncodedOutput, EncodeError> {
+pub(super) fn encode_webp(
+    source: &RgbaImage,
+    quality: u8,
+    lossless: bool,
+    method: u8,
+    alpha_quality: u8,
+) -> Result<EncodedOutput, EncodeError> {
+    let mut config = webp::WebPConfig::new().map_err(|_| EncodeError::Webp {
+        message: "no se pudo inicializar la configuración de WebP".to_owned(),
+    })?;
+    config.lossless = i32::from(lossless);
+    config.quality = quality as f32;
+    config.method = i32::from(method.min(6));
+    config.alpha_quality = i32::from(alpha_quality.min(100));
+    config.alpha_compression = if lossless { 0 } else { 1 };
     let memory = webp::Encoder::from_rgba(source.as_raw(), source.width(), source.height())
-        .encode(quality as f32);
+        .encode_advanced(&config)
+        .map_err(|error| EncodeError::Webp {
+            message: format!("{error:?}"),
+        })?;
     let bytes = memory.to_vec();
     let preview = decode_preview(ImageFormat::WebP, &bytes)?;
     Ok(output(source, bytes, preview))
@@ -64,18 +81,32 @@ pub(super) fn encode_png(source: &RgbaImage) -> Result<EncodedOutput, EncodeErro
     Ok(output(source, bytes, preview))
 }
 
-pub(super) fn encode_avif(source: &RgbaImage, quality: u8) -> Result<EncodedOutput, EncodeError> {
-    let mut bytes = Vec::new();
-    AvifEncoder::new_with_speed_quality(Cursor::new(&mut bytes), 4, quality)
-        .write_image(
-            source.as_raw(),
-            source.width(),
-            source.height(),
-            ExtendedColorType::Rgba8,
-        )
+pub(super) fn encode_avif(
+    source: &RgbaImage,
+    quality: u8,
+    speed: u8,
+    alpha_quality: u8,
+) -> Result<EncodedOutput, EncodeError> {
+    let quality = quality.clamp(1, 100) as f32;
+    let alpha_quality = if alpha_quality == 0 {
+        quality
+    } else {
+        f32::from(alpha_quality.clamp(1, 100))
+    };
+    let encoded = ravif::Encoder::new()
+        .with_quality(quality)
+        .with_alpha_quality(alpha_quality)
+        .with_speed(speed.clamp(1, 10))
+        .with_bit_depth(ravif::BitDepth::Eight)
+        .encode_rgba(ravif::Img::new(
+            source.as_raw().as_rgba(),
+            source.width() as usize,
+            source.height() as usize,
+        ))
         .map_err(|source| EncodeError::Avif {
             source: Box::new(source),
         })?;
+    let bytes = encoded.avif_file;
     let preview = decode_avif_preview(&bytes)?;
     Ok(output(source, bytes, preview))
 }

@@ -209,7 +209,9 @@ t-37.
 - Configuraciones antiguas siguen funcionando.
 - Tests de mapeo de opciones y roundtrip.
 
-### t-40 — Opciones con pérdida y color
+### t-40 — WebP y AVIF avanzados
+
+**Estado:** completada el 2026-10-31; WebP avanzado y AVIF con ravif directo.
 
 **Objetivo:** completar el modo avanzado con los controles que sí puede ofrecer
 el stack de códecs.

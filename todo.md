@@ -7,16 +7,12 @@
 > Camino único de 1.1.0:
 > 1. **Entrada y preparación:** TIFF (t-36, completada), AVIF (t-37, completada) y benchmark (completado).
 > 2. **Paridad con Squoosh:** MozJPEG/OxiPNG (t-39, completada), WebP/AVIF
->    avanzados (t-40), preprocesado (t-41), UI/persistencia (t-42) y cierre
->    (t-43).
+>    avanzados (t-40, completada), preprocesado (t-41), UI/persistencia (t-42) y
+>    cierre (t-43).
 >
 > t-38 (salida TGA/TIFF), la parte JPEG XL de t-37 y las ampliaciones de JPEG XL,
 > QOI y WebP2 quedan fuera del alcance web de 1.1. Ver
 > `docs/objetivo-1.1-web.md`.
-
-## t-40 — WebP y AVIF avanzados
-
-**Descripción:** Exponer las opciones reales de libwebp (lossless, method/effort, alpha quality) y de AVIF (speed/effort, alpha quality y submuestreo si el encoder lo permite). Medir ravif frente a libavif/AOM y elegir el backend con criterios de tamaño, calidad y velocidad. No mostrar controles que no lleguen al encoder.
 
 ## t-41 — Preprocesado: redimensionar, rotar y paleta
 

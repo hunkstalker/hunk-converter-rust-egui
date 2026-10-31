@@ -293,6 +293,7 @@ catalogue! {
         "The image exceeds the 40 MP or 16,384 px per side limit."
     ),
     ErrProcessImage => ("No se pudo procesar la imagen:", "No s'ha pogut processar la imatge:", "Could not process the image:"),
+    ErrEncodeWebp => ("No se pudo codificar WebP:", "No s'ha pogut codificar WebP:", "Could not encode WebP:"),
     ErrEncodeJpg => ("No se pudo codificar el JPG:", "No s'ha pogut codificar el JPG:", "Could not encode the JPG:"),
     ErrEncodePng => ("No se pudo codificar el PNG:", "No s'ha pogut codificar el PNG:", "Could not encode the PNG:"),
     ErrEncodeAvif => ("No se pudo codificar el AVIF:", "No s'ha pogut codificar l'AVIF:", "Could not encode the AVIF:"),
@@ -421,6 +422,9 @@ fn present_encode_error(lang: Lang, error: &EncodeError) -> String {
     match error {
         EncodeError::InvalidDimensions => t(lang, K::ErrInvalidDimensions).to_owned(),
         EncodeError::Ico(error) => present_ico_error(lang, error),
+        EncodeError::Webp { message } => {
+            format!("{} {message}", t(lang, K::ErrEncodeWebp))
+        }
         EncodeError::Jpg { source } => detail(lang, K::ErrEncodeJpg, source),
         EncodeError::PngStart { source } => detail(lang, K::ErrPngStart, source),
         EncodeError::Png { source } => detail(lang, K::ErrEncodePng, source),

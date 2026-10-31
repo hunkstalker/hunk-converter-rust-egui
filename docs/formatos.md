@@ -46,7 +46,7 @@
 | JPEG XL | `.jxl` | Sin pérdida | Sin opciones |
 | ICO | `.ico` | Sin pérdida | Tamaños 16–256 px |
 
-JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. Los controles avanzados para cambiarlos llegarán en `t-42`.
+JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. WebP usa libwebp avanzado y AVIF usa ravif directo con speed/alfa. Los controles avanzados para cambiarlos llegarán en `t-42`.
 
 La salida se elige en un desplegable con modo `Automático`: conserva el formato de entrada cuando existe salida equivalente y usa WebP como fallback.
 
@@ -271,8 +271,9 @@ sin alterar los píxeles; en JPG, WebP y AVIF la pérdida se controla con
 
 ### 7.2 Controles previstos
 
-JPG y PNG ya usan MozJPEG/OxiPNG; sus controles se expondrán en la UI en
-`t-42`. La tabla conserva el alcance completo.
+JPG y PNG ya usan MozJPEG/OxiPNG. WebP acepta lossless, method y alpha quality,
+y AVIF acepta speed y alpha quality en el backend. Sus controles se expondrán en
+la UI en `t-42`. La tabla conserva el alcance completo.
 
 | Formato | Básico | Avanzado |
 | --- | --- | --- |

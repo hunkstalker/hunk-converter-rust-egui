@@ -109,7 +109,16 @@ OxiPNG nativo iguala o supera a Squoosh en las siete imágenes opacas y es unas
 3,2 veces más rápido. El icono con alfa también queda ligeramente por debajo
 del tamaño de Squoosh.
 
-## 5. Lectura de producto
+## 5. Opciones avanzadas (t-40)
+
+- WebP usa `WebPConfig` avanzado: lossless, method y alpha quality.
+- AVIF usa ravif directo: speed y alpha quality, manteniendo 8 bits.
+- Los valores por defecto conservan la paridad anterior: WebP sigue produciendo
+  los mismos bytes y AVIF mantiene la curva medida.
+- No se integró libavif/AOM: ravif es nativo, mantiene velocidad competitiva y
+  evita otra dependencia C. La brecha de AVIF en UI sigue pendiente de ajuste.
+
+## 6. Lectura de producto
 
 - **WebP** ya es una victoria: mismo archivo, más rápido.
 - **JPEG** queda en paridad práctica y mantiene una ventaja clara de velocidad.
@@ -120,9 +129,10 @@ del tamaño de Squoosh.
 - La ventaja de HUNK debe ser nativa: velocidad, flujo de escritorio y opciones
   cuidadas; no una copia de la UI.
 
-## 6. Próximos pasos
+## 7. Próximos pasos
 
-1. Exponer WebP avanzado sin perder la paridad actual.
-2. Hacer una segunda curva AVIF con ravif y, si hace falta, evaluar libavif/AOM.
+1. Exponer las opciones en la UI (`t-42`) sin romper los valores por defecto.
+2. Hacer una segunda curva AVIF específica de UI y decidir si el ajuste de
+   calidad/velocidad basta o si hace falta evaluar AOM.
 3. Repetir el benchmark con resize/rotate/palette cuando existan.
 4. Solo entonces cerrar la puerta de compresión de 1.1.

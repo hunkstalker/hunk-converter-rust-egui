@@ -185,9 +185,10 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 - **Rust 1.99.1**, fijado en `rust-toolchain.toml`.
 - **eframe/egui 0.37** con renderizador **glow** (OpenGL).
-- `image` 0.25 para decodificación PNG/JPG/WebP/BMP/TGA/TIFF y codificación AVIF.
+- `image` 0.25 para decodificación PNG/JPG/WebP/BMP/TGA/TIFF.
 - `mozjpeg-rs` para JPG progresivo con submuestreo automático.
 - `oxipng` para compresión PNG sin pérdida.
+- `ravif` para AVIF con speed y alpha quality.
 - `webp`/libwebp para codificación WebP.
 - `png` 0.18 para la codificación PNG.
 - `avif-decode`/rav1d para decodificar AVIF y `avif-parse` para comprobar dimensiones antes de decodificar.
@@ -360,7 +361,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **49 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **51 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa y AVIF speed/alfa, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

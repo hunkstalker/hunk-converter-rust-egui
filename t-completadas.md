@@ -255,3 +255,10 @@
 
 **Completada:** 2026-10-31
 **Resultado:** JPG usa MozJPEG-rs con progresivo y submuestreo automático (4:2:0 <80, 4:2:2 80–89, 4:4:4 ≥90). PNG usa OxiPNG nivel 2. El benchmark queda en paridad práctica: JPEG +0,4 % mediana a q75 y +0,3 % a q90, con 2,5× más velocidad; PNG −0,8 % mediana y 3,2× más velocidad. Suite de 49 pruebas con progresivo, submuestreo y píxeles PNG exactos.
+
+## t-40 — WebP y AVIF avanzados
+
+**Descripción:** Exponer opciones reales de libwebp y AVIF, medir el backend y mantener los valores por defecto.
+
+**Completada:** 2026-10-31
+**Resultado:** WebP usa `WebPConfig` con lossless, method y alpha quality. AVIF usa ravif directo con speed y alpha quality, manteniendo 8 bits. Los valores por defecto conservan la paridad anterior: WebP sigue generando los mismos bytes y AVIF mantiene su curva. Se descartó integrar AOM por ahora por coste y portabilidad; ravif es nativo y competitivo en velocidad. Suite de 51 pruebas con WebP lossless exacto y AVIF speed/alfa.

@@ -50,6 +50,7 @@ fn main() {
             quality,
             ico_sizes,
             background: [255, 255, 255, 255],
+            ..EncodeOptions::default()
         };
         let started = Instant::now();
         match codec::encode(&loaded.pixels, &options) {

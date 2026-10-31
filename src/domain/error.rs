@@ -105,6 +105,9 @@ impl Error for IcoError {
 pub enum EncodeError {
     InvalidDimensions,
     Ico(IcoError),
+    Webp {
+        message: String,
+    },
     Jpg {
         source: BoxError,
     },
@@ -134,6 +137,7 @@ impl fmt::Display for EncodeError {
                 formatter.write_str("la imagen no tiene dimensiones válidas")
             }
             Self::Ico(error) => write!(formatter, "{error}"),
+            Self::Webp { message } => write!(formatter, "no se pudo codificar WebP: {message}"),
             Self::Jpg { source } => write!(formatter, "no se pudo codificar el JPG: {source}"),
             Self::PngStart { source } => write!(formatter, "no se pudo iniciar el PNG: {source}"),
             Self::Png { source } => write!(formatter, "no se pudo codificar el PNG: {source}"),

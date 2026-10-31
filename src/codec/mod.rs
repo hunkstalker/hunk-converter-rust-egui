@@ -26,6 +26,27 @@ pub struct EncodeOptions {
     pub quality: u8,
     pub ico_sizes: Vec<u32>,
     pub background: [u8; 4],
+    pub webp_lossless: bool,
+    pub webp_method: u8,
+    pub webp_alpha_quality: u8,
+    pub avif_speed: u8,
+    pub avif_alpha_quality: u8,
+}
+
+impl Default for EncodeOptions {
+    fn default() -> Self {
+        Self {
+            format: OutputFormat::Webp,
+            quality: 82,
+            ico_sizes: Vec::new(),
+            background: [255, 255, 255, 255],
+            webp_lossless: false,
+            webp_method: 4,
+            webp_alpha_quality: 100,
+            avif_speed: 4,
+            avif_alpha_quality: 0,
+        }
+    }
 }
 
 pub struct EncodedOutput {
@@ -44,10 +65,21 @@ pub fn encode(source: &RgbaImage, options: &EncodeOptions) -> Result<EncodedOutp
     let quality = options.quality.clamp(1, 100);
 
     let mut result = match options.format {
-        OutputFormat::Webp => encoders::encode_webp(source, quality)?,
+        OutputFormat::Webp => encoders::encode_webp(
+            source,
+            quality,
+            options.webp_lossless,
+            options.webp_method,
+            options.webp_alpha_quality,
+        )?,
         OutputFormat::Jpg => encoders::encode_jpg(source, quality, options.background)?,
         OutputFormat::Png => encoders::encode_png(source)?,
-        OutputFormat::Avif => encoders::encode_avif(source, quality)?,
+        OutputFormat::Avif => encoders::encode_avif(
+            source,
+            quality,
+            options.avif_speed,
+            options.avif_alpha_quality,
+        )?,
         OutputFormat::Jxl => encoders::encode_jxl(source)?,
         OutputFormat::Ico => {
             let ico = ico::encode_ico(source, &options.ico_sizes)?;
@@ -251,6 +283,7 @@ mod tests {
                     quality: 82,
                     ico_sizes: Vec::new(),
                     background: [255, 255, 255, 255],
+                    ..EncodeOptions::default()
                 },
             )
             .unwrap();
@@ -270,6 +303,7 @@ mod tests {
                 quality: 20,
                 ico_sizes: Vec::new(),
                 background: [255; 4],
+                ..EncodeOptions::default()
             },
         )
         .unwrap();
@@ -280,6 +314,7 @@ mod tests {
                 quality: 92,
                 ico_sizes: Vec::new(),
                 background: [255; 4],
+                ..EncodeOptions::default()
             },
         )
         .unwrap();
@@ -297,6 +332,7 @@ mod tests {
                 quality: 82,
                 ico_sizes: Vec::new(),
                 background: [255; 4],
+                ..EncodeOptions::default()
             },
         )
         .unwrap();
@@ -314,6 +350,7 @@ mod tests {
                 quality: 82,
                 ico_sizes: Vec::new(),
                 background: [255; 4],
+                ..EncodeOptions::default()
             },
         )
         .unwrap();
@@ -498,6 +535,46 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn webp_lossless_preserves_pixels() {
+        let mut source = noise(24, 16);
+        source.put_pixel(2, 2, Rgba([10, 20, 30, 128]));
+        let output = encode(
+            &source,
+            &EncodeOptions {
+                format: OutputFormat::Webp,
+                quality: 100,
+                webp_lossless: true,
+                webp_method: 6,
+                webp_alpha_quality: 100,
+                ..EncodeOptions::default()
+            },
+        )
+        .unwrap();
+        let decoded = image::load_from_memory(&output.bytes).unwrap().to_rgba8();
+        assert!(decoded.pixels().eq(source.pixels()));
+    }
+
+    #[test]
+    fn avif_speed_and_alpha_quality_are_applied() {
+        let mut source = noise(16, 12);
+        source.put_pixel(1, 1, Rgba([200, 10, 20, 128]));
+        let output = encode(
+            &source,
+            &EncodeOptions {
+                format: OutputFormat::Avif,
+                quality: 75,
+                avif_speed: 10,
+                avif_alpha_quality: 100,
+                ..EncodeOptions::default()
+            },
+        )
+        .unwrap();
+        assert!(!output.bytes.is_empty());
+        assert_eq!(output.preview.dimensions(), (16, 12));
+        assert!(output.preview.get_pixel(1, 1).0[3] > 0);
+    }
+
     fn jpeg_luma_sampling(bytes: &[u8]) -> Option<(u8, u8)> {
         let mut index = 2;
         while index + 9 < bytes.len() {
@@ -531,6 +608,7 @@ mod tests {
                     quality,
                     ico_sizes: Vec::new(),
                     background: [255; 4],
+                    ..EncodeOptions::default()
                 },
             )
             .unwrap()
@@ -559,6 +637,7 @@ mod tests {
                 quality: 82,
                 ico_sizes: Vec::new(),
                 background: [255; 4],
+                ..EncodeOptions::default()
             },
         )
         .unwrap();

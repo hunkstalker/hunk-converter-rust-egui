@@ -247,6 +247,7 @@ La suite cubre:
 - nombres de exportación y no sobrescritura atómica;
 - códecs WebP/JPG/PNG/AVIF/JPEG XL;
 - JPG progresivo y submuestreo automático; PNG OxiPNG sin pérdida exacta;
+- WebP lossless/method/alfa y AVIF speed/alfa;
 - entrada TIFF de una página, compresiones LZW/Deflate/PackBits y rechazo de 16 bits;
 - entrada AVIF con alfa y conversión a RGBA8;
 - orientación EXIF y TIFF;
@@ -256,7 +257,7 @@ La suite cubre:
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **49 pruebas**, `cargo fmt --check` y
+Estado actual: **51 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

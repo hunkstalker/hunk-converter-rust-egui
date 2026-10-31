@@ -27,6 +27,7 @@ fn options(format: OutputFormat) -> EncodeOptions {
         quality: 82,
         ico_sizes: Vec::new(),
         background: [255, 255, 255, 255],
+        ..EncodeOptions::default()
     }
 }
 

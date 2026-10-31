@@ -213,7 +213,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 49 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 51 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa y AVIF speed/alfa, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 
