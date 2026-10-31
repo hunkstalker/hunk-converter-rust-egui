@@ -101,6 +101,7 @@ mezcla `·` y resúmenes como `Máxima · —`, que resultan confusos.
 
 ## Orden de trabajo
 
-1. `t-44` — cerrar la brecha AVIF.
-2. `t-45` — aplicar estas correcciones.
-3. `t-43` — benchmark final, capturas y release.
+1. `t-44` — cerrada; revisar AVIF con el usuario.
+2. `t-45` — aplicar estas correcciones y revisar resize.
+3. Revisar el resto de features una por una.
+4. `t-43` — benchmark final, capturas y release.

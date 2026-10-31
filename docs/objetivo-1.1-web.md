@@ -123,14 +123,13 @@ calidad o velocidad.
 Estado tras `t-39`: WebP cumple con paridad exacta, JPEG queda en paridad
 práctica (±0,5 % mediana) y PNG comprime igual o mejor.
 
-Estado tras `t-40`: WebP expone lossless/method/alfa y AVIF expone speed/alfa en
-el backend. Los valores por defecto no cambian el benchmark. AVIF sigue
-pendiente de una curva específica de UI; ravif se mantiene por ser nativo y
-competitivo en velocidad.
+Estado tras `t-44`: AVIF usa `libavif`/AOM con YUV420, BT.601 y cuantizador
+directo. A igual SSIMULACRA2, el tamaño mediano es **0,994×** frente a Squoosh
+(0,704–1,069), la UI queda entre **0,705× y 0,960×** y la velocidad es **1,82×**
+en UI y **4,58×** de mediana. La puerta de AVIF se cumple.
 
-**1.1.0 no se publica hasta cerrar `t-44`.** La release queda bloqueada por la
-brecha de AVIF, no por falta de formato: AVIF entra y sale, pero todavía no
-iguala la compresión de Squoosh a igual calidad.
+**1.1.0 sigue sin publicarse** hasta aplicar `t-45` (resize/UI), revisar cada
+feature con el usuario y cerrar `t-43`. El bloqueo ya no es AVIF.
 
 ## 4. Encoders de referencia
 
@@ -139,7 +138,7 @@ iguala la compresión de Squoosh a igual calidad.
 | JPEG | MozJPEG | Progresivo, submuestreo y mejor compresión |
 | PNG | OxiPNG | Mejor selección de filtros y compresión sin pérdida |
 | WebP | libwebp avanzado | Lossless, method, alpha quality y filtros |
-| AVIF | ravif o libavif/AOM | Decidir con benchmark; exponer speed/alfa |
+| AVIF | libavif/AOM | Cuantizador directo, YUV420, alfa y velocidad |
 
 No se añadirá una opción si el encoder no la aplica. Las opciones deben ser
 contextuales, estar colapsadas por defecto y tener resumen/reset.
@@ -161,9 +160,10 @@ Todo pertenece a la misma release. No hay una 1.2 ni un bloque sin numerar.
 - WebP y AVIF avanzados (`t-40`, completada).
 - Preprocesado: redimensionar, rotar y reducir paleta (`t-41`, completada).
 - UI, selector web+ICO y persistencia (`t-42`, completada).
-- Cierre, benchmark final y release (`t-43`, bloqueada por AVIF).
-- Cerrar la brecha AVIF (`t-44`).
-- Correcciones de resize y UI (`t-45`, después de AVIF).
+- Cerrar la brecha AVIF (`t-44`, completada).
+- Correcciones de resize y UI (`t-45`).
+- Cierre, benchmark final y release (`t-43`, bloqueada por la revisión
+  incremental y `t-45`).
 
 El bloque 2 no se publica aparte: es la segunda mitad de 1.1.0.
 

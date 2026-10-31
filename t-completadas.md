@@ -276,3 +276,10 @@
 
 **Completada:** 2026-10-31
 **Resultado:** Bloque `Avanzado` contextual y colapsado con resumen y reset: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa y AVIF speed/alfa. JPEG XL sale del selector. Las opciones y el preprocesado se guardan en `[advanced]` de `config.ini`, con migración de configuraciones antiguas. Suite de 55 pruebas.
+
+## t-44 — Cerrar la brecha de compresión AVIF
+
+**Descripción:** Igualar o superar a Squoosh en AVIF a igual calidad perceptual, sin aceptar la brecha del 6,5 %.
+
+**Completada:** 2026-10-31
+**Resultado:** ravif se sustituye por `libavif-sys` con AOM 3.11 estático: RGBA8 → YUV420, BT.601, `end-usage=q`, `cq-level`, alfa y `tune=ssim` para cuantizadores ≤ 32. A igual SSIMULACRA2, el tamaño mediano es 0,994× frente a Squoosh (0,704–1,069); la UI queda en 0,705–0,960× y la velocidad es 1,82× en UI y 4,58× de mediana. El peor caso es el icono con alfa en calidad alta (+6,9 %). Suite de 57 pruebas; build Linux y Windows GNU validados localmente. La release sigue sin etiquetarse hasta la revisión de AVIF, `t-45` y el cierre `t-43`.

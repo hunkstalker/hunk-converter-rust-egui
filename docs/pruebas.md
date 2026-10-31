@@ -1,6 +1,6 @@
 # Pruebas y automatización
 
-> Estado: 2026-10-31 · 1.1.0 en preparación
+> Estado: 2026-10-31 · 1.1.0 pendiente de revisión incremental y `t-45`
 
 ## 1. Capas
 
@@ -18,6 +18,7 @@
 - carga desde archivo de PNG, JPG, WebP, AVIF, BMP, TGA, TIFF y SVG;
 - dimensiones y etiqueta de formato;
 - alfa en PNG, WebP y TIFF;
+- codificación AVIF con AOM, cuantizador directo y alfa;
 - preprocesado: rotación, resize con proporción y paleta con alfa;
 - opciones avanzadas y persistencia `[advanced]` de `config.ini`;
 - rechazo de imágenes de más de 16 384 px por lado;

@@ -45,11 +45,11 @@
 | WebP | `.webp` | Con pérdida | Calidad 1–100 |
 | JPG | `.jpg` | Con pérdida | Calidad 1–100; progresivo; submuestreo automático; fondo blanco fijo |
 | PNG | `.png` | Sin pérdida | OxiPNG nivel 2 |
-| AVIF | `.avif` | Con pérdida | Calidad 1–100; velocidad fija |
+| AVIF | `.avif` | Con pérdida | Calidad 1–100; velocidad; calidad alfa; YUV420 fijo |
 | JPEG XL | `.jxl` | Sin pérdida | Sin opciones |
 | ICO | `.ico` | Sin pérdida | Tamaños 16–256 px |
 
-JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. WebP usa libwebp avanzado y AVIF usa ravif directo con speed/alfa. Los controles avanzados para cambiarlos llegarán en `t-42`.
+JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. WebP usa libwebp avanzado. AVIF usa libavif/AOM con YUV420, BT.601, cuantizador directo, speed y alpha quality. Los controles están expuestos en el bloque `Avanzado` y se persisten en `config.ini`.
 
 La salida se elige en un desplegable con modo `Automático`: conserva el formato de entrada cuando existe salida equivalente y usa WebP como fallback.
 
@@ -275,8 +275,8 @@ sin alterar los píxeles; en JPG, WebP y AVIF la pérdida se controla con
 ### 7.2 Controles previstos
 
 JPG y PNG usan MozJPEG/OxiPNG. WebP acepta lossless, method y alpha quality, y
-AVIF acepta speed y alpha quality. Los controles están expuestos en el bloque
-`Avanzado` y se persisten en `config.ini`.
+AVIF acepta speed y alpha quality con YUV420 fijo. Los controles están expuestos
+en el bloque `Avanzado` y se persisten en `config.ini`.
 
 Preprocesado actual: resize Lanczos3 con proporción opcional, rotación en pasos
 de 90° y paleta de 2–256 colores con alfa conservado. Rotación y resize actualizan
@@ -287,7 +287,7 @@ la vista previa de entrada; la paleta se aplica al resultado codificado.
 | PNG | Sin pérdida | Compresión `Rápida / Equilibrada / Máxima`; filtro |
 | JPG | Calidad | Fondo para aplanar alfa; submuestreo y progresivo si el encoder lo permite |
 | WebP | Calidad | Modo lossless, método/effort y calidad de alfa |
-| AVIF | Calidad | Velocidad/effort; submuestreo si el encoder lo permite |
+| AVIF | Calidad | Velocidad; alpha quality; YUV420 fijo |
 | JPEG XL | Sin pérdida | Esfuerzo; modo lossy cuando se añada |
 | TIFF | Sin pérdida | LZW/Deflate/ninguna; predictor |
 | TGA | Sin pérdida | RLE on/off |
@@ -346,7 +346,7 @@ Alcance de esta fase:
 - Conservar o aplanar alfa.
 - Elegir el color de fondo para JPG.
 - Calidad de alfa en WebP, si el encoder la expone.
-- Submuestreo de croma en JPG/AVIF, si el encoder lo permite.
+- Submuestreo de croma en JPG; AVIF usa YUV420 fijo.
 
 Fuera de alcance:
 
@@ -433,7 +433,7 @@ progressive=0
 
 - Resolución de `Auto` para cada formato de entrada y fallback WebP.
 - Persistencia y migración de `config.ini`.
-- Roundtrip de AVIF con alfa y sin alfa.
+- Roundtrip de AVIF con alfa y sin alfa, con AOM y cuantizador directo.
 - Entrada AVIF desde archivo, con detección por cabecera.
 - TIFF de varias páginas: solo se carga la primera.
 - TIFF RGB, RGBA, gris, gris con alfa y orientación.

@@ -20,6 +20,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Orientación EXIF/TIFF:** las fotos de móvil y los TIFF se muestran, comparan, muestrean y exportan ya orientados.
 - **Salida:** WebP, AVIF, JPG, PNG e ICO, con selector desplegable y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
+- **AVIF de referencia:** libavif/AOM con YUV420 y alfa; paridad práctica con Squoosh y más velocidad.
 - **Preprocesado:** redimensionar con proporción, rotar en pasos de 90° y reducir la paleta a 2–256 colores conservando alfa.
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
 - **Zoom y paneo:** rueda del ratón sobre la imagen y clic derecho para desplazarte.
@@ -94,10 +95,10 @@ Las capturas usan imágenes de muestra generadas por el propio proyecto.
 Requisitos:
 
 - **Rust 1.99.1** (fijado en `rust-toolchain.toml`).
-- Un compilador de C para `libwebp-sys`.
-- **NASM** en x86/x86_64 para el decodificador AVIF (`rav1d`).
+- Un compilador de C y **CMake** para `libwebp-sys` y `libavif`/AOM.
+- **NASM** en x86/x86_64 para `rav1d` y AOM.
 - En Linux, las bibliotecas gráficas habituales de X11/OpenGL.
-- En Windows, MSVC Build Tools o un toolchain GNU.
+- En Windows, MSVC Build Tools o un toolchain GNU. Al compilar para Windows GNU desde Linux/macOS, `scripts/build_dist.sh windows` configura CMake para el target; necesitas definir `CC_x86_64_pc_windows_gnu`, `CXX_x86_64_pc_windows_gnu` y `AR_x86_64_pc_windows_gnu`.
 - En macOS, Xcode Command Line Tools y Rust con los targets `aarch64-apple-darwin` y `x86_64-apple-darwin`.
 
 ```bash
@@ -109,7 +110,7 @@ cargo run --release
 ## Uso
 
 1. Arrastra una imagen a la ventana, pulsa **Seleccionar una imagen** o usa `Ctrl+V`.
-2. Elige **WebP**, **JPG**, **PNG** o **ICO**.
+2. Elige **WebP**, **AVIF**, **JPG**, **PNG** o **ICO**.
 3. Ajusta la calidad o los tamaños del icono.
 4. Arrastra el divisor para comparar. Usa la rueda para acercar y el clic derecho para moverte por la imagen.
 5. Activa el cuentagotas si necesitas extraer colores.
@@ -169,7 +170,7 @@ muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.
 | TIFF | ✓ | — | Sí, 8 bits | Sin pérdida |
 | SVG | ✓ | — | Rasterizado | — |
 
-Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como primera página RGBA8; se admiten RGB, RGBA, gris y gris con alfa de 8 bits. AVIF se abre con `avif-decode` y se convierte a RGBA8. AVIF se añade como formato de salida. PNG no muestra deslizador porque no modifica la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md); el alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
+Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como primera página RGBA8; se admiten RGB, RGBA, gris y gris con alfa de 8 bits. AVIF se abre con `avif-decode` y se convierte a RGBA8. La salida AVIF usa libavif/AOM con YUV420, BT.601 y cuantizador directo; AOM se enlaza estáticamente. PNG no muestra deslizador porque no modifica la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md); el alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
 
 ## Builds portables
 
@@ -213,7 +214,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 55 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF speed/alfa, preprocesado y opciones avanzadas persistentes, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 57 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas persistentes, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 

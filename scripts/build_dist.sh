@@ -94,6 +94,11 @@ build_linux() {
 build_windows() {
 	local folder="$DIST/hunk-converter-$VERSION-windows-x86_64"
 	local target="${WINDOWS_TARGET:-x86_64-pc-windows-gnu}"
+	if [[ "$target" == *-windows-gnu ]]; then
+		# libaom/libavif usan CMake y necesitan saber que el target es Windows
+		# cuando se compilan desde Linux/macOS con mingw-w64.
+		export CMAKE_SYSTEM_NAME=Windows
+	fi
 	echo "→ Compilando Windows ($target)"
 	cargo build --release --target "$target" --bin "$BIN_NAME"
 	rm -rf "$folder"

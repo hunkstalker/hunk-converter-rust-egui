@@ -63,6 +63,16 @@ fn main() {
             quality: 90,
         },
         Case {
+            label: "avif-q20",
+            format: OutputFormat::Avif,
+            quality: 20,
+        },
+        Case {
+            label: "avif-q30",
+            format: OutputFormat::Avif,
+            quality: 30,
+        },
+        Case {
             label: "avif-q40",
             format: OutputFormat::Avif,
             quality: 40,

@@ -2,6 +2,9 @@
 
 Fecha: 2026-10-31 · Tarea: `t-40`
 
+> Actualización: ravif se sustituyó por libavif/AOM en `t-44`; esta nota
+> conserva la decisión y el benchmark de la pasada anterior.
+
 ## Cambios
 
 - WebP usa `WebPConfig` avanzado:

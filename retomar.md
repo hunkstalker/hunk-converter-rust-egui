@@ -1,7 +1,7 @@
 # Retomar HUNK Converter
 
 > Punto de entrada para nuevas sesiones. Última actualización: **2026-10-31**.
-> Versión: **1.0.0** publicada · **1.1.0** bloqueada por AVIF · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
+> Versión: **1.0.0** publicada · **1.1.0** pendiente de revisión incremental y `t-45` · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
 
 ## 1. Qué es este proyecto
 
@@ -22,10 +22,10 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Selector de salida desplegable con modo Automático implementado y validado (t-35).
 - Objetivo 1.1: salida web JPEG/PNG/WebP/AVIF + ICO; entrada amplia JPEG/PNG/WebP/AVIF/SVG/BMP/TGA/TIFF; preprocesado de redimensionado, rotación y reducción de paleta. TIFF de entrada forma parte de 1.1. Ver `docs/objetivo-1.1-web.md`.
 - Camino único de 1.1.0: **bloque 1** entrada TIFF/AVIF + benchmark; **bloque 2** paridad con Squoosh (MozJPEG, OxiPNG, WebP/AVIF avanzados, preprocesado y UI). Sin release intermedia.
-- Benchmark HUNK vs Squoosh: WebP empata, JPEG queda en paridad práctica (2,5× más rápido), PNG comprime igual o mejor (3,2× más rápido) y AVIF sigue cerca pero necesita ajuste. Ver `docs/benchmark-squoosh-2026-10-31.md`.
+- Benchmark HUNK vs Squoosh: WebP empata, JPEG queda en paridad práctica (2,5× más rápido), PNG comprime igual o mejor (3,2× más rápido) y AVIF queda en paridad práctica (0,994× mediana a igual SSIM, 1,82× más rápido en UI). Ver `docs/benchmark-squoosh-2026-10-31.md`.
 - Preprocesado: resize Lanczos3 con proporción, rotación 90/180/270 y paleta 2–256 colores con alfa.
-- Opciones avanzadas y persistencia implementadas: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado. Queda preparar y publicar 1.1.
-- Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG.
+- Opciones avanzadas y persistencia implementadas: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado. Queda la revisión incremental y `t-45` antes de publicar 1.1.
+- Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG; AVIF usa libavif/AOM.
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %.
 - Cuentagotas con muestra del píxel original, coordenadas, códigos HEX/RGB/RGBA/HSL, botones de copia y aviso de confirmación. La tarjeta reserva el espacio de coordenadas y códigos para no cambiar de altura.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
@@ -40,9 +40,9 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **55 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **57 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
-- Versión **1.0.0** publicada; **1.1.0** bloqueada por la brecha de compresión AVIF. Pendiente `t-44`, `t-45` y `t-43` antes de push/tag.
+- Versión **1.0.0** publicada; **1.1.0** pendiente de la revisión de AVIF, `t-45` (resize/UI), revisión del resto de features y `t-43`. No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
 
 ## 3. Comandos
@@ -75,6 +75,7 @@ Builds portables:
 - Windows se compila con MSVC en CI y por defecto con `x86_64-pc-windows-gnu` en local; requiere toolchain/linker de Windows.
 - macOS produce un binario universal `arm64 + x86_64`; no está firmado ni notarizado.
 - La build Windows de la release está validada en Windows 10/11, con icono correcto en Explorer y barra de tareas.
+- AVIF compila AOM de forma estática: requiere CMake, NASM y compilador de C; no añade DLLs de runtime.
 
 ## 4. Decisiones que no se deben romper
 
@@ -96,7 +97,7 @@ Builds portables:
 - **ICO:** frames PNG, contenedor manual, ajuste centrado sin recorte, al menos un tamaño.
 - **Calidad inicial:** 82 %.
 - **PNG:** sin pérdida y sin deslizador de calidad.
-- **AVIF:** salida con pérdida y control de calidad; vista previa decodificada con `avif-decode`.
+- **AVIF:** salida con pérdida mediante libavif/AOM, cuantizador directo y control de calidad; vista previa decodificada con `avif-decode`.
 - **Badges del comparador:** el formato de salida va a la izquierda y `ORIGINAL` a la derecha, igual que las mitades visibles.
 - **Reinicio:** restablece formato, calidad, tamaños y muestra de color.
 - **Privacidad:** sin red, cuentas ni telemetría.
@@ -129,12 +130,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `t-44` (brecha AVIF), `t-45` (correcciones resize/UI) y `t-43` (cierre bloqueado).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37, t-39, t-40, t-41 y t-42).
+- Pendientes: `t-45` (correcciones resize/UI) y `t-43` (cierre bloqueado por la revisión incremental).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37, t-39, t-40, t-41, t-42 y t-44).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso: **t-44 — cerrar la brecha AVIF** y revisión de AVIF. Después, **t-45 — resize/UI** y revisión de resize, seguido del resto de features una por una. No etiquetar v1.1.0 hasta completar esas revisiones y el cierre t-43.
+Siguiente paso: **revisión de AVIF** por el usuario. Después, **t-45 — resize/UI** y revisión de resize, seguido del resto de features una por una. No etiquetar v1.1.0 hasta completar esas revisiones y el cierre t-43.
 
 ## 7. Benchmarks y límites
 
@@ -142,7 +143,7 @@ Los informes completos están en `docs/benchmark-2026-10-28.md` y
 `docs/benchmark-squoosh-2026-10-31.md`.
 
 - La versión Rust es mucho más pequeña que el prototipo Godot, arranca antes, usa menos RAM y es más rápida codificando.
-- Frente a Squoosh, WebP empata en tamaño y es 2,3–2,8× más rápido; JPEG queda en paridad práctica y 2,5× más rápido; PNG comprime igual o mejor y 3,2× más rápido; AVIF está un 6,5 % por detrás en mediana de tamaño.
+- Frente a Squoosh, WebP empata en tamaño y es 2,3–2,8× más rápido; JPEG queda en paridad práctica y 2,5× más rápido; PNG comprime igual o mejor y 3,2× más rápido; AVIF queda en paridad práctica (0,994× mediana a igual SSIM) y es 1,82× más rápido en UI.
 - La CPU en reposo del prototipo Godot medida bajo llvmpipe no representa un equipo con GPU, pero sí evidencia el repintado continuo.
 - El benchmark frente a Squoosh usa SSIMULACRA2 y mide WebP, JPEG, PNG y AVIF; el icono se reserva para tamaño, alfa y velocidad.
 

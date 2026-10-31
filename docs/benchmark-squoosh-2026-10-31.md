@@ -1,7 +1,8 @@
 # Benchmark HUNK vs Squoosh — 2026-10-31
 
-> Benchmark en dos pasadas: línea base y estado tras MozJPEG/OxiPNG (`t-39`).
-> Los resultados son indicativos y deben repetirse tras cada cambio de encoder.
+> Benchmark en tres pasadas: línea base, MozJPEG/OxiPNG (`t-39`) y AVIF con
+> libavif/AOM (`t-44`). Los resultados son indicativos y deben repetirse tras
+> cada cambio de encoder.
 
 ## 1. Objetivo
 
@@ -112,27 +113,64 @@ del tamaño de Squoosh.
 ## 5. Opciones avanzadas (t-40)
 
 - WebP usa `WebPConfig` avanzado: lossless, method y alpha quality.
-- AVIF usa ravif directo: speed y alpha quality, manteniendo 8 bits.
-- Los valores por defecto conservan la paridad anterior: WebP sigue produciendo
-  los mismos bytes y AVIF mantiene la curva medida.
-- No se integró libavif/AOM: ravif es nativo, mantiene velocidad competitiva y
-  evita otra dependencia C. La brecha de AVIF en UI sigue pendiente de ajuste.
+- AVIF usó ravif directo durante esta pasada: speed y alpha quality, 8 bits.
+- Los valores por defecto conservaron la paridad anterior de WebP, pero ravif
+  no cerraba la brecha de AVIF. Esta decisión se revisó en `t-44`.
 
-## 6. Lectura de producto
+## 6. Tercera pasada: AVIF con libavif/AOM (t-44)
+
+Datos completos:
+[`benchmark-squoosh-2026-10-31-t44-avif.tsv`](benchmark-squoosh-2026-10-31-t44-avif.tsv).
+
+Configuración medida:
+
+- HUNK `release`, `libavif` 1.0.4 con AOM 3.11 estático.
+- Entrada RGBA8 → YUV420, BT.601, rango completo.
+- `end-usage=q`, `cq-level`, `sharpness=0`, `denoise=0` y `tune=ssim` para
+  cuantizadores ≤ 32.
+- Calidad HUNK 20–90, muestreada en 64 puntos; Squoosh `cqLevel` 20–45, 56
+  puntos. La comparación se hace interpolando tamaño a igual SSIMULACRA2.
+
+| Métrica | Resultado | Puerta |
+| --- | --- | --- |
+| Tamaño global a igual calidad | **0,994** mediana (0,704–1,069) | ≤ 1,00 ✅ |
+| UI a igual calidad | **0,705–0,960** (mediana 0,894) | Sin caso peor ✅ |
+| Peor foto | **+5,8 %** (kodim04, calidad media) | Sin caso UI ✅ |
+| Peor caso global | **+6,9 %** (icono, calidad alta) | Aceptado como alfa |
+| Velocidad global a igual calidad | **4,58×** mediana (1,77–7,29×) | ≥ 1,2× ✅ |
+| Velocidad en UI | **1,82×** mediana (1,77–1,97×) | ≥ 1,2× ✅ |
+
+La captura de UI deja de ser el punto débil: AOM produce entre un 4 % y un 30 %
+menos que Squoosh a igual calidad. En fotos la curva queda prácticamente
+solapada, con una dispersión de ±2 % en la mayoría de puntos. El icono con alfa
+es el peor caso (+6,9 % en calidad alta); no es un caso de UI y sigue dentro de
+un margen aceptable.
+
+Consecuencias técnicas:
+
+- `ravif` se retira del camino de salida. La integración usa `libavif-sys` con
+  `codec-aom`; no hay dependencia de una DLL externa.
+- AOM añade unos 4,2 MB al binario Linux (`21,8 MB → 26,1 MB`).
+- La compilación requiere **CMake** además de NASM y un compilador de C.
+- El build cruzado Windows GNU se validó localmente; la build MSVC sigue
+  pendiente del CI.
+
+## 7. Lectura de producto
 
 - **WebP** ya es una victoria: mismo archivo, más rápido.
 - **JPEG** queda en paridad práctica y mantiene una ventaja clara de velocidad.
 - **PNG** ya comprime igual o mejor y sigue siendo más rápido.
-- **AVIF** es el único formato que aún necesita una segunda ronda de ajuste.
+- **AVIF** queda en paridad práctica, con UI claramente mejor y más velocidad.
+- La deuda restante es de producto y revisión incremental, no de compresión.
 - Squoosh no es imbatible: su desarrollo está parado desde 2024 y usa versiones
   antiguas de MozJPEG, libwebp, libavif/AOM y OxiPNG.
 - La ventaja de HUNK debe ser nativa: velocidad, flujo de escritorio y opciones
   cuidadas; no una copia de la UI.
 
-## 7. Próximos pasos
+## 8. Próximos pasos
 
-1. Exponer las opciones en la UI (`t-42`) sin romper los valores por defecto.
-2. Hacer una segunda curva AVIF específica de UI y decidir si el ajuste de
-   calidad/velocidad basta o si hace falta evaluar AOM.
-3. Repetir el benchmark con resize/rotate/palette cuando existan.
-4. Solo entonces cerrar la puerta de compresión de 1.1.
+1. Revisar AVIF con el usuario.
+2. Aplicar las correcciones de resize y UI (`t-45`).
+3. Revisar el resto de features una por una.
+4. Repetir el benchmark final y cerrar `t-43`; solo entonces etiquetar
+   `v1.1.0`.

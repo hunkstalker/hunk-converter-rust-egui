@@ -212,6 +212,7 @@ t-37.
 ### t-40 — WebP y AVIF avanzados
 
 **Estado:** completada el 2026-10-31; WebP avanzado y AVIF con ravif directo.
+El backend AVIF se sustituyó por libavif/AOM en `t-44` tras el benchmark.
 
 **Objetivo:** completar el modo avanzado con los controles que sí puede ofrecer
 el stack de códecs.
@@ -284,7 +285,7 @@ catálogo de formatos de t-35 debe existir antes de integrarlas en la UI.
 | TIFF tiene demasiadas variantes | Documentar subconjunto y fallar con error claro |
 | Decodificar AVIF/JXL bloquea la UI | Medir; mover a worker si supera el umbral perceptible |
 | El encoder actual de JPG no permite submuestreo/progresivo | Evaluar `jpeg-encoder`/mozjpeg antes de prometerlo |
-| AVIF no expone submuestreo en el encoder actual | Mostrar solo lo que se pueda aplicar o evaluar ravif |
+| AVIF usa YUV420 fijo y no expone submuestreo | Documentarlo; AOM lo aplica siempre por defecto |
 | La barra lateral se queda sin espacio | Desplegable + bloque colapsado + scroll existente |
 | Configuración avanzada rompe configs antiguas | Secciones opcionales y valores por defecto |
 | Se promete “TIFF completo” | Etiquetar siempre “RGBA8, una página” |

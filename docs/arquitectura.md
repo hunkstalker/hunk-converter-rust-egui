@@ -52,6 +52,7 @@ domain/                     lógica pura y tipos del negocio
 
 codec/                      implementaciones concretas de códecs
   ├── mod.rs
+  ├── avif.rs
   ├── encoders.rs
   ├── ico.rs
   └── svg.rs
@@ -247,7 +248,7 @@ La suite cubre:
 - nombres de exportación y no sobrescritura atómica;
 - códecs WebP/JPG/PNG/AVIF/JPEG XL;
 - JPG progresivo y submuestreo automático; PNG OxiPNG sin pérdida exacta;
-- WebP lossless/method/alfa y AVIF speed/alfa;
+- WebP lossless/method/alfa y AVIF con AOM (YUV420, cuantizador y alfa);
 - preprocesado de rotación, resize con proporción y paleta con alfa;
 - opciones avanzadas y persistencia `[advanced]` de `config.ini`;
 - entrada TIFF de una página, compresiones LZW/Deflate/PackBits y rechazo de 16 bits;
@@ -259,7 +260,7 @@ La suite cubre:
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **55 pruebas**, `cargo fmt --check` y
+Estado actual: **57 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas
@@ -287,7 +288,7 @@ Estado actual: **55 pruebas**, `cargo fmt --check` y
 | --- | --- |
 | `src/app.rs` | `src/app/mod.rs` + `src/app/ui/*` + `src/app/{encoding,session,export,state,actions}.rs` |
 | `src/config.rs` | `src/settings/mod.rs` + `src/settings/ini.rs` |
-| `src/core/codec.rs` | `src/codec/mod.rs` + `src/codec/encoders.rs` + `src/codec/svg.rs` |
+| `src/core/codec.rs` | `src/codec/mod.rs` + `src/codec/avif.rs` + `src/codec/encoders.rs` + `src/codec/svg.rs` |
 | `src/core/ico.rs` | `src/codec/ico.rs` |
 | `src/core/color.rs` | `src/domain/color.rs` |
 | Reglas del historial en `config.rs` | `src/domain/history.rs` |

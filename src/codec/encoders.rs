@@ -2,7 +2,6 @@ use std::io::Cursor;
 
 use image::{ImageFormat, RgbaImage};
 use mozjpeg_rs::{Encoder as JpegEncoder, Preset as JpegPreset, Subsampling};
-use rgb::FromSlice;
 use zune_core::bit_depth::BitDepth as ZuneBitDepth;
 use zune_core::colorspace::ColorSpace;
 use zune_core::options::EncoderOptions as ZuneEncoderOptions;
@@ -104,26 +103,12 @@ pub(super) fn encode_avif(
     speed: u8,
     alpha_quality: u8,
 ) -> Result<EncodedOutput, EncodeError> {
-    let quality = quality.clamp(1, 100) as f32;
-    let alpha_quality = if alpha_quality == 0 {
-        quality
-    } else {
-        f32::from(alpha_quality.clamp(1, 100))
-    };
-    let encoded = ravif::Encoder::new()
-        .with_quality(quality)
-        .with_alpha_quality(alpha_quality)
-        .with_speed(speed.clamp(1, 10))
-        .with_bit_depth(ravif::BitDepth::Eight)
-        .encode_rgba(ravif::Img::new(
-            source.as_raw().as_rgba(),
-            source.width() as usize,
-            source.height() as usize,
-        ))
-        .map_err(|source| EncodeError::Avif {
-            source: Box::new(source),
+    let bytes =
+        super::avif::encode_rgba(source, quality, speed, alpha_quality).map_err(|source| {
+            EncodeError::Avif {
+                source: Box::new(source),
+            }
         })?;
-    let bytes = encoded.avif_file;
     let preview = decode_avif_preview(&bytes)?;
     Ok(output(source, bytes, preview))
 }

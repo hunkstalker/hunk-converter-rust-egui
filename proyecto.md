@@ -187,7 +187,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - `image` 0.25 para decodificación PNG/JPG/WebP/BMP/TGA/TIFF.
 - `mozjpeg-rs` para JPG progresivo con submuestreo automático.
 - `oxipng` para compresión PNG sin pérdida.
-- `ravif` para AVIF con speed y alpha quality.
+- `libavif-sys` con AOM para AVIF: YUV420, cuantizador directo, speed y alpha quality.
 - `webp`/libwebp para codificación WebP.
 - `png` 0.18 para la codificación PNG.
 - `avif-decode`/rav1d para decodificar AVIF y `avif-parse` para comprobar dimensiones antes de decodificar.
@@ -219,7 +219,8 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | `src/domain/export_name.rs` | Saneado y numeración de nombres de salida |
 | `src/domain/error.rs` | Errores tipados de carga, codificación, exportación y configuración |
 | `src/codec/mod.rs` | Carga, validación y dispatcher de codificación |
-| `src/codec/encoders.rs` | WebP, JPG, PNG, AVIF y JPEG XL |
+| `src/codec/encoders.rs` | WebP, JPG, PNG y JPEG XL |
+| `src/codec/avif.rs` | AVIF: carga con `avif-decode`/`avif-parse` y salida con AOM |
 | `src/codec/ico.rs` | Contenedor ICO y frames PNG |
 | `src/codec/svg.rs` | Rasterización SVG |
 | `src/settings/mod.rs` | `Settings`, ruta y guardado de `config.ini` |
@@ -332,7 +333,8 @@ hunk-converter-1.0.0-windows-x86_64/
 - El modo Windows genera una carpeta y un `.zip` (el CI lo crea con PowerShell).
 - El modo macOS genera una carpeta y un `.tar.gz` con binario universal `arm64 + x86_64`.
 - La build de Linux depende de las bibliotecas gráficas del sistema (X11/OpenGL), como cualquier app nativa.
-- Compilar en x86/x86_64 requiere NASM por el decodificador AVIF `rav1d`.
+- Compilar requiere un compilador de C y CMake para libwebp y libavif/AOM; en x86/x86_64 también NASM para `rav1d` y AOM.
+- AVIF enlaza AOM de forma estática; no añade DLLs de runtime.
 - La build Windows importa únicamente DLLs del sistema; no necesita DLLs de MinGW.
 - La release [v1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0) está publicada y validada en Windows 10/11, con icono en Explorer y barra de tareas.
 - El CI de GitHub ejecuta pruebas en `main` y PR, y compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal solo al empujar un tag `*.*.*` o `v*.*.*`, o al lanzarlo manualmente. Los jobs usan `rust-cache`; `sccache` se evaluó y se descartó por ahora.
@@ -346,13 +348,13 @@ Resumen del contexto de referencia:
 - La aplicación Rust es drásticamente más pequeña y usa menos RAM.
 - El arranque a ventana es más rápido.
 - La interfaz no consume CPU de render en reposo: repinta bajo demanda.
-- WebP, JPG, PNG e ICO son más rápidos en la versión Rust; AVIF se añade como códec nuevo.
+- WebP, JPG, PNG e ICO son más rápidos en la versión Rust; AVIF usa AOM nativo y queda en paridad práctica con Squoosh.
 - Las cifras absolutas de CPU en reposo de Godot están infladas por usar llvmpipe sin VSync; no representan vatios reales en una GPU.
 
 ## 8. Límites conocidos
 
 - No se conservan metadatos, pero la orientación EXIF se aplica a los píxeles al cargar.
-- Sin redimensionado, recorte ni procesamiento por lotes: fuera del alcance del producto.
+- Sin recorte ni procesamiento por lotes: fuera del alcance del producto.
 - HEIC no está soportado; queda fuera del alcance. AVIF está disponible como salida y JXL se retira del selector.
 - No se conservan perfiles ICC.
 - La build macOS universal se genera en CI, pero no está firmada ni notarizada; la firma se descartó por falta de presupuesto.
@@ -360,7 +362,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **55 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF speed/alfa, preprocesado y opciones avanzadas persistentes, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **57 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas persistentes, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.
