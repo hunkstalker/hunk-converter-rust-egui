@@ -128,6 +128,10 @@ el backend. Los valores por defecto no cambian el benchmark. AVIF sigue
 pendiente de una curva específica de UI; ravif se mantiene por ser nativo y
 competitivo en velocidad.
 
+**1.1.0 no se publica hasta cerrar `t-44`.** La release queda bloqueada por la
+brecha de AVIF, no por falta de formato: AVIF entra y sale, pero todavía no
+iguala la compresión de Squoosh a igual calidad.
+
 ## 4. Encoders de referencia
 
 | Formato | Backend objetivo | Motivo |
@@ -157,7 +161,9 @@ Todo pertenece a la misma release. No hay una 1.2 ni un bloque sin numerar.
 - WebP y AVIF avanzados (`t-40`, completada).
 - Preprocesado: redimensionar, rotar y reducir paleta (`t-41`, completada).
 - UI, selector web+ICO y persistencia (`t-42`, completada).
-- Cierre, benchmark final y release (`t-43`, completada).
+- Cierre, benchmark final y release (`t-43`, bloqueada por AVIF).
+- Cerrar la brecha AVIF (`t-44`).
+- Correcciones de resize y UI (`t-45`, después de AVIF).
 
 El bloque 2 no se publica aparte: es la segunda mitad de 1.1.0.
 

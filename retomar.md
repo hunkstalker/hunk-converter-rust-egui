@@ -1,7 +1,7 @@
 # Retomar HUNK Converter
 
 > Punto de entrada para nuevas sesiones. Última actualización: **2026-10-31**.
-> Versión: **1.0.0** publicada · **1.1.0** preparada para publicar · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
+> Versión: **1.0.0** publicada · **1.1.0** bloqueada por AVIF · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
 
 ## 1. Qué es este proyecto
 
@@ -42,7 +42,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
 - **55 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
-- Versión **1.0.0** publicada; **1.1.0** preparada, pendiente de push, tag y validación CI/Windows.
+- Versión **1.0.0** publicada; **1.1.0** bloqueada por la brecha de compresión AVIF. Pendiente `t-44`, `t-45` y `t-43` antes de push/tag.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
 
 ## 3. Comandos
@@ -129,12 +129,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: ninguno. La release 1.1.0 está preparada.
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37, t-39, t-40, t-41, t-42 y t-43).
+- Pendientes: `t-44` (brecha AVIF), `t-45` (correcciones resize/UI) y `t-43` (cierre bloqueado).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37, t-39, t-40, t-41 y t-42).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso: **push de main, tag v1.1.0 y validación del artefacto Windows MSVC del CI**.
+Siguiente paso: **t-44 — cerrar la brecha AVIF**. Después, t-45 y el cierre t-43. No etiquetar v1.1.0 hasta entonces.
 
 ## 7. Benchmarks y límites
 

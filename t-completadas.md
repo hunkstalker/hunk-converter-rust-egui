@@ -276,10 +276,3 @@
 
 **Completada:** 2026-10-31
 **Resultado:** Bloque `Avanzado` contextual y colapsado con resumen y reset: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa y AVIF speed/alfa. JPEG XL sale del selector. Las opciones y el preprocesado se guardan en `[advanced]` de `config.ini`, con migración de configuraciones antiguas. Suite de 55 pruebas.
-
-## t-43 — Cierre 1.1: benchmark, documentación y release
-
-**Descripción:** Repetir el benchmark final, regenerar capturas, actualizar documentación, validar builds y preparar la release 1.1.
-
-**Completada:** 2026-10-31
-**Resultado:** Benchmark final sin regresiones: WebP paridad exacta, JPEG ±0,5 % mediana, PNG igual o mejor y AVIF pendiente de curva UI. 55 pruebas, formato y clippy limpios; capturas regeneradas; builds Linux y Windows GNU actualizadas. Release 1.1.0 preparada, pendiente de push, tag y validación Windows MSVC en CI.
