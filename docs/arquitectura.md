@@ -5,8 +5,9 @@
 ## 1. Contexto
 
 HUNK Converter es una aplicación de escritorio terminada: convierte, comprime,
-compara y muestrea imágenes. Tiene unos 4.300 líneas de Rust, seis formatos de
-salida y no se espera que crezca de forma significativa.
+compara y muestrea imágenes. Tiene unos 4.300 líneas de Rust y seis formatos de
+salida en 1.1.0. La ampliación de formatos y opciones avanzadas está planificada
+en `docs/formatos.md` y `docs/plan-formatos-y-opciones.md`.
 
 El objetivo de esta arquitectura no es preparar la aplicación para una escala
 que no va a tener. Es conseguir que el código sea fácil de leer, probar y
@@ -204,6 +205,9 @@ guardado se registran en `stderr`.
 language=es
 maximized=1
 
+[output]
+format=auto
+
 [window]
 x=120
 y=80
@@ -223,6 +227,7 @@ Decisiones:
 - Al llenarse el historial se sustituye el color libre más antiguo.
 - `maximized` sustituye al antiguo `fullscreen`; el valor antiguo se acepta
   para no romper configuraciones existentes.
+- `[output]` guarda `auto` o el formato fijo elegido en el selector de salida.
 - `[window]` guarda posición y tamaño de la ventana cuando no está maximizada.
   Al restaurar se usa la posición guardada; el sistema operativo la corrige si
   el monitor ya no existe.
@@ -235,7 +240,7 @@ Decisiones:
 La suite cubre:
 
 - reglas del historial y bloqueos;
-- ida y vuelta de `config.ini`, incluidos colores fijados y geometría de ventana;
+- ida y vuelta de `config.ini`, incluidos colores fijados, formato de salida y geometría de ventana;
 - compatibilidad con `fullscreen`;
 - advertencias de configuración inválida;
 - política de formatos;
@@ -248,7 +253,7 @@ La suite cubre:
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **34 pruebas**, `cargo fmt --check` y
+Estado actual: **36 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

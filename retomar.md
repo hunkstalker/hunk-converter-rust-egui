@@ -1,7 +1,7 @@
 # Retomar HUNK Converter
 
-> Punto de entrada para nuevas sesiones. Última actualización: **2026-10-29**.
-> Versión: **1.0.0** publicada · **1.1.0** en preparación · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
+> Punto de entrada para nuevas sesiones. Última actualización: **2026-10-31**.
+> Versión: **1.0.0** publicada · **1.1.0** en preparación · Plan de formatos para la siguiente release · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
 
 ## 1. Qué es este proyecto
 
@@ -19,12 +19,14 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Carga por arrastre, selector nativo, argumento de línea de comandos o `Ctrl+V` desde el portapapeles.
 - Entrada: PNG, JPG, WebP, BMP, TGA y SVG. La orientación EXIF de JPG/WebP se aplica al cargar.
 - Salida: WebP, AVIF, JPG, PNG, JPEG XL e ICO.
+- Selector de salida desplegable con modo Automático implementado y validado (t-35).
+- Planificado: apertura TIFF/AVIF/JXL, salida TGA/TIFF y opciones avanzadas de compresión y color. Ver `docs/formatos.md` y `docs/plan-formatos-y-opciones.md`.
 - Calidad 1–100 para WebP/JPG/AVIF; PNG y JPEG XL sin pérdida; JPG aplanado sobre blanco.
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %.
 - Cuentagotas con muestra del píxel original, coordenadas, códigos HEX/RGB/RGBA/HSL, botones de copia y aviso de confirmación. La tarjeta reserva el espacio de coordenadas y códigos para no cambiar de altura.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
 - Arquitectura modular: dominio puro, acciones explícitas, errores tipados y UI dividida por componentes. Ver `docs/arquitectura.md`.
-- Idioma, historial, bloqueos, estado maximizado, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
+- Idioma, historial, bloqueos, estado maximizado, formato de salida, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
 - Pie con enlace directo a `github.com/hunkstalker/hunk-converter`, abierto en el navegador.
@@ -34,7 +36,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **34 pruebas Rust**, clippy y formato limpios.
+- **36 pruebas Rust**, clippy y formato limpios.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; release validada en Windows 10/11.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
@@ -105,7 +107,7 @@ src/app/                     Shell, acciones, estado y componentes egui
 src/app/ui/                  Cabecera, sidebar, color, canvas, avisos
 src/domain/                  Formatos, color, historial, exportación y errores
 src/codec/                   WebP, JPG, PNG, AVIF, JPEG XL, ICO y SVG
-src/settings/                config.ini, idioma, historial y maximizado
+src/settings/                config.ini, idioma, historial, formato y maximizado
 src/i18n.rs                  Traducciones es/ca/en y errores tipados
 src/demo.rs                  Imagen sintética para demos/capturas
 src/theme.rs                 Tema egui
@@ -114,7 +116,7 @@ src/bin/make_demo.rs         Generador de muestra
 src/bin/make_icons.rs        Genera PNG, ICO e ICNS desde el icono fuente
 scripts/build_dist.sh        Empaquetado portable Linux/Windows/macOS
 assets/                      Manrope, iconos y licencias
-docs/                        Capturas, benchmark y arquitectura
+docs/                        Capturas, benchmark, arquitectura, formatos y plan
 notes/                       Evidencia fechada
 proyecto.md                 Documento de producto
 todo.md                     Tareas pendientes
@@ -123,12 +125,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: ninguno.
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33 y t-34).
+- Pendientes: `todo.md` (t-36 a t-41: formatos nuevos y opciones avanzadas).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34 y t-35).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso recomendado: **preparar la release 1.1.0** y validar el workflow en el tag.
+Siguiente paso recomendado: **t-36 — entrada TIFF**. Antes, publicar/validar 1.1.0 si procede.
 
 ## 7. Benchmarks y límites
 

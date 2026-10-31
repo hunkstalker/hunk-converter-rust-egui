@@ -1,3 +1,37 @@
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum FormatSelection {
+    #[default]
+    Auto,
+    Fixed(OutputFormat),
+}
+
+impl FormatSelection {
+    pub fn code(self) -> &'static str {
+        match self {
+            Self::Auto => "auto",
+            Self::Fixed(format) => format.extension(),
+        }
+    }
+
+    pub fn from_code(code: &str) -> Option<Self> {
+        let code = code.trim().to_ascii_lowercase();
+        if code == "auto" {
+            Some(Self::Auto)
+        } else {
+            OutputFormat::from_code(&code).map(Self::Fixed)
+        }
+    }
+
+    pub fn resolve(self, input: Option<&str>) -> OutputFormat {
+        match self {
+            Self::Fixed(format) => format,
+            Self::Auto => input
+                .and_then(OutputFormat::from_input_label)
+                .unwrap_or(OutputFormat::Webp),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OutputFormat {
     Webp,
@@ -51,6 +85,29 @@ impl OutputFormat {
         }
     }
 
+    pub fn from_code(code: &str) -> Option<Self> {
+        match code.trim().to_ascii_lowercase().as_str() {
+            "webp" => Some(Self::Webp),
+            "jpg" | "jpeg" => Some(Self::Jpg),
+            "png" => Some(Self::Png),
+            "ico" => Some(Self::Ico),
+            "avif" => Some(Self::Avif),
+            "jxl" | "jpegxl" | "jpeg-xl" => Some(Self::Jxl),
+            _ => None,
+        }
+    }
+
+    pub fn from_input_label(label: &str) -> Option<Self> {
+        match label.trim().to_ascii_uppercase().as_str() {
+            "PNG" => Some(Self::Png),
+            "JPG" | "JPEG" => Some(Self::Jpg),
+            "WEBP" => Some(Self::Webp),
+            "AVIF" => Some(Self::Avif),
+            "JXL" | "JPEG XL" => Some(Self::Jxl),
+            _ => None,
+        }
+    }
+
     pub fn is_lossy(self) -> bool {
         matches!(self, Self::Webp | Self::Jpg | Self::Avif)
     }
@@ -79,6 +136,54 @@ mod tests {
         assert!(!OutputFormat::Png.is_lossy());
         assert!(!OutputFormat::Jxl.is_lossy());
         assert_eq!(OutputFormat::Jxl.badge(), "JXL");
+    }
+
+    #[test]
+    fn format_selection_round_trips_and_resolves_inputs() {
+        assert_eq!(FormatSelection::Auto.code(), "auto");
+        assert_eq!(
+            FormatSelection::from_code("auto"),
+            Some(FormatSelection::Auto)
+        );
+        assert_eq!(
+            FormatSelection::from_code("jpeg"),
+            Some(FormatSelection::Fixed(OutputFormat::Jpg))
+        );
+        assert_eq!(FormatSelection::from_code("nope"), None);
+        assert_eq!(
+            OutputFormat::from_input_label("PNG"),
+            Some(OutputFormat::Png)
+        );
+        assert_eq!(
+            OutputFormat::from_input_label("jpeg"),
+            Some(OutputFormat::Jpg)
+        );
+        assert_eq!(
+            OutputFormat::from_input_label("WEBP"),
+            Some(OutputFormat::Webp)
+        );
+        assert_eq!(OutputFormat::from_input_label("BMP"), None);
+        assert_eq!(OutputFormat::from_input_label("SVG"), None);
+        assert_eq!(
+            FormatSelection::Auto.resolve(Some("PNG")),
+            OutputFormat::Png
+        );
+        assert_eq!(
+            FormatSelection::Auto.resolve(Some("JPG")),
+            OutputFormat::Jpg
+        );
+        assert_eq!(
+            FormatSelection::Auto.resolve(Some("BMP")),
+            OutputFormat::Webp
+        );
+        assert_eq!(
+            FormatSelection::Auto.resolve(Some("SVG")),
+            OutputFormat::Webp
+        );
+        assert_eq!(
+            FormatSelection::Fixed(OutputFormat::Avif).resolve(Some("PNG")),
+            OutputFormat::Avif
+        );
     }
 
     #[test]

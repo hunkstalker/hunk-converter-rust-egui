@@ -256,6 +256,17 @@ catalogue! {
         "Could not save the image:"
     ),
     ImagesFilter => ("Imágenes", "Imatges", "Images"),
+    FormatAuto => ("Automático", "Automàtic", "Automatic"),
+    FormatAutoHint => (
+        "Mismo formato que la entrada cuando sea posible; si no, WebP.",
+        "Mateix format que l'entrada quan sigui possible; si no, WebP.",
+        "Same format as the input when possible; otherwise WebP."
+    ),
+    RecompressWarning => (
+        "Recompresión con pérdida: ajusta la calidad para conservar más detalle.",
+        "Recompressió amb pèrdua: ajusta la qualitat per conservar més detall.",
+        "Lossy recompression: adjust quality to preserve more detail."
+    ),
     FormatWebpHint => ("Equilibrio", "Equilibri", "Balanced"),
     FormatJpgHint => ("Compatible", "Compatible", "Compatible"),
     FormatPngHint => ("Sin pérdida", "Sense pèrdua", "Lossless"),

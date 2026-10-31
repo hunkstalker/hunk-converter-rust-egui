@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::domain::FormatSelection;
 use crate::domain::color::parse_hex_rgba;
 use crate::domain::history::{HISTORY_LIMIT, HistoryEntry};
 use crate::i18n::Lang;
@@ -20,6 +21,7 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
         language: Lang::detect(),
         history: Vec::new(),
         maximized: true,
+        output_format: FormatSelection::Auto,
         window: WindowState::default(),
     };
     let mut warnings = Vec::new();
@@ -56,6 +58,14 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
             maximized_seen = true;
         } else if section == "general" && key == "fullscreen" && !maximized_seen {
             settings.maximized = parse_bool(value);
+        } else if section == "output" && key == "format" {
+            match FormatSelection::from_code(value) {
+                Some(format) => settings.output_format = format,
+                None => warnings.push(ConfigWarning::new(
+                    line_number,
+                    format!("formato de salida desconocido: {value}"),
+                )),
+            }
         } else if section == "window" {
             match key.as_str() {
                 "x" | "y" => {
@@ -140,9 +150,10 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
 pub(super) fn serialize(settings: &Settings) -> String {
     let mut text = String::from("[general]\n");
     text.push_str(&format!(
-        "language={}\nmaximized={}\n\n[window]\n",
+        "language={}\nmaximized={}\n\n[output]\nformat={}\n\n[window]\n",
         settings.language.code(),
-        u8::from(settings.maximized)
+        u8::from(settings.maximized),
+        settings.output_format.code()
     ));
     if let Some(x) = settings.window.x {
         text.push_str(&format!("x={x}\n"));
@@ -219,6 +230,35 @@ mod tests {
         assert_eq!(loaded.settings.window.width, 1280.0);
         assert_eq!(loaded.settings.window.height, 800.0);
         assert_eq!(loaded.warnings.len(), 2);
+    }
+
+    #[test]
+    fn parses_output_format_and_falls_back_to_auto() {
+        let loaded = parse(
+            "[output]
+format=auto
+",
+        );
+        assert_eq!(loaded.settings.output_format, FormatSelection::Auto);
+        assert!(loaded.warnings.is_empty());
+
+        let loaded = parse(
+            "[output]
+format=avif
+",
+        );
+        assert_eq!(
+            loaded.settings.output_format,
+            FormatSelection::Fixed(crate::domain::OutputFormat::Avif)
+        );
+
+        let loaded = parse(
+            "[output]
+format=desconocido
+",
+        );
+        assert_eq!(loaded.settings.output_format, FormatSelection::Auto);
+        assert_eq!(loaded.warnings.len(), 1);
     }
 
     #[test]

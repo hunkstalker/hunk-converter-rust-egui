@@ -18,7 +18,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Pegar desde el portapapeles** con `Ctrl+V`, haya o no una imagen cargada.
 - **Entrada:** PNG, JPG/JPEG, WebP, BMP, TGA y SVG.
 - **Orientación EXIF:** las fotos de móvil se muestran, comparan, muestrean y exportan ya orientadas.
-- **Salida:** WebP, AVIF, JPG, PNG, JPEG XL e ICO.
+- **Salida:** WebP, AVIF, JPG, PNG, JPEG XL e ICO, con selector desplegable y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
 - **Zoom y paneo:** rueda del ratón sobre la imagen y clic derecho para desplazarte.
@@ -66,7 +66,7 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 
 - Selector **ES / CA / EN** en la cabecera.
 - En el primer arranque se detecta el idioma del sistema.
-- El idioma, el historial, los bloqueos, el estado maximizado y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
+- El idioma, el historial, los bloqueos, el estado maximizado, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
 - Si no se puede escribir el archivo, la aplicación sigue funcionando sin persistencia.
 
 ## Zoom y navegación
@@ -168,7 +168,7 @@ muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.
 | TGA | ✓ | — | Según archivo | — |
 | SVG | ✓ | — | Rasterizado | — |
 
-Los SVG se rasterizan con `resvg` al tamaño declarado. AVIF y JPEG XL se añaden como formatos de salida; JPEG XL se codifica sin pérdida. PNG y JPEG XL no muestran deslizador porque no modifican la calidad de la imagen. El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
+Los SVG se rasterizan con `resvg` al tamaño declarado. AVIF y JPEG XL se añaden como formatos de salida; JPEG XL se codifica sin pérdida. PNG y JPEG XL no muestran deslizador porque no modifican la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md) y planificadas en [docs/plan-formatos-y-opciones.md](docs/plan-formatos-y-opciones.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
 
 ## Builds portables
 
@@ -212,7 +212,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 34 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 36 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 
@@ -227,7 +227,7 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 ```text
 .
 ├── assets/                 Iconos, tipografía y licencias
-├── docs/                   Capturas, benchmark, arquitectura y CI
+├── docs/                   Capturas, benchmark, arquitectura, CI, formatos y plan
 ├── notes/                  Evidencia fechada de las sesiones
 ├── build.rs                Icono embebido del .exe de Windows
 ├── scripts/build_dist.sh   Empaquetado portable
@@ -258,6 +258,8 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 - [todo.md](todo.md) — tareas pendientes.
 - [t-completadas.md](t-completadas.md) — tareas cerradas.
 - [retomar.md](retomar.md) — estado y contexto para continuar.
+- [docs/formatos.md](docs/formatos.md) — matriz de formatos, entrada/salida y opciones avanzadas.
+- [docs/plan-formatos-y-opciones.md](docs/plan-formatos-y-opciones.md) — plan de desarrollo por fases.
 - [notes/](notes/) — evidencia fechada.
 - [docs/benchmark-2026-10-28.md](docs/benchmark-2026-10-28.md) — benchmark comparativo.
 - [docs/arquitectura.md](docs/arquitectura.md) — decisiones de arquitectura y reglas de código.

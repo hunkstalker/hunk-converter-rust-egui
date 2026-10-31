@@ -227,3 +227,10 @@
 
 **Completada:** 2026-10-30
 **Resultado:** Builds limitados a tags y `workflow_dispatch`; `main` y PR solo ejecutan formato, clippy y pruebas. `rust-cache` añadido a pruebas y builds. `sccache` evaluado y descartado por solapamiento con la caché de `target` y por no cubrir NASM. Workflow único y release automática en tags.
+
+## t-35 — Selector de salida con modo automático
+
+**Descripción:** Sustituir la rejilla de tarjetas por un desplegable compacto, añadir `Automático` para resolver el formato de salida desde la entrada y usar WebP como fallback, mantener la selección fija entre imágenes, avisar de la recompresión en JPG/WebP y persistir la elección en `config.ini`.
+
+**Completada:** 2026-10-31
+**Resultado:** Desplegable compacto con `Automático · formato` y selección fija; PNG/JPG/WebP resuelven al mismo formato y BMP/SVG usan WebP. La elección se guarda en `[output] format`, el reinicio vuelve a `Auto` y el aviso de recompresión aparece con entradas JPG/WebP. El selector permanece dentro del scroll, el menú muestra las siete opciones completas y el panel recupera la geometría de `HEAD` (x=30..389, hasta el footer). Suite de 36 pruebas, capturas regeneradas y builds Linux/Windows GNU actualizadas.

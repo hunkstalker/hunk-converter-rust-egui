@@ -1,79 +1,93 @@
-use eframe::egui::{
-    self, Align2, CornerRadius, CursorIcon, FontId, Sense, Stroke, StrokeKind, vec2,
-};
+use eframe::egui::{self, RichText};
 
-use crate::codec::OutputFormat;
+use crate::domain::{FormatSelection, OutputFormat};
+use crate::i18n::{self, K, Lang};
 use crate::theme as T;
 
-pub(super) struct FormatCard<'a> {
-    pub format: OutputFormat,
+pub(super) struct FormatSelector<'a> {
+    pub selection: FormatSelection,
     pub current: OutputFormat,
-    pub width: f32,
-    pub hint: &'a str,
+    pub language: Lang,
+    pub source_format: Option<&'a str>,
 }
 
-pub(super) fn format_card(ui: &mut egui::Ui, card: FormatCard<'_>) -> egui::Response {
-    let (rect, response) = ui.allocate_exact_size(vec2(card.width, 50.0), Sense::click());
-    let selected = card.format == card.current;
-    let hovered = response.hovered();
-    let fill = if selected {
-        T::ACCENT_SOFT
-    } else if hovered {
-        T::SURFACE_3
-    } else {
-        T::SURFACE_2
+pub(super) fn format_selector(
+    ui: &mut egui::Ui,
+    spec: FormatSelector<'_>,
+) -> Option<FormatSelection> {
+    let FormatSelector {
+        selection,
+        current,
+        language,
+        source_format,
+    } = spec;
+    let auto_label = i18n::t(language, K::FormatAuto);
+    let selected_text = match selection {
+        FormatSelection::Auto => format!("{auto_label} · {}", current.label()),
+        FormatSelection::Fixed(_) => format!(
+            "{} · {}",
+            current.label(),
+            i18n::format_hint(language, current)
+        ),
     };
-    let stroke = Stroke::new(
-        1.0,
-        if selected {
-            T::ACCENT
-        } else if hovered {
-            T::BORDER_STRONG
-        } else {
-            T::BORDER
-        },
-    );
-    ui.painter().rect(
-        rect,
-        CornerRadius::same(12),
-        fill,
-        stroke,
-        StrokeKind::Inside,
-    );
-    ui.painter().text(
-        rect.left_top() + vec2(10.0, 10.0),
-        Align2::LEFT_TOP,
-        card.format.label(),
-        FontId::proportional(13.5),
-        T::TEXT,
-    );
-    ui.painter().text(
-        rect.left_bottom() + vec2(10.0, -10.0),
-        Align2::LEFT_BOTTOM,
-        card.hint,
-        FontId::proportional(9.5),
-        if selected { T::ACCENT } else { T::TEXT_FAINT },
-    );
-    response.widget_info(|| {
-        egui::WidgetInfo::selected(
-            egui::Role::RadioButton,
-            true,
-            selected,
-            format!("{} — {}", card.format.label(), card.hint),
-        )
-    });
-    if response.has_focus() {
-        ui.memory_mut(|memory| {
-            memory.set_focus_lock_filter(
-                response.id,
-                egui::EventFilter {
-                    horizontal_arrows: true,
-                    vertical_arrows: true,
-                    ..Default::default()
-                },
+
+    let mut choice = selection;
+    let response = egui::ComboBox::from_id_salt("output_format_selector")
+        .selected_text(RichText::new(&selected_text).size(12.0).color(T::TEXT))
+        .width(ui.available_width())
+        .height(320.0)
+        .show_ui(ui, |ui| {
+            let auto_selected = choice == FormatSelection::Auto;
+            ui.selectable_value(
+                &mut choice,
+                FormatSelection::Auto,
+                RichText::new(auto_label).color(if auto_selected {
+                    T::ACCENT_INK
+                } else {
+                    T::TEXT
+                }),
             );
-        });
-        super::widgets::paint_focus_ring(ui.painter(), rect, 12);
+            ui.separator();
+            for format in OutputFormat::ALL {
+                let selected = choice == FormatSelection::Fixed(format);
+                let label = format!(
+                    "{} · {}",
+                    format.label(),
+                    i18n::format_hint(language, format)
+                );
+                ui.selectable_value(
+                    &mut choice,
+                    FormatSelection::Fixed(format),
+                    RichText::new(label).color(if selected { T::ACCENT_INK } else { T::TEXT }),
+                );
+            }
+        })
+        .response;
+    let hint = if selection == FormatSelection::Auto {
+        i18n::t(language, K::FormatAutoHint)
+    } else {
+        i18n::format_hint(language, current)
+    };
+    let response = response.on_hover_text(hint);
+
+    if response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), response.rect, 10);
     }
-    response.on_hover_cursor(CursorIcon::PointingHand)
+    response.accessible_name(format!(
+        "{}: {selected_text}",
+        i18n::t(language, K::OutputFormat)
+    ));
+
+    let input_matches = source_format
+        .and_then(OutputFormat::from_input_label)
+        .is_some_and(|input_format| input_format == current);
+    if input_matches && current.is_lossy() {
+        ui.label(
+            RichText::new(i18n::t(language, K::RecompressWarning))
+                .size(9.0)
+                .color(T::WARNING),
+        );
+    }
+
+    (choice != selection).then_some(choice)
 }

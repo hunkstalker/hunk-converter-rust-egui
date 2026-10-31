@@ -4,7 +4,7 @@ use eframe::egui;
 use image::{ImageFormat, RgbaImage};
 
 use crate::codec;
-use crate::domain::{AppError, ClipboardError, OutputFormat};
+use crate::domain::{AppError, ClipboardError, FormatSelection, OutputFormat};
 use crate::i18n;
 
 use super::HunkApp;
@@ -14,6 +14,12 @@ use super::{FIT_ZOOM, UI_PREVIEW_MAX};
 
 impl HunkApp {
     pub(crate) fn set_source(&mut self, input: SourceInput, ctx: &egui::Context) {
+        let resolved_format = match self.format_selection {
+            FormatSelection::Fixed(format) => format,
+            FormatSelection::Auto => {
+                OutputFormat::from_input_label(&input.format).unwrap_or(OutputFormat::Webp)
+            }
+        };
         let (width, height) = input.pixels.dimensions();
         let preview = resized_for_ui(&input.pixels, UI_PREVIEW_MAX);
         let texture = upload_texture(ctx, &format!("source-{}", self.revision), &preview);
@@ -27,6 +33,7 @@ impl HunkApp {
             pixels: std::sync::Arc::new(input.pixels),
             texture,
         });
+        self.format = resolved_format;
         self.result = None;
         self.eyedropper_active = false;
         self.sampled_color = None;
@@ -167,6 +174,7 @@ impl HunkApp {
         self.source = None;
         self.result = None;
         self.format = OutputFormat::Webp;
+        self.format_selection = FormatSelection::Auto;
         self.quality = 82;
         self.ico_selected = [true; 6];
         self.split = 0.5;
@@ -184,10 +192,26 @@ impl HunkApp {
         self.screenshot_at = None;
         self.screenshot_requested = false;
         self.toast = None;
+        self.save_settings();
         ctx.request_repaint();
     }
 
     pub(crate) fn set_format(&mut self, format: OutputFormat) -> bool {
+        self.format_selection = FormatSelection::Fixed(format);
+        self.apply_resolved_format(format)
+    }
+
+    pub(crate) fn set_format_selection(&mut self, selection: FormatSelection) -> bool {
+        self.format_selection = selection;
+        self.apply_resolved_format(self.resolve_output_format())
+    }
+
+    fn resolve_output_format(&self) -> OutputFormat {
+        self.format_selection
+            .resolve(self.source.as_ref().map(|source| source.format.as_str()))
+    }
+
+    fn apply_resolved_format(&mut self, format: OutputFormat) -> bool {
         if self.format == format {
             return false;
         }

@@ -6,7 +6,7 @@ use crate::theme as T;
 
 use super::super::HunkApp;
 use super::super::actions::AppAction;
-use super::format_picker::{FormatCard, format_card};
+use super::format_picker::{FormatSelector, format_selector};
 use super::widgets::small_text_button;
 
 pub(super) struct FileCard<'a> {
@@ -42,9 +42,9 @@ impl HunkApp {
             .show_separator_line(false)
             .frame(Frame::new().fill(T::BG).inner_margin(Margin {
                 left: 30,
-                right: 20,
+                right: 0,
                 top: 14,
-                bottom: 14,
+                bottom: 0,
             }))
             .show(root, |ui| {
                 T::sidebar_frame().show(ui, |ui| {
@@ -130,71 +130,20 @@ impl HunkApp {
         ui.label(T::eyebrow(self.t(K::OutputFormat)));
         ui.add_space(6.0);
 
-        let gap = 6.0;
-        let card_width = (ui.available_width() - gap * 2.0) / 3.0;
-        let mut requested_format = None;
-        let mut format_responses = Vec::new();
-        for (row, formats) in OutputFormat::ALL.chunks(3).enumerate() {
-            ui.horizontal(|ui| {
-                for (column, format) in formats.iter().enumerate() {
-                    let hint = i18n::format_hint(self.language, *format);
-                    let response = format_card(
-                        ui,
-                        FormatCard {
-                            format: *format,
-                            current: self.format,
-                            width: card_width,
-                            hint,
-                        },
-                    );
-                    if response.clicked() {
-                        requested_format = Some(*format);
-                        response.request_focus();
-                    }
-                    format_responses.push((*format, response));
-                    if column + 1 < formats.len() {
-                        ui.add_space(gap);
-                    }
-                }
-            });
-            if row + 1 < OutputFormat::ALL.len().div_ceil(3) {
-                ui.add_space(gap);
+        if let Some(selection) = format_selector(
+            ui,
+            FormatSelector {
+                selection: self.format_selection,
+                current: self.format,
+                language: self.language,
+                source_format: Some(card.format),
+            },
+        ) {
+            let changed = self.set_format_selection(selection);
+            actions.push(AppAction::PersistSettings);
+            if changed {
+                actions.push(AppAction::RequestEncode(None));
             }
-        }
-        if let Some(index) = format_responses
-            .iter()
-            .position(|(_, response)| response.has_focus())
-        {
-            let (left, right, up, down) = ui.input(|input| {
-                (
-                    input.key_pressed(egui::Key::ArrowLeft),
-                    input.key_pressed(egui::Key::ArrowRight),
-                    input.key_pressed(egui::Key::ArrowUp),
-                    input.key_pressed(egui::Key::ArrowDown),
-                )
-            });
-            let count = format_responses.len();
-            let step = if left {
-                Some(count - 1)
-            } else if right {
-                Some(1)
-            } else if up {
-                Some(count - 3)
-            } else if down {
-                Some(3)
-            } else {
-                None
-            };
-            if let Some(step) = step {
-                let next = (index + step) % count;
-                requested_format = Some(format_responses[next].0);
-                format_responses[next].1.request_focus();
-            }
-        }
-        if let Some(format) = requested_format
-            && self.set_format(format)
-        {
-            actions.push(AppAction::RequestEncode(None));
         }
 
         ui.add_space(10.0);

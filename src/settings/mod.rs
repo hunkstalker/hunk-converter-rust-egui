@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use crate::domain::ConfigError;
 use crate::domain::history::HistoryEntry;
+use crate::domain::{ConfigError, FormatSelection};
 use crate::i18n::Lang;
 
 mod ini;
@@ -11,6 +11,7 @@ pub struct Settings {
     pub language: Lang,
     pub history: Vec<HistoryEntry>,
     pub maximized: bool,
+    pub output_format: FormatSelection,
     pub window: WindowState,
 }
 
@@ -39,6 +40,7 @@ impl Default for Settings {
             language: Lang::detect(),
             history: Vec::new(),
             maximized: true,
+            output_format: FormatSelection::Auto,
             window: WindowState::default(),
         }
     }
@@ -177,6 +179,7 @@ mod tests {
                 HistoryEntry::new([179, 142, 117, 255], false),
             ],
             maximized: false,
+            output_format: FormatSelection::Fixed(crate::domain::OutputFormat::Avif),
             window: WindowState {
                 x: Some(120.0),
                 y: Some(80.0),

@@ -53,6 +53,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 | JPEG XL | `.jxl` | Sin pérdida | Sí | Alternativa moderna sin pérdida |
 | ICO | `.ico` | PNG por tamaño | Sí | Iconos de Windows |
 
+- Selector de salida desplegable con modo **Automático** (mismo formato que la entrada cuando existe salida equivalente; WebP como fallback).
 - Calidad inicial: **82 %**.
 - WebP, JPG y AVIF muestran deslizador de calidad; PNG y JPEG XL son sin pérdida y no muestran deslizador; ICO usa selección de tamaños.
 - AVIF y JPEG XL se añaden como formatos de salida. JPEG XL se codifica sin pérdida.
@@ -95,7 +96,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 
 - Selector **ES / CA / EN** junto al botón de reinicio.
 - En el primer arranque se detecta el idioma del sistema con `sys-locale`.
-- La preferencia, el historial, los bloqueos, el estado maximizado y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
+- La preferencia, el historial, los bloqueos, el estado maximizado, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
 - Si el archivo no es escribible, la app sigue funcionando sin persistencia.
 
 ### 3.6 Exportación
@@ -161,7 +162,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 - Cabecera con marca, selector de idioma y botón de reinicio. Los controles de ventana son los nativos.
 - La barra lateral tiene scroll vertical cuando los ajustes no caben; la tarjeta del cuentagotas y el botón de exportar quedan fijos abajo con altura estable.
 - Panel lateral de 390 px con archivo, formato, calidad o tamaños ICO, historial de colores, cuentagotas y exportación.
-- La tarjeta lateral conserva los radios superiores y las esquinas inferiores cuadradas, con margen derecho y separación respecto a la cabecera.
+- La tarjeta lateral conserva los radios superiores y las esquinas inferiores cuadradas, con separación respecto a la cabecera y sin margen inferior: llega hasta el footer.
 - Zona principal con cabecera de vista previa, lienzo y pie de pesos.
 - Pie global con estado del proyecto, versión y enlace al repositorio.
 - El cuentagotas permanece visible y se sitúa por encima del botón de exportar.
@@ -204,6 +205,8 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 | `src/app/state.rs` | `SourceImage`, `RenderedResult`, `Toast` y mensajes del worker |
 | `src/app/ui/` | Componentes egui: cabecera, sidebar, color, canvas, avisos |
 | `src/domain/format.rs` | Política de formatos, extensiones y badges |
+| `docs/formatos.md` | Matriz de entrada/salida y opciones avanzadas |
+| `docs/plan-formatos-y-opciones.md` | Plan de desarrollo de formatos y opciones |
 | `src/domain/color.rs` | Códigos de color, HSL y aplanado RGBA |
 | `src/domain/history.rs` | Historial, límite, bloqueos y limpieza |
 | `src/domain/export_name.rs` | Saneado y numeración de nombres de salida |
@@ -302,7 +305,7 @@ Archivo local
 
 - En una build: `<carpeta del ejecutable>/export/`.
 - En desarrollo: `target/release/export/`.
-- `config.ini` se crea junto al ejecutable y guarda idioma, historial, estado maximizado, posición y tamaño de la ventana.
+- `config.ini` se crea junto al ejecutable y guarda idioma, historial, estado maximizado, formato de salida, posición y tamaño de la ventana.
 - Los nombres no se sobrescriben.
 
 ### Estructura de la build
@@ -350,7 +353,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **34 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, contraste, navegación por teclado y zona de agarre del comparador.
+- **36 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

@@ -5,7 +5,9 @@ use std::time::{Duration, Instant};
 use eframe::egui::{self, TextureHandle};
 
 use crate::codec::{ICO_SIZES, OutputFormat};
-use crate::domain::{AppError, HistoryEntry, clear_unlocked, remember_color, toggle_lock};
+use crate::domain::{
+    AppError, FormatSelection, HistoryEntry, clear_unlocked, remember_color, toggle_lock,
+};
 use crate::i18n::{self, K, Lang};
 use crate::settings;
 use crate::theme as T;
@@ -39,6 +41,7 @@ pub struct HunkApp {
     sample_pending_history: bool,
     color_panel_height: f32,
     format: OutputFormat,
+    format_selection: FormatSelection,
     quality: u8,
     ico_selected: [bool; 6],
     eyedropper_active: bool,
@@ -97,7 +100,11 @@ impl HunkApp {
             native_maximized_seen: false,
             sample_pending_history: false,
             color_panel_height: 300.0,
-            format: OutputFormat::Webp,
+            format: match settings.output_format {
+                FormatSelection::Fixed(format) => format,
+                FormatSelection::Auto => OutputFormat::Webp,
+            },
+            format_selection: settings.output_format,
             quality: 82,
             ico_selected: [true; 6],
             eyedropper_active: false,
@@ -156,6 +163,7 @@ impl HunkApp {
             language: self.language,
             history: self.history.clone(),
             maximized: self.maximized,
+            output_format: self.format_selection,
             window: settings::WindowState {
                 x: self.window_x,
                 y: self.window_y,
