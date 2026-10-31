@@ -22,9 +22,9 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Selector de salida desplegable con modo Automático implementado y validado (t-35).
 - Objetivo 1.1: salida web JPEG/PNG/WebP/AVIF + ICO; entrada amplia JPEG/PNG/WebP/AVIF/SVG/BMP/TGA/TIFF; preprocesado de redimensionado, rotación y reducción de paleta. TIFF de entrada forma parte de 1.1. Ver `docs/objetivo-1.1-web.md`.
 - Camino único de 1.1.0: **bloque 1** entrada TIFF/AVIF + benchmark; **bloque 2** paridad con Squoosh (MozJPEG, OxiPNG, WebP/AVIF avanzados, preprocesado y UI). Sin release intermedia.
-- Benchmark inicial HUNK vs Squoosh: WebP empata y es más rápido; JPEG/PNG necesitan MozJPEG/OxiPNG; AVIF está cerca. Ver `docs/benchmark-squoosh-2026-10-31.md`.
-- Planificado: apertura AVIF, paridad de códecs, opciones avanzadas y preprocesado. JPEG XL, QOI, WebP2 y salidas TIFF/TGA/BMP quedan fuera del núcleo web.
-- Calidad 1–100 para WebP/JPG/AVIF; PNG y JPEG XL sin pérdida; JPG aplanado sobre blanco.
+- Benchmark HUNK vs Squoosh: WebP empata, JPEG queda en paridad práctica (2,5× más rápido), PNG comprime igual o mejor (3,2× más rápido) y AVIF sigue cerca pero necesita ajuste. Ver `docs/benchmark-squoosh-2026-10-31.md`.
+- Planificado: WebP/AVIF avanzados, preprocesado, UI y release. JPEG XL, QOI, WebP2 y salidas TIFF/TGA/BMP quedan fuera del núcleo web.
+- Calidad 1–100 para WebP/JPG/AVIF; PNG y JPEG XL sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG.
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %.
 - Cuentagotas con muestra del píxel original, coordenadas, códigos HEX/RGB/RGBA/HSL, botones de copia y aviso de confirmación. La tarjeta reserva el espacio de coordenadas y códigos para no cambiar de altura.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
@@ -39,7 +39,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **47 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **49 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; release validada en Windows 10/11.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
@@ -128,12 +128,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `todo.md` (t-39 a t-43: códecs, preprocesado, UI y release).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36 y t-37).
+- Pendientes: `todo.md` (t-40 a t-43: WebP/AVIF, preprocesado, UI y release).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37 y t-39).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso recomendado: **t-39 — paridad JPEG/PNG**.
+Siguiente paso recomendado: **t-40 — WebP y AVIF avanzados**.
 
 ## 7. Benchmarks y límites
 
@@ -141,7 +141,7 @@ Los informes completos están en `docs/benchmark-2026-10-28.md` y
 `docs/benchmark-squoosh-2026-10-31.md`.
 
 - La versión Rust es mucho más pequeña que el prototipo Godot, arranca antes, usa menos RAM y es más rápida codificando.
-- Frente a Squoosh, WebP empata en tamaño y es 2,3–2,8× más rápido; JPEG y PNG necesitan MozJPEG/OxiPNG; AVIF está un 6,5 % por detrás en mediana de tamaño.
+- Frente a Squoosh, WebP empata en tamaño y es 2,3–2,8× más rápido; JPEG queda en paridad práctica y 2,5× más rápido; PNG comprime igual o mejor y 3,2× más rápido; AVIF está un 6,5 % por detrás en mediana de tamaño.
 - La CPU en reposo del prototipo Godot medida bajo llvmpipe no representa un equipo con GPU, pero sí evidencia el repintado continuo.
 - El benchmark frente a Squoosh usa SSIMULACRA2 y mide WebP, JPEG, PNG y AVIF; el icono se reserva para tamaño, alfa y velocidad.
 

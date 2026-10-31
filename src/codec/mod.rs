@@ -498,6 +498,75 @@ mod tests {
         ));
     }
 
+    fn jpeg_luma_sampling(bytes: &[u8]) -> Option<(u8, u8)> {
+        let mut index = 2;
+        while index + 9 < bytes.len() {
+            if bytes[index] != 0xFF {
+                index += 1;
+                continue;
+            }
+            let marker = bytes[index + 1];
+            if matches!(marker, 0xC0..=0xC3) {
+                let component = index + 10;
+                return Some((bytes[component + 1] >> 4, bytes[component + 1] & 0x0F));
+            }
+            if matches!(marker, 0xD8 | 0xD9 | 0x01) || (0xD0..=0xD7).contains(&marker) {
+                index += 2;
+                continue;
+            }
+            let length = usize::from(u16::from_be_bytes([bytes[index + 2], bytes[index + 3]]));
+            index += 2 + length;
+        }
+        None
+    }
+
+    #[test]
+    fn jpeg_is_progressive_and_uses_auto_subsampling() {
+        let source = noise(64, 48);
+        let encode_at = |quality| {
+            encode(
+                &source,
+                &EncodeOptions {
+                    format: OutputFormat::Jpg,
+                    quality,
+                    ico_sizes: Vec::new(),
+                    background: [255; 4],
+                },
+            )
+            .unwrap()
+            .bytes
+        };
+
+        for (quality, expected) in [(75, (2, 2)), (82, (2, 1)), (90, (1, 1))] {
+            let bytes = encode_at(quality);
+            assert!(
+                bytes.windows(2).any(|window| window == [0xFF, 0xC2]),
+                "q{quality} no es progresivo"
+            );
+            assert_eq!(jpeg_luma_sampling(&bytes), Some(expected), "q{quality}");
+        }
+    }
+
+    #[test]
+    fn png_preserves_all_pixels() {
+        let mut source = noise(32, 24);
+        source.put_pixel(3, 4, Rgba([12, 34, 56, 78]));
+        source.put_pixel(7, 8, Rgba([90, 12, 34, 0]));
+        let output = encode(
+            &source,
+            &EncodeOptions {
+                format: OutputFormat::Png,
+                quality: 82,
+                ico_sizes: Vec::new(),
+                background: [255; 4],
+            },
+        )
+        .unwrap();
+        let decoded = image::load_from_memory(&output.bytes).unwrap().to_rgba8();
+        assert_eq!(decoded.dimensions(), source.dimensions());
+        assert!(decoded.pixels().eq(source.pixels()));
+    }
+
     fn jpeg_with_orientation(orientation: u8) -> Vec<u8> {
         let source = RgbImage::from_fn(32, 20, |x, _| {
             if x < 16 {

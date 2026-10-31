@@ -40,11 +40,13 @@
 | Formato | Extensión | Política | Opciones actuales |
 | --- | --- | --- | --- |
 | WebP | `.webp` | Con pérdida | Calidad 1–100 |
-| JPG | `.jpg` | Con pérdida | Calidad 1–100; fondo blanco fijo |
-| PNG | `.png` | Sin pérdida | Compresión `Balanced` fija |
+| JPG | `.jpg` | Con pérdida | Calidad 1–100; progresivo; submuestreo automático; fondo blanco fijo |
+| PNG | `.png` | Sin pérdida | OxiPNG nivel 2 |
 | AVIF | `.avif` | Con pérdida | Calidad 1–100; velocidad fija |
 | JPEG XL | `.jxl` | Sin pérdida | Sin opciones |
 | ICO | `.ico` | Sin pérdida | Tamaños 16–256 px |
+
+JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. Los controles avanzados para cambiarlos llegarán en `t-42`.
 
 La salida se elige en un desplegable con modo `Automático`: conserva el formato de entrada cuando existe salida equivalente y usa WebP como fallback.
 
@@ -268,6 +270,9 @@ sin alterar los píxeles; en JPG, WebP y AVIF la pérdida se controla con
 - **Accesibles:** controles con nombre, estado y foco visible.
 
 ### 7.2 Controles previstos
+
+JPG y PNG ya usan MozJPEG/OxiPNG; sus controles se expondrán en la UI en
+`t-42`. La tabla conserva el alcance completo.
 
 | Formato | Básico | Avanzado |
 | --- | --- | --- |

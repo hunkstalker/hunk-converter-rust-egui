@@ -178,7 +178,9 @@ t-37.
 - Los nombres siguen sin sobrescribirse.
 - Tests de estructura y contenido.
 
-### t-39 — Opciones avanzadas sin pérdida
+### t-39 — Paridad JPEG/PNG
+
+**Estado:** completada el 2026-10-31; MozJPEG-rs y OxiPNG integrados con paridad de benchmark.
 
 **Objetivo:** introducir un modelo de opciones por formato y el bloque
 `Avanzado` para compresión lossless.

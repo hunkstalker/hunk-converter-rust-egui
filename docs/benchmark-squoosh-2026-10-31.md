@@ -1,7 +1,7 @@
 # Benchmark HUNK vs Squoosh — 2026-10-31
 
-> Primera pasada de referencia para el objetivo web de 1.1. Los resultados son
-> indicativos y deben repetirse después de cambiar los encoders.
+> Benchmark en dos pasadas: línea base y estado tras MozJPEG/OxiPNG (`t-39`).
+> Los resultados son indicativos y deben repetirse tras cada cambio de encoder.
 
 ## 1. Objetivo
 
@@ -37,7 +37,7 @@ número de calidad.
 Los datos completos están en
 [`benchmark-squoosh-2026-10-31.tsv`](benchmark-squoosh-2026-10-31.tsv).
 
-## 3. Resultado agregado
+## 3. Línea base (antes de t-39)
 
 | Formato | Tamaño HUNK/Squoosh a igual calidad | Velocidad HUNK vs Squoosh | Lectura |
 | --- | --- | --- | --- |
@@ -88,22 +88,41 @@ HUNK también. La ventaja es real, aunque menor que en WebP/JPEG/PNG.
 Conclusión: AVIF no está mal, pero hay que decidir entre seguir con ravif y
 exponer speed/alfa o evaluar libavif/AOM. No se debe cambiar a ciegas.
 
-## 4. Lectura de producto
+## 4. Segunda pasada: MozJPEG y OxiPNG (t-39)
+
+Datos completos:
+[`benchmark-squoosh-2026-10-31-t39.tsv`](benchmark-squoosh-2026-10-31-t39.tsv).
+
+| Formato | Tamaño HUNK/Squoosh a igual calidad | Velocidad HUNK vs Squoosh | Lectura |
+| --- | --- | --- | --- |
+| **JPEG q75** | **1,004** mediana (0,999–1,039) | **2,48×** mediana | Paridad práctica; UI +3,9 % |
+| **JPEG q90** | **1,003** mediana (0,999–1,023) | **2,50×** mediana | Paridad práctica |
+| **PNG** | **0,992** mediana (0,955–1,003) | **3,22×** mediana | HUNK comprime mejor |
+| **WebP** | 1,000 | 2,35–2,80× | Sin cambios |
+| **AVIF** | 1,065 | 1,4–3,4× | Pendiente de ajuste |
+
+MozJPEG-rs reproduce el comportamiento de Squoosh con una diferencia mediana
+inferior al 0,5 % en JPEG. La captura de UI a calidad 75 sigue siendo el peor
+caso (+3,9 %), pero la velocidad se mantiene entre 2 y 2,7 veces por encima.
+
+OxiPNG nativo iguala o supera a Squoosh en las siete imágenes opacas y es unas
+3,2 veces más rápido. El icono con alfa también queda ligeramente por debajo
+del tamaño de Squoosh.
+
+## 5. Lectura de producto
 
 - **WebP** ya es una victoria: mismo archivo, más rápido.
-- **JPEG y PNG** son las dos brechas que impiden decir “igual o mejor que
-  Squoosh”.
-- **AVIF** es competitivo, pero necesita una segunda ronda de ajuste.
+- **JPEG** queda en paridad práctica y mantiene una ventaja clara de velocidad.
+- **PNG** ya comprime igual o mejor y sigue siendo más rápido.
+- **AVIF** es el único formato que aún necesita una segunda ronda de ajuste.
 - Squoosh no es imbatible: su desarrollo está parado desde 2024 y usa versiones
   antiguas de MozJPEG, libwebp, libavif/AOM y OxiPNG.
 - La ventaja de HUNK debe ser nativa: velocidad, flujo de escritorio y opciones
   cuidadas; no una copia de la UI.
 
-## 5. Próximos pasos
+## 6. Próximos pasos
 
-1. Integrar MozJPEG y comparar de nuevo JPEG.
-2. Integrar OxiPNG nativo y comparar PNG a niveles 1–2.
-3. Exponer WebP avanzado sin perder la paridad actual.
-4. Hacer una segunda curva AVIF con ravif y, si hace falta, evaluar libavif/AOM.
-5. Repetir el benchmark con resize/rotate/palette cuando existan.
-6. Solo entonces cerrar la puerta de compresión de 1.1.
+1. Exponer WebP avanzado sin perder la paridad actual.
+2. Hacer una segunda curva AVIF con ravif y, si hace falta, evaluar libavif/AOM.
+3. Repetir el benchmark con resize/rotate/palette cuando existan.
+4. Solo entonces cerrar la puerta de compresión de 1.1.

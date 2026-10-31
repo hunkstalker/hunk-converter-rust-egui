@@ -120,6 +120,10 @@ Objetivo deseable: 5 % menos tamaño en WebP/AVIF y mantener la ventaja de
 velocidad. Ningún formato del núcleo puede quedar por debajo de Squoosh en
 calidad o velocidad.
 
+Estado tras `t-39`: WebP cumple con paridad exacta, JPEG queda en paridad
+práctica (±0,5 % mediana) y PNG comprime igual o mejor. AVIF sigue pendiente de
+la segunda curva y del ajuste de velocidad/alfa.
+
 ## 4. Encoders de referencia
 
 | Formato | Backend objetivo | Motivo |
@@ -145,7 +149,7 @@ Todo pertenece a la misma release. No hay una 1.2 ni un bloque sin numerar.
 
 ### Bloque 2 — Paridad con Squoosh
 
-- MozJPEG y OxiPNG (`t-39`).
+- MozJPEG y OxiPNG (`t-39`, completada).
 - WebP y AVIF avanzados (`t-40`).
 - Preprocesado: redimensionar, rotar y reducir paleta (`t-41`).
 - UI, selector web+ICO y persistencia (`t-42`).

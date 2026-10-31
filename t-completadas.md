@@ -248,3 +248,10 @@
 
 **Completada:** 2026-10-31
 **Resultado:** AVIF se carga desde archivo, se valida su tamaño con `avif-parse` antes de decodificar y se convierte a RGBA8 conservando alfa. Se añadió al filtro y a la matriz de integración; `Automático` resuelve AVIF → AVIF. JPEG XL queda fuera del alcance web.
+
+## t-39 — Paridad JPEG y PNG
+
+**Descripción:** Sustituir los encoders JPEG/PNG por MozJPEG y OxiPNG, mantener alfa y límites, y verificar la paridad de tamaño y velocidad frente a Squoosh.
+
+**Completada:** 2026-10-31
+**Resultado:** JPG usa MozJPEG-rs con progresivo y submuestreo automático (4:2:0 <80, 4:2:2 80–89, 4:4:4 ≥90). PNG usa OxiPNG nivel 2. El benchmark queda en paridad práctica: JPEG +0,4 % mediana a q75 y +0,3 % a q90, con 2,5× más velocidad; PNG −0,8 % mediana y 3,2× más velocidad. Suite de 49 pruebas con progresivo, submuestreo y píxeles PNG exactos.
