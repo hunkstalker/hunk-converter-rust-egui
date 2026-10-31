@@ -26,6 +26,10 @@ pub struct EncodeOptions {
     pub quality: u8,
     pub ico_sizes: Vec<u32>,
     pub background: [u8; 4],
+    pub jpg_progressive: bool,
+    pub jpg_subsampling: u8,
+    pub png_level: u8,
+    pub png_interlace: bool,
     pub webp_lossless: bool,
     pub webp_method: u8,
     pub webp_alpha_quality: u8,
@@ -40,6 +44,10 @@ impl Default for EncodeOptions {
             quality: 82,
             ico_sizes: Vec::new(),
             background: [255, 255, 255, 255],
+            jpg_progressive: true,
+            jpg_subsampling: 0,
+            png_level: 2,
+            png_interlace: false,
             webp_lossless: false,
             webp_method: 4,
             webp_alpha_quality: 100,
@@ -72,8 +80,16 @@ pub fn encode(source: &RgbaImage, options: &EncodeOptions) -> Result<EncodedOutp
             options.webp_method,
             options.webp_alpha_quality,
         )?,
-        OutputFormat::Jpg => encoders::encode_jpg(source, quality, options.background)?,
-        OutputFormat::Png => encoders::encode_png(source)?,
+        OutputFormat::Jpg => encoders::encode_jpg(
+            source,
+            quality,
+            options.background,
+            options.jpg_progressive,
+            options.jpg_subsampling,
+        )?,
+        OutputFormat::Png => {
+            encoders::encode_png(source, options.png_level, options.png_interlace)?
+        }
         OutputFormat::Avif => encoders::encode_avif(
             source,
             quality,

@@ -43,14 +43,7 @@ pub enum OutputFormat {
 }
 
 impl OutputFormat {
-    pub const ALL: [Self; 6] = [
-        Self::Webp,
-        Self::Jpg,
-        Self::Png,
-        Self::Avif,
-        Self::Jxl,
-        Self::Ico,
-    ];
+    pub const ALL: [Self; 5] = [Self::Webp, Self::Jpg, Self::Png, Self::Avif, Self::Ico];
 
     pub fn label(self) -> &'static str {
         match self {
@@ -92,7 +85,6 @@ impl OutputFormat {
             "png" => Some(Self::Png),
             "ico" => Some(Self::Ico),
             "avif" => Some(Self::Avif),
-            "jxl" | "jpegxl" | "jpeg-xl" => Some(Self::Jxl),
             _ => None,
         }
     }
@@ -150,6 +142,8 @@ mod tests {
             Some(FormatSelection::Fixed(OutputFormat::Jpg))
         );
         assert_eq!(FormatSelection::from_code("nope"), None);
+        assert_eq!(FormatSelection::from_code("jxl"), None);
+        assert!(!OutputFormat::ALL.contains(&OutputFormat::Jxl));
         assert_eq!(
             OutputFormat::from_input_label("PNG"),
             Some(OutputFormat::Png)

@@ -47,13 +47,21 @@ impl HunkApp {
 
         let revision = self.revision;
         let pixels = Arc::clone(&source.pixels);
-        let palette = self.preprocess.palette_colors;
+        let palette = self.advanced.preprocess.palette_colors;
         let options = EncodeOptions {
             format: self.format,
             quality: self.quality,
             ico_sizes: self.selected_ico_sizes(),
             background: [255, 255, 255, 255],
-            ..EncodeOptions::default()
+            jpg_progressive: self.advanced.jpg_progressive,
+            jpg_subsampling: self.advanced.jpg_subsampling,
+            png_level: self.advanced.png_level,
+            png_interlace: self.advanced.png_interlace,
+            webp_lossless: self.advanced.webp_lossless,
+            webp_method: self.advanced.webp_method,
+            webp_alpha_quality: self.advanced.webp_alpha_quality,
+            avif_speed: self.advanced.avif_speed,
+            avif_alpha_quality: self.advanced.avif_alpha_quality,
         };
         let (sender, receiver) = mpsc::channel();
         let thread_ctx = ctx.clone();

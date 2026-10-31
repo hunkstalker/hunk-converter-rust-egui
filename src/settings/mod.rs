@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::domain::history::HistoryEntry;
-use crate::domain::{ConfigError, FormatSelection};
+use crate::domain::{ConfigError, FormatSelection, PreprocessOptions};
 use crate::i18n::Lang;
 
 mod ini;
@@ -12,6 +12,7 @@ pub struct Settings {
     pub history: Vec<HistoryEntry>,
     pub maximized: bool,
     pub output_format: FormatSelection,
+    pub advanced: AdvancedSettings,
     pub window: WindowState,
 }
 
@@ -34,6 +35,37 @@ impl Default for WindowState {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct AdvancedSettings {
+    pub jpg_progressive: bool,
+    pub jpg_subsampling: u8,
+    pub png_level: u8,
+    pub png_interlace: bool,
+    pub webp_lossless: bool,
+    pub webp_method: u8,
+    pub webp_alpha_quality: u8,
+    pub avif_speed: u8,
+    pub avif_alpha_quality: u8,
+    pub preprocess: PreprocessOptions,
+}
+
+impl Default for AdvancedSettings {
+    fn default() -> Self {
+        Self {
+            jpg_progressive: true,
+            jpg_subsampling: 0,
+            png_level: 2,
+            png_interlace: false,
+            webp_lossless: false,
+            webp_method: 4,
+            webp_alpha_quality: 100,
+            avif_speed: 4,
+            avif_alpha_quality: 0,
+            preprocess: PreprocessOptions::default(),
+        }
+    }
+}
+
 impl Default for Settings {
     fn default() -> Self {
         Self {
@@ -41,6 +73,7 @@ impl Default for Settings {
             history: Vec::new(),
             maximized: true,
             output_format: FormatSelection::Auto,
+            advanced: AdvancedSettings::default(),
             window: WindowState::default(),
         }
     }
@@ -180,6 +213,7 @@ mod tests {
             ],
             maximized: false,
             output_format: FormatSelection::Fixed(crate::domain::OutputFormat::Avif),
+            advanced: AdvancedSettings::default(),
             window: WindowState {
                 x: Some(120.0),
                 y: Some(80.0),

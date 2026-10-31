@@ -156,7 +156,7 @@ Todo pertenece a la misma release. No hay una 1.2 ni un bloque sin numerar.
 - MozJPEG y OxiPNG (`t-39`, completada).
 - WebP y AVIF avanzados (`t-40`, completada).
 - Preprocesado: redimensionar, rotar y reducir paleta (`t-41`, completada).
-- UI, selector web+ICO y persistencia (`t-42`).
+- UI, selector web+ICO y persistencia (`t-42`, completada).
 - Cierre, benchmark final y release (`t-43`).
 
 El bloque 2 no se publica aparte: es la segunda mitad de 1.1.0.

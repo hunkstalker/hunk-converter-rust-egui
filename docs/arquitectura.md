@@ -249,6 +249,7 @@ La suite cubre:
 - JPG progresivo y submuestreo automático; PNG OxiPNG sin pérdida exacta;
 - WebP lossless/method/alfa y AVIF speed/alfa;
 - preprocesado de rotación, resize con proporción y paleta con alfa;
+- opciones avanzadas y persistencia `[advanced]` de `config.ini`;
 - entrada TIFF de una página, compresiones LZW/Deflate/PackBits y rechazo de 16 bits;
 - entrada AVIF con alfa y conversión a RGBA8;
 - orientación EXIF y TIFF;
@@ -258,7 +259,7 @@ La suite cubre:
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **54 pruebas**, `cargo fmt --check` y
+Estado actual: **55 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

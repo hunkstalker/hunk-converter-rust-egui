@@ -21,9 +21,11 @@ impl HunkApp {
             }
         };
         let (input_width, input_height) = input.pixels.dimensions();
-        self.preprocess.reset_for_source(input_width, input_height);
+        self.advanced
+            .preprocess
+            .reset_for_source(input_width, input_height);
         let original = std::sync::Arc::new(input.pixels);
-        let processed = apply_geometry(&original, &self.preprocess);
+        let processed = apply_geometry(&original, &self.advanced.preprocess);
         let (width, height) = processed.dimensions();
         let preview = resized_for_ui(&processed, UI_PREVIEW_MAX);
         let texture = upload_texture(ctx, &format!("source-{}", self.revision), &preview);
@@ -63,7 +65,7 @@ impl HunkApp {
         else {
             return;
         };
-        let processed = apply_geometry(&original, &self.preprocess);
+        let processed = apply_geometry(&original, &self.advanced.preprocess);
         let (width, height) = processed.dimensions();
         let preview = resized_for_ui(&processed, UI_PREVIEW_MAX);
         let texture = upload_texture(ctx, &format!("source-{}", self.revision), &preview);
@@ -214,7 +216,7 @@ impl HunkApp {
         self.result = None;
         self.format = OutputFormat::Webp;
         self.format_selection = FormatSelection::Auto;
-        self.preprocess = crate::domain::PreprocessOptions::default();
+        self.advanced = crate::settings::AdvancedSettings::default();
         self.quality = 82;
         self.ico_selected = [true; 6];
         self.split = 0.5;

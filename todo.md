@@ -8,15 +8,11 @@
 > 1. **Entrada y preparación:** TIFF (t-36, completada), AVIF (t-37, completada) y benchmark (completado).
 > 2. **Paridad con Squoosh:** MozJPEG/OxiPNG (t-39, completada), WebP/AVIF
 >    avanzados (t-40, completada), preprocesado (t-41, completada),
->    UI/persistencia (t-42) y cierre (t-43).
+>    UI/persistencia (t-42, completada) y cierre (t-43).
 >
 > t-38 (salida TGA/TIFF), la parte JPEG XL de t-37 y las ampliaciones de JPEG XL,
 > QOI y WebP2 quedan fuera del alcance web de 1.1. Ver
 > `docs/objetivo-1.1-web.md`.
-
-## t-42 — UI avanzada y persistencia
-
-**Descripción:** Introducir opciones tipadas por formato, bloque `Avanzado` contextual, colapsado, con resumen y reset. Conectar las opciones de JPG/PNG/WebP/AVIF y el preprocesado con la UI, dejar el selector de salida en JPEG/PNG/WebP/AVIF/ICO retirando JPEG XL, persistir por formato en `config.ini` con migración compatible, añadir tooltips del glosario y mantener accesibilidad por teclado y lector de pantalla.
 
 ## t-43 — Cierre 1.1: benchmark, documentación y release
 

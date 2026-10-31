@@ -271,9 +271,9 @@ sin alterar los píxeles; en JPG, WebP y AVIF la pérdida se controla con
 
 ### 7.2 Controles previstos
 
-JPG y PNG ya usan MozJPEG/OxiPNG. WebP acepta lossless, method y alpha quality,
-y AVIF acepta speed y alpha quality en el backend. Sus controles se expondrán en
-la UI en `t-42`. La tabla conserva el alcance completo.
+JPG y PNG usan MozJPEG/OxiPNG. WebP acepta lossless, method y alpha quality, y
+AVIF acepta speed y alpha quality. Los controles están expuestos en el bloque
+`Avanzado` y se persisten en `config.ini`.
 
 Preprocesado actual: resize Lanczos3 con proporción opcional, rotación en pasos
 de 90° y paleta de 2–256 colores con alfa conservado. Rotación y resize actualizan

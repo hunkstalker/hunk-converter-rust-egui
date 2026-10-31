@@ -5,7 +5,7 @@ use crate::domain::color::parse_hex_rgba;
 use crate::domain::history::{HISTORY_LIMIT, HistoryEntry};
 use crate::i18n::Lang;
 
-use super::{ConfigLoad, ConfigWarning, Settings, WindowState};
+use super::{AdvancedSettings, ConfigLoad, ConfigWarning, Settings, WindowState};
 
 pub(super) fn read(path: &Path) -> Result<ConfigLoad, crate::domain::ConfigError> {
     let text =
@@ -22,6 +22,7 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
         history: Vec::new(),
         maximized: true,
         output_format: FormatSelection::Auto,
+        advanced: AdvancedSettings::default(),
         window: WindowState::default(),
     };
     let mut warnings = Vec::new();
@@ -65,6 +66,92 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
                     line_number,
                     format!("formato de salida desconocido: {value}"),
                 )),
+            }
+        } else if section == "advanced" {
+            let advanced = &mut settings.advanced;
+            match key.as_str() {
+                "jpg_progressive" => advanced.jpg_progressive = parse_bool(value),
+                "jpg_subsampling" => match value.to_ascii_lowercase().as_str() {
+                    "auto" => advanced.jpg_subsampling = 0,
+                    "420" => advanced.jpg_subsampling = 1,
+                    "422" => advanced.jpg_subsampling = 2,
+                    "444" => advanced.jpg_subsampling = 3,
+                    _ => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("submuestreo JPG no válido: {value}"),
+                    )),
+                },
+                "png_level" => match parse_u8_range(value, 0, 6) {
+                    Some(level) => advanced.png_level = level,
+                    None => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("nivel PNG no válido: {value}"),
+                    )),
+                },
+                "png_interlace" => advanced.png_interlace = parse_bool(value),
+                "webp_lossless" => advanced.webp_lossless = parse_bool(value),
+                "webp_method" => match parse_u8_range(value, 0, 6) {
+                    Some(method) => advanced.webp_method = method,
+                    None => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("method WebP no válido: {value}"),
+                    )),
+                },
+                "webp_alpha_quality" => match parse_u8_range(value, 0, 100) {
+                    Some(quality) => advanced.webp_alpha_quality = quality,
+                    None => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("calidad alfa WebP no válida: {value}"),
+                    )),
+                },
+                "avif_speed" => match parse_u8_range(value, 1, 10) {
+                    Some(speed) => advanced.avif_speed = speed,
+                    None => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("velocidad AVIF no válida: {value}"),
+                    )),
+                },
+                "avif_alpha_quality" => match parse_u8_range(value, 0, 100) {
+                    Some(quality) => advanced.avif_alpha_quality = quality,
+                    None => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("calidad alfa AVIF no válida: {value}"),
+                    )),
+                },
+                "preprocess_resize" => advanced.preprocess.resize_enabled = parse_bool(value),
+                "preprocess_width" => match parse_u32(value) {
+                    Some(width) => advanced.preprocess.width = width.min(16_384),
+                    None => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("ancho de preprocesado no válido: {value}"),
+                    )),
+                },
+                "preprocess_height" => match parse_u32(value) {
+                    Some(height) => advanced.preprocess.height = height.min(16_384),
+                    None => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("alto de preprocesado no válido: {value}"),
+                    )),
+                },
+                "preprocess_keep_aspect" => advanced.preprocess.keep_aspect = parse_bool(value),
+                "preprocess_rotation" => match value.parse::<u16>() {
+                    Ok(rotation) if matches!(rotation % 360, 0 | 90 | 180 | 270) => {
+                        advanced.preprocess.rotation = rotation % 360
+                    }
+                    _ => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("rotación no válida: {value}"),
+                    )),
+                },
+                "preprocess_palette" => match parse_u16(value) {
+                    Some(0) => advanced.preprocess.palette_colors = None,
+                    Some(colors @ 2..=256) => advanced.preprocess.palette_colors = Some(colors),
+                    _ => warnings.push(ConfigWarning::new(
+                        line_number,
+                        format!("paleta no válida: {value}"),
+                    )),
+                },
+                _ => {}
             }
         } else if section == "window" {
             match key.as_str() {
@@ -149,11 +236,32 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
 
 pub(super) fn serialize(settings: &Settings) -> String {
     let mut text = String::from("[general]\n");
+    let subsampling = match settings.advanced.jpg_subsampling {
+        1 => "420",
+        2 => "422",
+        3 => "444",
+        _ => "auto",
+    };
     text.push_str(&format!(
-        "language={}\nmaximized={}\n\n[output]\nformat={}\n\n[window]\n",
+        "language={}\nmaximized={}\n\n[output]\nformat={}\n\n[advanced]\njpg_progressive={}\njpg_subsampling={}\npng_level={}\npng_interlace={}\nwebp_lossless={}\nwebp_method={}\nwebp_alpha_quality={}\navif_speed={}\navif_alpha_quality={}\npreprocess_resize={}\npreprocess_width={}\npreprocess_height={}\npreprocess_keep_aspect={}\npreprocess_rotation={}\npreprocess_palette={}\n\n[window]\n",
         settings.language.code(),
         u8::from(settings.maximized),
-        settings.output_format.code()
+        settings.output_format.code(),
+        u8::from(settings.advanced.jpg_progressive),
+        subsampling,
+        settings.advanced.png_level,
+        u8::from(settings.advanced.png_interlace),
+        u8::from(settings.advanced.webp_lossless),
+        settings.advanced.webp_method,
+        settings.advanced.webp_alpha_quality,
+        settings.advanced.avif_speed,
+        settings.advanced.avif_alpha_quality,
+        u8::from(settings.advanced.preprocess.resize_enabled),
+        settings.advanced.preprocess.width,
+        settings.advanced.preprocess.height,
+        u8::from(settings.advanced.preprocess.keep_aspect),
+        settings.advanced.preprocess.rotation,
+        settings.advanced.preprocess.palette_colors.unwrap_or(0)
     ));
     if let Some(x) = settings.window.x {
         text.push_str(&format!("x={x}\n"));
@@ -180,6 +288,21 @@ pub(super) fn serialize(settings: &Settings) -> String {
 
 fn parse_bool(value: &str) -> bool {
     !matches!(value.to_ascii_lowercase().as_str(), "0" | "false" | "no")
+}
+
+fn parse_u8_range(value: &str, min: u8, max: u8) -> Option<u8> {
+    value
+        .parse::<u8>()
+        .ok()
+        .filter(|value| (min..=max).contains(value))
+}
+
+fn parse_u16(value: &str) -> Option<u16> {
+    value.parse::<u16>().ok()
+}
+
+fn parse_u32(value: &str) -> Option<u32> {
+    value.parse::<u32>().ok()
 }
 
 fn parse_coordinate(value: &str) -> Option<f32> {
@@ -212,6 +335,25 @@ mod tests {
 
         let round_trip = parse(&serialize(&loaded.settings));
         assert_eq!(round_trip.settings.history, loaded.settings.history);
+    }
+
+    #[test]
+    fn advanced_options_round_trip() {
+        let text = "[advanced]\njpg_progressive=0\njpg_subsampling=444\npng_level=6\npng_interlace=1\nwebp_lossless=1\nwebp_method=6\nwebp_alpha_quality=80\navif_speed=10\navif_alpha_quality=90\npreprocess_resize=1\npreprocess_width=800\npreprocess_height=600\npreprocess_keep_aspect=0\npreprocess_rotation=270\npreprocess_palette=64\n";
+        let loaded = parse(text);
+        assert!(!loaded.settings.advanced.jpg_progressive);
+        assert_eq!(loaded.settings.advanced.jpg_subsampling, 3);
+        assert_eq!(loaded.settings.advanced.png_level, 6);
+        assert!(loaded.settings.advanced.png_interlace);
+        assert!(loaded.settings.advanced.webp_lossless);
+        assert_eq!(loaded.settings.advanced.webp_method, 6);
+        assert_eq!(loaded.settings.advanced.avif_speed, 10);
+        assert_eq!(loaded.settings.advanced.preprocess.width, 800);
+        assert_eq!(loaded.settings.advanced.preprocess.rotation, 270);
+        assert_eq!(loaded.settings.advanced.preprocess.palette_colors, Some(64));
+
+        let round_trip = parse(&serialize(&loaded.settings));
+        assert_eq!(round_trip.settings, loaded.settings);
     }
 
     #[test]
@@ -255,6 +397,14 @@ format=avif
         let loaded = parse(
             "[output]
 format=desconocido
+",
+        );
+        assert_eq!(loaded.settings.output_format, FormatSelection::Auto);
+        assert_eq!(loaded.warnings.len(), 1);
+
+        let loaded = parse(
+            "[output]
+format=jxl
 ",
         );
         assert_eq!(loaded.settings.output_format, FormatSelection::Auto);

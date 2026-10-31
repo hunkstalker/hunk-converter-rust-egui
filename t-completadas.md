@@ -269,3 +269,10 @@
 
 **Completada:** 2026-10-31
 **Resultado:** Bloque `Preprocesado` en la barra lateral con resize Lanczos3 y proporción opcional, rotación 90/180/270 y paleta de 2–256 colores con alfa conservado. Rotación y resize actualizan la entrada y la vista previa; la paleta se aplica al resultado codificado. Se preserva la imagen original para recalcular geometría. Suite de 54 pruebas.
+
+## t-42 — UI avanzada y persistencia
+
+**Descripción:** Exponer las opciones tipadas, persistirlas y dejar el selector de salida en web+ICO.
+
+**Completada:** 2026-10-31
+**Resultado:** Bloque `Avanzado` contextual y colapsado con resumen y reset: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa y AVIF speed/alfa. JPEG XL sale del selector. Las opciones y el preprocesado se guardan en `[advanced]` de `config.ini`, con migración de configuraciones antiguas. Suite de 55 pruebas.

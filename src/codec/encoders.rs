@@ -43,25 +43,40 @@ pub(super) fn encode_jpg(
     source: &RgbaImage,
     quality: u8,
     background: [u8; 4],
+    progressive: bool,
+    subsampling: u8,
 ) -> Result<EncodedOutput, EncodeError> {
     let flattened = flatten_rgba(source, background);
-    let subsampling = match quality {
-        0..=79 => Subsampling::S420,
-        80..=89 => Subsampling::S422,
-        _ => Subsampling::S444,
+    let subsampling = match subsampling {
+        1 => Subsampling::S420,
+        2 => Subsampling::S422,
+        3 => Subsampling::S444,
+        _ => match quality {
+            0..=79 => Subsampling::S420,
+            80..=89 => Subsampling::S422,
+            _ => Subsampling::S444,
+        },
     };
-    let bytes = JpegEncoder::new(JpegPreset::ProgressiveBalanced)
-        .quality(quality)
-        .subsampling(subsampling)
-        .encode_rgb(flattened.as_raw(), source.width(), source.height())
-        .map_err(|source| EncodeError::Jpg {
-            source: Box::new(source),
-        })?;
+    let bytes = JpegEncoder::new(if progressive {
+        JpegPreset::ProgressiveBalanced
+    } else {
+        JpegPreset::BaselineBalanced
+    })
+    .quality(quality)
+    .subsampling(subsampling)
+    .encode_rgb(flattened.as_raw(), source.width(), source.height())
+    .map_err(|source| EncodeError::Jpg {
+        source: Box::new(source),
+    })?;
     let preview = decode_preview(ImageFormat::Jpeg, &bytes)?;
     Ok(output(source, bytes, preview))
 }
 
-pub(super) fn encode_png(source: &RgbaImage) -> Result<EncodedOutput, EncodeError> {
+pub(super) fn encode_png(
+    source: &RgbaImage,
+    level: u8,
+    interlace: bool,
+) -> Result<EncodedOutput, EncodeError> {
     let raw = oxipng::RawImage::new(
         source.width(),
         source.height(),
@@ -72,8 +87,10 @@ pub(super) fn encode_png(source: &RgbaImage) -> Result<EncodedOutput, EncodeErro
     .map_err(|source| EncodeError::PngStart {
         source: Box::new(source),
     })?;
+    let mut options = oxipng::Options::from_preset(level.min(6));
+    options.interlace = Some(interlace);
     let bytes = raw
-        .create_optimized_png(&oxipng::Options::from_preset(2))
+        .create_optimized_png(&options)
         .map_err(|source| EncodeError::Png {
             source: Box::new(source),
         })?;
