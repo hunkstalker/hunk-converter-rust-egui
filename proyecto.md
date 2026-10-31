@@ -37,7 +37,8 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - Selector nativo de archivos con el botón **Seleccionar una imagen** o `Ctrl+O`.
 - `Ctrl+V` pega una imagen del portapapeles y sustituye la sesión actual si ya había una.
 - Botón **Cambiar** para reemplazar la imagen conservando los ajustes.
-- Formatos: **PNG, JPG/JPEG, WebP, BMP, TGA, TIFF y SVG**.
+- Formatos: **PNG, JPG/JPEG, WebP, AVIF, BMP, TGA, TIFF y SVG**.
+- AVIF se abre con `avif-decode`, conserva alfa y se convierte a RGBA8.
 - Orientación EXIF aplicada al cargar JPG/WebP, y orientación TIFF, antes de mostrar, comparar y exportar.
 - TIFF de una página en RGB/RGBA/gris de 8 bits, con compresiones habituales (sin comprimir, LZW, Deflate y PackBits); CMYK y 16 bits se rechazan.
 - SVG rasterizado con `resvg`, manteniendo proporción y transparencia.
@@ -187,7 +188,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - `image` 0.25 para decodificación PNG/JPG/WebP/BMP/TGA/TIFF y codificación AVIF.
 - `webp`/libwebp para codificación WebP.
 - `png` 0.18 para la codificación PNG.
-- `avif-decode`/rav1d para la vista previa AVIF.
+- `avif-decode`/rav1d para decodificar AVIF y `avif-parse` para comprobar dimensiones antes de decodificar.
 - `zune-jpegxl` para codificación JPEG XL y `jxl-oxide` para su vista previa.
 - `resvg` 0.49 para SVG.
 - `sys-locale` para detectar el idioma del sistema.
@@ -357,7 +358,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **47 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **47 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

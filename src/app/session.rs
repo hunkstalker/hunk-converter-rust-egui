@@ -163,7 +163,7 @@ impl HunkApp {
             .add_filter(
                 self.t(crate::i18n::K::ImagesFilter),
                 &[
-                    "png", "jpg", "jpeg", "webp", "bmp", "tga", "tif", "tiff", "svg",
+                    "png", "jpg", "jpeg", "webp", "avif", "bmp", "tga", "tif", "tiff", "svg",
                 ],
             )
             .pick_file()

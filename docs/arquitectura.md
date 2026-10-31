@@ -247,8 +247,9 @@ La suite cubre:
 - nombres de exportación y no sobrescritura atómica;
 - códecs WebP/JPG/PNG/AVIF/JPEG XL;
 - entrada TIFF de una página, compresiones LZW/Deflate/PackBits y rechazo de 16 bits;
+- entrada AVIF con alfa y conversión a RGBA8;
 - orientación EXIF y TIFF;
-- transparencia PNG/JPEG XL/TIFF y aplanado JPG;
+- transparencia PNG/AVIF/JPEG XL/TIFF y aplanado JPG;
 - rasterización SVG;
 - estructura ICO;
 - códigos de color;

@@ -241,3 +241,10 @@
 
 **Completada:** 2026-10-31
 **Resultado:** Entrada TIFF con detección por magic bytes y extensión, primera página, RGB/RGBA/gris/gris con alfa de 8 bits, LZW/Deflate/PackBits/sin compresión, orientación y rechazo controlado de 16 bits y CMYK. `Automático` usa WebP como fallback. Se añadieron pruebas unitarias de compresiones, predictor, alfa, orientación, multipágina y rechazo de 16 bits; matriz de integración de entradas PNG/JPG/WebP/BMP/TGA/TIFF/SVG; límites y archivos corruptos; y el CLI `check_tiff` con pack de validación. Suite de 47 pruebas.
+
+## t-37 — Entrada AVIF
+
+**Descripción:** Abrir AVIF con `avif-decode`, detectar por cabecera y extensión, cargar la primera imagen, conservar alfa y respetar los límites.
+
+**Completada:** 2026-10-31
+**Resultado:** AVIF se carga desde archivo, se valida su tamaño con `avif-parse` antes de decodificar y se convierte a RGBA8 conservando alfa. Se añadió al filtro y a la matriz de integración; `Automático` resuelve AVIF → AVIF. JPEG XL queda fuera del alcance web.

@@ -29,6 +29,7 @@
 | PNG | `.png` | `image`/`png` | Conserva transparencia |
 | JPEG | `.jpg`, `.jpeg` | `image`/`zune-jpeg` | Aplica orientación EXIF |
 | WebP | `.webp` | `image`/`image-webp` | Imagen estática; transparencia |
+| AVIF | `.avif` | `avif-decode` | Primera imagen; alfa; se convierte a RGBA8 |
 | BMP | `.bmp` | `image` | Se convierte a RGBA8 |
 | TGA | `.tga` | `image` | Se detecta por extensión |
 | TIFF | `.tif`, `.tiff` | `image`/`tiff` | Primera página; RGB/RGBA/gris de 8 bits |
@@ -50,7 +51,7 @@ La salida se elige en un desplegable con modo `Automático`: conserva el formato
 ### 2.3 Detección de entrada
 
 - PNG, JPEG, WebP, BMP, TIFF, AVIF y otros formatos con firma se detectan por
-  **magic bytes**.
+  **magic bytes**. AVIF se decodifica con `avif-decode` y se convierte a RGBA8.
 - TGA no tiene firma fiable y depende de la extensión.
 - SVG se reconoce por extensión y se rasteriza con `resvg`.
 - El selector de archivos filtra las extensiones admitidas. Arrastrar, pegar o
@@ -82,7 +83,7 @@ y SVG.
 | TGA | Sí | No | Sí | Sí |
 | SVG | Sí | No | Sí | No |
 | TIFF | Sí, primera página | No | Sí, primera página | Sí, una página |
-| AVIF | No | Sí | Sí | Sí |
+| AVIF | Sí | Sí | Sí | Sí |
 | JPEG XL | No | Sí | Sí | Sí |
 | ICO | No | Sí | No | Sí |
 | GIF | No | No | No | No |
@@ -121,20 +122,20 @@ TIFF es un contenedor, no un códec único. La UI y la documentación hablan de
 queda fuera del alcance web de 1.1, el modo `Automático` usa WebP como fallback
 para entradas TIFF.
 
-### 4.2 Entrada AVIF y JPEG XL
+### 4.2 Entrada AVIF
 
-- La app ya incluye `avif-decode` y `jxl-oxide` para previsualizar su propia
-  salida. Se reutilizarán para cargar archivos de entrada.
-- Alcance:
+- Implementada con `avif-decode`, reutilizando el decodificador de la vista
+  previa.
+- Alcance actual:
   - primera imagen/fotograma;
   - alfa cuando el decodificador la exponga;
-  - límites de tamaño y dimensiones compartidos.
+  - dimensiones comprobadas antes de decodificar;
+  - conversión a RGBA8, incluidos 10/12 bits si el decodificador los entrega.
 - Limitaciones:
-  - no se conservan animaciones ni metadatos;
-  - la orientación y el perfil de color dependen de lo que exponga cada
-    decodificador;
-  - la decodificación puede ser lenta: la carga no debe bloquear la UI de forma
-    perceptible.
+  - no se conservan animaciones, HDR ni metadatos;
+  - la orientación y el perfil de color dependen del decodificador;
+  - la decodificación puede ser lenta para imágenes grandes.
+- JPEG XL queda fuera del alcance web de 1.1.
 
 ### 4.3 Salida TGA
 
@@ -419,7 +420,8 @@ progressive=0
 
 - Resolución de `Auto` para cada formato de entrada y fallback WebP.
 - Persistencia y migración de `config.ini`.
-- Roundtrip de AVIF y JXL con alfa y sin alfa.
+- Roundtrip de AVIF con alfa y sin alfa.
+- Entrada AVIF desde archivo, con detección por cabecera.
 - TIFF de varias páginas: solo se carga la primera.
 - TIFF RGB, RGBA, gris, gris con alfa y orientación.
 - TIFF CMYK y 16 bits rechazados con error controlado.

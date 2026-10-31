@@ -5,17 +5,13 @@
 > Las tareas se listan en orden ascendente y los identificadores no se reutilizan.
 >
 > Camino único de 1.1.0:
-> 1. **Entrada y preparación:** TIFF (t-36, completada), AVIF (t-37) y benchmark.
+> 1. **Entrada y preparación:** TIFF (t-36, completada), AVIF (t-37, completada) y benchmark (completado).
 > 2. **Paridad con Squoosh:** MozJPEG/OxiPNG (t-39), WebP/AVIF avanzados (t-40),
 >    preprocesado (t-41), UI/persistencia (t-42) y cierre (t-43).
 >
 > t-38 (salida TGA/TIFF), la parte JPEG XL de t-37 y las ampliaciones de JPEG XL,
 > QOI y WebP2 quedan fuera del alcance web de 1.1. Ver
 > `docs/objetivo-1.1-web.md`.
-
-## t-37 — Entrada AVIF
-
-**Descripción:** Reutilizar `avif-decode` para abrir AVIF, añadir `.avif` al filtro y a la detección por cabecera, cargar la primera imagen/fotograma, conservar alfa cuando el decodificador lo exponga y respetar los límites. Mantener la UI fluida; si la decodificación es lenta, moverla a un worker con estado visible. JPEG XL queda fuera del alcance web.
 
 ## t-39 — Paridad JPEG y PNG
 

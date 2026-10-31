@@ -17,7 +17,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 
 - Interfaz en español, catalán e inglés, con detección del idioma del sistema y tema oscuro propio.
 - Carga por arrastre, selector nativo, argumento de línea de comandos o `Ctrl+V` desde el portapapeles.
-- Entrada: PNG, JPG, WebP, BMP, TGA, TIFF y SVG. La orientación EXIF de JPG/WebP y la orientación TIFF se aplican al cargar. TIFF se limita a la primera página y a 8 bits RGB/RGBA/gris.
+- Entrada: PNG, JPG, WebP, AVIF, BMP, TGA, TIFF y SVG. La orientación EXIF de JPG/WebP y la orientación TIFF se aplican al cargar. TIFF se limita a la primera página y a 8 bits RGB/RGBA/gris.
 - Salida actual: WebP, AVIF, JPG, PNG, JPEG XL e ICO. Salida objetivo de 1.1: WebP, AVIF, JPG, PNG e ICO; JPEG XL sale del selector.
 - Selector de salida desplegable con modo Automático implementado y validado (t-35).
 - Objetivo 1.1: salida web JPEG/PNG/WebP/AVIF + ICO; entrada amplia JPEG/PNG/WebP/AVIF/SVG/BMP/TGA/TIFF; preprocesado de redimensionado, rotación y reducción de paleta. TIFF de entrada forma parte de 1.1. Ver `docs/objetivo-1.1-web.md`.
@@ -128,12 +128,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `todo.md` (t-37 y t-39 a t-43: AVIF, códecs, preprocesado, UI y release).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35 y t-36).
+- Pendientes: `todo.md` (t-39 a t-43: códecs, preprocesado, UI y release).
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36 y t-37).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso recomendado: **t-37 — entrada AVIF**. Después, **t-39 — paridad JPEG/PNG**.
+Siguiente paso recomendado: **t-39 — paridad JPEG/PNG**.
 
 ## 7. Benchmarks y límites
 

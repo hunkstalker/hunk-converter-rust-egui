@@ -5,6 +5,7 @@ use image::{ExtendedColorType, ImageDecoder, ImageFormat, RgbaImage, imageops};
 
 use crate::domain::error::{EncodeError, LoadError};
 
+mod avif;
 mod encoders;
 mod ico;
 mod svg;
@@ -103,13 +104,27 @@ pub fn load_image_file(path: &Path) -> Result<LoadedImage, LoadError> {
     let guessed = image::guess_format(&bytes)
         .or_else(|_| ImageFormat::from_path(path))
         .map_err(|_| LoadError::Unsupported)?;
-    let pixels = decode_raster(&bytes, guessed)?;
+    let pixels = if guessed == ImageFormat::Avif {
+        decode_avif(&bytes)?
+    } else {
+        decode_raster(&bytes, guessed)?
+    };
     validate_dimensions(pixels.width(), pixels.height())?;
 
     Ok(LoadedImage {
         pixels,
         format: format_name(guessed).to_owned(),
         file_bytes: bytes.len() as u64,
+    })
+}
+
+fn decode_avif(bytes: &[u8]) -> Result<RgbaImage, LoadError> {
+    let (width, height) = avif::dimensions(bytes).map_err(|source| LoadError::Decode {
+        source: Box::new(source),
+    })?;
+    validate_dimensions(width, height)?;
+    avif::decode_rgba(bytes).map_err(|source| LoadError::Decode {
+        source: Box::new(source),
     })
 }
 
@@ -182,6 +197,7 @@ fn format_name(format: ImageFormat) -> &'static str {
         ImageFormat::Bmp => "BMP",
         ImageFormat::Tga => "TGA",
         ImageFormat::Tiff => "TIFF",
+        ImageFormat::Avif => "AVIF",
         _ => "IMG",
     }
 }

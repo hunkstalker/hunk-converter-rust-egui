@@ -64,6 +64,7 @@ fn loads_all_supported_input_formats() {
     let bmp = directory.join("entrada.bmp");
     let tga = directory.join("entrada.tga");
     let tiff = directory.join("entrada.tiff");
+    let avif = directory.join("entrada.avif");
     let svg = directory.join("entrada.svg");
 
     DynamicImage::ImageRgba8(source.clone()).save(&png).unwrap();
@@ -83,6 +84,13 @@ fn loads_all_supported_input_formats() {
             .bytes,
     )
     .unwrap();
+    std::fs::write(
+        &avif,
+        codec::encode(&source, &options(OutputFormat::Avif))
+            .unwrap()
+            .bytes,
+    )
+    .unwrap();
     std::fs::write(&tiff, tiff_rgba(&source)).unwrap();
     std::fs::write(
         &svg,
@@ -92,10 +100,11 @@ fn loads_all_supported_input_formats() {
     )
     .unwrap();
 
-    let cases: [(&Path, &str); 7] = [
+    let cases: [(&Path, &str); 8] = [
         (&png, "PNG"),
         (&jpg, "JPG"),
         (&webp, "WEBP"),
+        (&avif, "AVIF"),
         (&bmp, "BMP"),
         (&tga, "TGA"),
         (&tiff, "TIFF"),
@@ -117,6 +126,8 @@ fn loads_all_supported_input_formats() {
         let loaded = codec::load_image_file(path).unwrap();
         assert_eq!(loaded.pixels.get_pixel(0, 0).0[3], 128);
     }
+    let loaded = codec::load_image_file(&avif).unwrap();
+    assert!(loaded.pixels.get_pixel(0, 0).0[3].abs_diff(128) <= 4);
 
     std::fs::remove_dir_all(directory).unwrap();
 }
@@ -151,9 +162,10 @@ fn rejects_files_over_the_byte_limit_before_reading() {
 #[test]
 fn rejects_corrupt_images_with_a_controlled_error() {
     let directory = temp_dir("corrupt");
-    let path = directory.join("corrupta.png");
-    std::fs::write(&path, b"esto no es una imagen").unwrap();
-
-    assert!(codec::load_image_file(&path).is_err());
+    for name in ["corrupta.png", "corrupta.avif"] {
+        let path = directory.join(name);
+        std::fs::write(&path, b"esto no es una imagen").unwrap();
+        assert!(codec::load_image_file(&path).is_err(), "{name}");
+    }
     std::fs::remove_dir_all(directory).unwrap();
 }

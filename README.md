@@ -16,7 +16,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 
 - **Arrastrar y soltar** en cualquier parte de la ventana, o selector nativo con `Ctrl+O`.
 - **Pegar desde el portapapeles** con `Ctrl+V`, haya o no una imagen cargada.
-- **Entrada:** PNG, JPG/JPEG, WebP, BMP, TGA, TIFF y SVG.
+- **Entrada:** PNG, JPG/JPEG, WebP, AVIF, BMP, TGA, TIFF y SVG.
 - **Orientación EXIF/TIFF:** las fotos de móvil y los TIFF se muestran, comparan, muestrean y exportan ya orientados.
 - **Salida:** WebP, AVIF, JPG, PNG, JPEG XL e ICO, con selector desplegable y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
@@ -159,7 +159,7 @@ muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.
 | Formato | Entrada | Salida | Transparencia | Calidad |
 | --- | :---: | :---: | :---: | :---: |
 | WebP | ✓ | ✓ | Sí | 1–100 |
-| AVIF | — | ✓ | Sí | 1–100 |
+| AVIF | ✓ | ✓ | Sí | 1–100 |
 | JPG / JPEG | ✓ | ✓ | No (fondo blanco) | 1–100 |
 | PNG | ✓ | ✓ | Sí | Sin pérdida |
 | JPEG XL | — | ✓ | Sí | Sin pérdida |
@@ -169,7 +169,7 @@ muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.
 | TIFF | ✓ | — | Sí, 8 bits | Sin pérdida |
 | SVG | ✓ | — | Rasterizado | — |
 
-Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como primera página RGBA8; se admiten RGB, RGBA, gris y gris con alfa de 8 bits. AVIF y JPEG XL se añaden como formatos de salida; JPEG XL se codifica sin pérdida. PNG y JPEG XL no muestran deslizador porque no modifican la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md); el alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
+Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como primera página RGBA8; se admiten RGB, RGBA, gris y gris con alfa de 8 bits. AVIF se abre con `avif-decode` y se convierte a RGBA8. AVIF y JPEG XL se añaden como formatos de salida; JPEG XL se codifica sin pérdida. PNG y JPEG XL no muestran deslizador porque no modifican la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md); el alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
 
 ## Builds portables
 

@@ -15,7 +15,7 @@
 
 `tests/format_matrix.rs` comprueba:
 
-- carga desde archivo de PNG, JPG, WebP, BMP, TGA, TIFF y SVG;
+- carga desde archivo de PNG, JPG, WebP, AVIF, BMP, TGA, TIFF y SVG;
 - dimensiones y etiqueta de formato;
 - alfa en PNG, WebP y TIFF;
 - rechazo de imágenes de más de 16 384 px por lado;

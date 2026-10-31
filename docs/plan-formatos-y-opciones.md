@@ -128,20 +128,20 @@ añadir la resolución automática por formato de entrada.
 - Se respetan los límites antes de un consumo desproporcionado.
 - Tests de orientación, alfa y conversión a RGBA8.
 
-### t-37 — Entrada AVIF y JPEG XL
+### t-37 — Entrada AVIF (JPEG XL fuera del alcance web)
 
-**Objetivo:** eliminar la asimetría actual y permitir abrir los formatos que ya
-se exportan.
+**Estado:** completada el 2026-10-31; AVIF implementado con `avif-decode`.
+
+**Objetivo:** eliminar la asimetría actual y permitir abrir AVIF.
 
 **Alcance:**
 
-- Reutilizar `avif-decode` y `jxl-oxide`.
-- Detección por cabecera y filtros `.avif`, `.jxl`.
+- Reutilizar `avif-decode`.
+- Detección por cabecera y filtro `.avif`.
 - Primera imagen/fotograma.
 - Alfa cuando el decodificador la exponga.
-- Límites compartidos.
-- Carga sin bloquear la UI de forma perceptible; si la decodificación es lenta,
-  moverla a un worker y mostrar estado.
+- Límites compartidos comprobados antes de decodificar.
+- JPEG XL queda fuera del alcance web.
 
 **No incluye:** animaciones, metadatos, gestión ICC ni multipágina.
 
@@ -149,10 +149,9 @@ se exportan.
 
 **Aceptación:**
 
-- AVIF y JXL con y sin alfa se abren y se pueden reexportar.
+- AVIF con y sin alfa se abre y se puede reexportar.
 - Archivos corruptos muestran error sin cerrar la app.
-- La UI no se congela durante la carga.
-- Tests de detección, dimensiones y roundtrip.
+- Tests de detección, dimensiones y alfa.
 
 ### t-38 — Salida TGA y TIFF
 
