@@ -16,8 +16,8 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 
 - **Arrastrar y soltar** en cualquier parte de la ventana, o selector nativo con `Ctrl+O`.
 - **Pegar desde el portapapeles** con `Ctrl+V`, haya o no una imagen cargada.
-- **Entrada:** PNG, JPG/JPEG, WebP, BMP, TGA y SVG.
-- **Orientación EXIF:** las fotos de móvil se muestran, comparan, muestrean y exportan ya orientadas.
+- **Entrada:** PNG, JPG/JPEG, WebP, BMP, TGA, TIFF y SVG.
+- **Orientación EXIF/TIFF:** las fotos de móvil y los TIFF se muestran, comparan, muestrean y exportan ya orientados.
 - **Salida:** WebP, AVIF, JPG, PNG, JPEG XL e ICO, con selector desplegable y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
@@ -166,9 +166,10 @@ muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.
 | ICO | — | ✓ | Sí | Tamaños fijos |
 | BMP | ✓ | — | Según archivo | — |
 | TGA | ✓ | — | Según archivo | — |
+| TIFF | ✓ | — | Sí, 8 bits | Sin pérdida |
 | SVG | ✓ | — | Rasterizado | — |
 
-Los SVG se rasterizan con `resvg` al tamaño declarado. AVIF y JPEG XL se añaden como formatos de salida; JPEG XL se codifica sin pérdida. PNG y JPEG XL no muestran deslizador porque no modifican la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md) y planificadas en [docs/plan-formatos-y-opciones.md](docs/plan-formatos-y-opciones.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
+Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como primera página RGBA8; se admiten RGB, RGBA, gris y gris con alfa de 8 bits. AVIF y JPEG XL se añaden como formatos de salida; JPEG XL se codifica sin pérdida. PNG y JPEG XL no muestran deslizador porque no modifican la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md); el alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
 
 ## Builds portables
 
@@ -212,7 +213,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 36 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 47 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 
@@ -239,13 +240,14 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 │   │   ├── session.rs      Carga, pegado, reinicio y formato
 │   │   ├── state.rs        SourceImage, RenderedResult, Toast
 │   │   └── ui/             Cabecera, sidebar, color, preview y widgets
-│   ├── codec/              WebP, JPG, PNG, AVIF, JPEG XL, ICO y SVG
+│   ├── codec/              WebP, JPG, PNG, AVIF, JPEG XL, ICO, SVG y TIFF
 │   ├── domain/             Formatos, color, historial y errores tipados
 │   ├── settings/           config.ini, idioma, historial y maximizado
-│   ├── bin/                Benchmark, muestra y generador de icono
+│   ├── bin/                Benchmarks, muestra y generador de icono
 │   ├── demo.rs             Imagen sintética para capturas
 │   ├── i18n.rs             Textos en español, catalán e inglés
 │   └── theme.rs            Tema visual
+├── tests/                  Matriz de integración de formatos y límites
 ├── proyecto.md             Documento vivo
 ├── todo.md                 Tareas pendientes
 ├── t-completadas.md        Tareas cerradas
@@ -258,10 +260,13 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 - [todo.md](todo.md) — tareas pendientes.
 - [t-completadas.md](t-completadas.md) — tareas cerradas.
 - [retomar.md](retomar.md) — estado y contexto para continuar.
+- [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md) — objetivo y alcance web de 1.1.
 - [docs/formatos.md](docs/formatos.md) — matriz de formatos, entrada/salida y opciones avanzadas.
-- [docs/plan-formatos-y-opciones.md](docs/plan-formatos-y-opciones.md) — plan de desarrollo por fases.
+- [docs/plan-formatos-y-opciones.md](docs/plan-formatos-y-opciones.md) — plan histórico de ampliación de formatos.
 - [notes/](notes/) — evidencia fechada.
-- [docs/benchmark-2026-10-28.md](docs/benchmark-2026-10-28.md) — benchmark comparativo.
+- [docs/benchmark-2026-10-28.md](docs/benchmark-2026-10-28.md) — benchmark Godot vs Rust.
+- [docs/benchmark-squoosh-2026-10-31.md](docs/benchmark-squoosh-2026-10-31.md) — benchmark HUNK vs Squoosh.
+- [docs/pruebas.md](docs/pruebas.md) — capas de prueba y matriz de cobertura.
 - [docs/arquitectura.md](docs/arquitectura.md) — decisiones de arquitectura y reglas de código.
 - [docs/ci.md](docs/ci.md) — workflows, artefactos y publicación de releases.
 

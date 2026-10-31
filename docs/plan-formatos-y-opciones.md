@@ -1,8 +1,12 @@
 # Plan de desarrollo: formatos y opciones avanzadas
 
-> Estado: propuesto · Fecha: 2026-10-30
+> **Histórico:** este plan queda sustituido para 1.1 por
+> [`objetivo-1.1-web.md`](objetivo-1.1-web.md). Se conserva como referencia de
+> las decisiones anteriores. TGA/TIFF de salida, JPEG XL, QOI y WebP2 no forman
+> parte del núcleo web.
+>
+> Estado: histórico · Fecha: 2026-10-30
 > Especificación funcional: [formatos.md](formatos.md)
-> Release objetivo: siguiente release de features posterior a 1.1.0
 
 ## 1. Objetivo
 
@@ -111,6 +115,8 @@ añadir la resolución automática por formato de entrada.
 - Errores específicos y pruebas con LZW, Deflate, PackBits y sin compresión.
 
 **No incluye:** multipágina, CMYK fiable, 16 bits, ICC, capas.
+
+**Estado:** completada y validada por pruebas automatizadas el 2026-10-31.
 
 **Dependencias:** ninguna; se integra en el catálogo de t-35.
 

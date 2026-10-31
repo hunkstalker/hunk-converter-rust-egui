@@ -17,6 +17,7 @@ pub enum LoadError {
         limit: u64,
     },
     Unsupported,
+    UnsupportedTiff,
     Decode {
         source: BoxError,
     },
@@ -42,6 +43,9 @@ impl fmt::Display for LoadError {
                 )
             }
             Self::Unsupported => formatter.write_str("formato de imagen no compatible"),
+            Self::UnsupportedTiff => formatter.write_str(
+                "TIFF no soportado: se admiten RGB, RGBA, gris y gris con alfa de 8 bits",
+            ),
             Self::Decode { source } => write!(formatter, "no se pudo decodificar: {source}"),
             Self::SvgParse { source } => {
                 write!(formatter, "no se pudo interpretar el SVG: {source}")

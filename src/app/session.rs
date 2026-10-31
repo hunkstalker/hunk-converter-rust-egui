@@ -162,7 +162,9 @@ impl HunkApp {
         if let Some(path) = rfd::FileDialog::new()
             .add_filter(
                 self.t(crate::i18n::K::ImagesFilter),
-                &["png", "jpg", "jpeg", "webp", "bmp", "tga", "svg"],
+                &[
+                    "png", "jpg", "jpeg", "webp", "bmp", "tga", "tif", "tiff", "svg",
+                ],
             )
             .pick_file()
         {

@@ -1,7 +1,7 @@
 # Proyecto — HUNK Converter
 
-> Documento vivo. Última actualización: 2026-10-29.
-> Versión actual: **1.0.0** · Estado: **aplicación principal Rust + egui, portable y funcional**.
+> Documento vivo. Última actualización: 2026-10-31.
+> Versión actual: **1.0.0** publicada · Versión en preparación: **1.1.0** · Estado: **aplicación principal Rust + egui, portable y funcional**.
 
 ## 1. Visión
 
@@ -16,6 +16,8 @@ El producto está diseñado para hacer tres operaciones sin fricción:
 La interacción principal es arrastrar, ajustar y comparar en una sola ventana. No hay cuentas, subidas, telemetría ni pasos de configuración inicial.
 
 La versión actual está construida en **Rust + egui**. El prototipo original de Godot se conserva como material histórico en `../Prototipo`.
+
+El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md): núcleo web JPEG/PNG/WebP/AVIF, SVG como entrada, ICO como extra y preprocesado de redimensionado, rotación y paleta.
 
 ## 2. Principios de producto
 
@@ -35,8 +37,9 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 - Selector nativo de archivos con el botón **Seleccionar una imagen** o `Ctrl+O`.
 - `Ctrl+V` pega una imagen del portapapeles y sustituye la sesión actual si ya había una.
 - Botón **Cambiar** para reemplazar la imagen conservando los ajustes.
-- Formatos: **PNG, JPG/JPEG, WebP, BMP, TGA y SVG**.
-- Orientación EXIF aplicada al cargar JPG/WebP antes de mostrar, comparar y exportar.
+- Formatos: **PNG, JPG/JPEG, WebP, BMP, TGA, TIFF y SVG**.
+- Orientación EXIF aplicada al cargar JPG/WebP, y orientación TIFF, antes de mostrar, comparar y exportar.
+- TIFF de una página en RGB/RGBA/gris de 8 bits, con compresiones habituales (sin comprimir, LZW, Deflate y PackBits); CMYK y 16 bits se rechazan.
 - SVG rasterizado con `resvg`, manteniendo proporción y transparencia.
 - Detección por contenido con respaldo por extensión.
 - Límites: **200 MB**, **40 megapíxeles** y **16 384 px por lado**.
@@ -53,6 +56,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 | JPEG XL | `.jxl` | Sin pérdida | Sí | Alternativa moderna sin pérdida |
 | ICO | `.ico` | PNG por tamaño | Sí | Iconos de Windows |
 
+- Salida objetivo de 1.1: JPEG, PNG, WebP, AVIF e ICO. JPEG XL se retira del selector. La entrada es más amplia: JPEG, PNG, WebP, AVIF, SVG, BMP, TGA y TIFF.
 - Selector de salida desplegable con modo **Automático** (mismo formato que la entrada cuando existe salida equivalente; WebP como fallback).
 - Calidad inicial: **82 %**.
 - WebP, JPG y AVIF muestran deslizador de calidad; PNG y JPEG XL son sin pérdida y no muestran deslizador; ICO usa selección de tamaños.
@@ -180,7 +184,7 @@ La versión actual está construida en **Rust + egui**. El prototipo original de
 
 - **Rust 1.99.1**, fijado en `rust-toolchain.toml`.
 - **eframe/egui 0.37** con renderizador **glow** (OpenGL).
-- `image` 0.25 para decodificación PNG/JPG/WebP/BMP/TGA y codificación AVIF.
+- `image` 0.25 para decodificación PNG/JPG/WebP/BMP/TGA/TIFF y codificación AVIF.
 - `webp`/libwebp para codificación WebP.
 - `png` 0.18 para la codificación PNG.
 - `avif-decode`/rav1d para la vista previa AVIF.
@@ -353,7 +357,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **36 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **47 pruebas Rust**: codificación WebP/JPG/PNG/AVIF/JPEG XL, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

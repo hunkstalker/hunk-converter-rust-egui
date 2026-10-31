@@ -1,7 +1,7 @@
 # Formatos de entrada, salida y opciones avanzadas
 
-> Estado: especificación de producto · Fecha: 2026-10-30
-> Versión de desarrollo: 1.1.0 · Selector automático implementado y validado en `t-35` · Plan: [plan-formatos-y-opciones.md](plan-formatos-y-opciones.md)
+> Estado: especificación de producto · Fecha: 2026-10-31
+> Versión de desarrollo: 1.1.0 · Selector automático validado (`t-35`) · Entrada TIFF implementada (`t-36`) · Alcance 1.1: [objetivo-1.1-web.md](objetivo-1.1-web.md) · Plan histórico: [plan-formatos-y-opciones.md](plan-formatos-y-opciones.md)
 
 ## 1. Principios
 
@@ -31,6 +31,7 @@
 | WebP | `.webp` | `image`/`image-webp` | Imagen estática; transparencia |
 | BMP | `.bmp` | `image` | Se convierte a RGBA8 |
 | TGA | `.tga` | `image` | Se detecta por extensión |
+| TIFF | `.tif`, `.tiff` | `image`/`tiff` | Primera página; RGB/RGBA/gris de 8 bits |
 | SVG | `.svg` | `resvg` | Se rasteriza al tamaño declarado |
 
 ### 2.2 Salida
@@ -48,8 +49,8 @@ La salida se elige en un desplegable con modo `Automático`: conserva el formato
 
 ### 2.3 Detección de entrada
 
-- PNG, JPEG, WebP, BMP, AVIF y otros formatos con firma se detectan por **magic
-  bytes**.
+- PNG, JPEG, WebP, BMP, TIFF, AVIF y otros formatos con firma se detectan por
+  **magic bytes**.
 - TGA no tiene firma fiable y depende de la extensión.
 - SVG se reconoce por extensión y se rasteriza con `resvg`.
 - El selector de archivos filtra las extensiones admitidas. Arrastrar, pegar o
@@ -67,8 +68,10 @@ La salida se elige en un desplegable con modo `Automático`: conserva el formato
 
 ## 3. Matriz de capacidades
 
-`Actual` describe lo que ya funciona. `Planificado` describe el alcance de este
-plan; no se presenta como disponible hasta que se implemente y valide.
+`Actual` describe lo que ya funciona. `Planificado` conserva el análisis
+histórico de ampliación; para 1.1 rige el alcance de
+[`objetivo-1.1-web.md`](objetivo-1.1-web.md), centrado en JPEG, PNG, WebP, AVIF
+y SVG.
 
 | Formato | Entrada actual | Salida actual | Entrada planificada | Salida planificada |
 | --- | :---: | :---: | :---: | :---: |
@@ -78,7 +81,7 @@ plan; no se presenta como disponible hasta que se implemente y valide.
 | BMP | Sí | No | Sí | No |
 | TGA | Sí | No | Sí | Sí |
 | SVG | Sí | No | Sí | No |
-| TIFF | No | No | Sí, primera página | Sí, una página |
+| TIFF | Sí, primera página | No | Sí, primera página | Sí, una página |
 | AVIF | No | Sí | Sí | Sí |
 | JPEG XL | No | Sí | Sí | Sí |
 | ICO | No | Sí | No | Sí |
@@ -99,20 +102,24 @@ plan; no se presenta como disponible hasta que se implemente y valide.
 ### 4.1 Entrada TIFF
 
 - Extensiones: `.tif` y `.tiff`.
-- Implementación prevista: feature `tiff` de `image`.
-- Alcance:
+- Implementación: feature `tiff` de `image`.
+- Alcance actual:
   - primera página;
-  - RGB, RGBA y gris convertidos a RGBA8;
-  - compresiones habituales del decodificador `tiff` (sin comprimir, LZW,
-    Deflate, PackBits y otras soportadas por la librería);
-  - orientación TIFF aplicada al cargar.
+  - RGB, RGBA, gris y gris con alfa convertidos a RGBA8;
+  - compresiones habituales del decodificador `tiff`: sin comprimir, LZW,
+    Deflate y PackBits;
+  - orientación TIFF aplicada al cargar;
+  - límites de dimensiones comprobados antes de decodificar.
 - Limitaciones explícitas:
   - no se conservan capas, perfiles ICC, EXIF ni metadatos;
-  - CMYK y 16 bits se convierten a RGBA8;
+  - CMYK, 16 bits y otros tipos no RGB/RGBA/gris de 8 bits se rechazan con un
+    error controlado;
   - las páginas adicionales se ignoran.
 
-TIFF es un contenedor, no un códec único. La UI y la documentación deben hablar
-de “TIFF de una página, RGBA 8 bits”, no de “TIFF” a secas.
+TIFF es un contenedor, no un códec único. La UI y la documentación hablan de
+“TIFF de una página, RGBA 8 bits”, no de “TIFF” a secas. Como la salida TIFF
+queda fuera del alcance web de 1.1, el modo `Automático` usa WebP como fallback
+para entradas TIFF.
 
 ### 4.2 Entrada AVIF y JPEG XL
 
@@ -412,11 +419,12 @@ progressive=0
 
 - Resolución de `Auto` para cada formato de entrada y fallback WebP.
 - Persistencia y migración de `config.ini`.
-- Roundtrip de TIFF, TGA, AVIF y JXL con alfa y sin alfa.
+- Roundtrip de AVIF y JXL con alfa y sin alfa.
 - TIFF de varias páginas: solo se carga la primera.
-- TIFF CMYK, gris y 16 bits convertidos a RGBA8.
+- TIFF RGB, RGBA, gris, gris con alfa y orientación.
+- TIFF CMYK y 16 bits rechazados con error controlado.
 - TGA RLE y no RLE.
-- TIFF LZW, Deflate y sin compresión.
+- TIFF LZW, Deflate, PackBits y sin compresión.
 - Opciones avanzadas aplicadas al encoder correcto.
 - Límites de tamaño y dimensiones antes de asignar memoria desproporcionada.
 - Contraste y accesibilidad de los controles nuevos.

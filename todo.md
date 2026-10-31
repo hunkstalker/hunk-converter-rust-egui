@@ -3,27 +3,36 @@
 > Convención: cada tarea usa un identificador `t-N`, un título y una descripción.
 > Al completarse se retira de este archivo y se registra en `t-completadas.md`.
 > Las tareas se listan en orden ascendente y los identificadores no se reutilizan.
+>
+> Camino único de 1.1.0:
+> 1. **Entrada y preparación:** TIFF (t-36, completada), AVIF (t-37) y benchmark.
+> 2. **Paridad con Squoosh:** MozJPEG/OxiPNG (t-39), WebP/AVIF avanzados (t-40),
+>    preprocesado (t-41), UI/persistencia (t-42) y cierre (t-43).
+>
+> t-38 (salida TGA/TIFF), la parte JPEG XL de t-37 y las ampliaciones de JPEG XL,
+> QOI y WebP2 quedan fuera del alcance web de 1.1. Ver
+> `docs/objetivo-1.1-web.md`.
 
-## t-36 — Entrada TIFF
+## t-37 — Entrada AVIF
 
-**Descripción:** Abrir archivos `.tif` y `.tiff` con la feature `tiff` de `image`. Soportar la primera página, RGB/RGBA/gris y las compresiones habituales del decodificador; convertir a RGBA8, aplicar la orientación y respetar los límites actuales de tamaño y dimensiones. Documentar que no se soportan multipágina, CMYK fiable, 16 bits, ICC ni capas.
+**Descripción:** Reutilizar `avif-decode` para abrir AVIF, añadir `.avif` al filtro y a la detección por cabecera, cargar la primera imagen/fotograma, conservar alfa cuando el decodificador lo exponga y respetar los límites. Mantener la UI fluida; si la decodificación es lenta, moverla a un worker con estado visible. JPEG XL queda fuera del alcance web.
 
-## t-37 — Entrada AVIF y JPEG XL
+## t-39 — Paridad JPEG y PNG
 
-**Descripción:** Reutilizar `avif-decode` y `jxl-oxide` para abrir AVIF y JPEG XL, que hoy solo se pueden exportar. Añadir filtros y detección por cabecera, cargar la primera imagen/fotograma, conservar alfa cuando el decodificador lo exponga y respetar los límites. Si la decodificación bloquea la UI de forma perceptible, moverla a un worker con estado visible.
+**Descripción:** Sustituir el encoder JPEG actual por MozJPEG y el PNG actual por OxiPNG. Exponer calidad, progresivo y submuestreo en JPG; nivel de compresión e interlazado en PNG. Mantener alfa, límites y exportación segura. Repetir el benchmark HUNK vs Squoosh y no cerrar la tarea si JPEG o PNG siguen comprimiendo peor a igual calidad perceptual.
 
-## t-38 — Salida TGA y TIFF
+## t-40 — WebP y AVIF avanzados
 
-**Descripción:** Añadir salida TGA RGBA8 con RLE configurable y TIFF de una página RGBA8 con compresión LZW, Deflate o sin compresión. Ambos serán formatos sin pérdida, sin slider de calidad, con pistas claras en la UI. TIFF no incluirá multipágina, 16 bits, CMYK, ICC ni capas. Incluye roundtrip, alfa y pruebas de estructura.
+**Descripción:** Exponer las opciones reales de libwebp (lossless, method/effort, alpha quality) y de AVIF (speed/effort, alpha quality y submuestreo si el encoder lo permite). Medir ravif frente a libavif/AOM y elegir el backend con criterios de tamaño, calidad y velocidad. No mostrar controles que no lleguen al encoder.
 
-## t-39 — Opciones avanzadas sin pérdida
+## t-41 — Preprocesado: redimensionar, rotar y paleta
 
-**Descripción:** Introducir un modelo de opciones tipadas por formato y un bloque `Avanzado` contextual, colapsable y con resumen/reset. Añadir compresión para PNG (`Rápida`/`Equilibrada`/`Máxima` y filtro), TGA (RLE), TIFF (LZW/Deflate/ninguna y predictor) y esfuerzo para WebP lossless/JPEG XL si el encoder lo permite. Persistir las opciones por formato en `config.ini` con migración compatible y cubrir el mapeo con pruebas.
+**Descripción:** Añadir redimensionado con métodos de calidad y conservación de proporción, rotación en pasos de 90° y reducción de paleta para PNG/WebP. El resultado debe verse en la vista previa antes de exportar y conservar alfa cuando corresponda. Incluye pruebas de dimensiones, orientación y paleta.
 
-## t-40 — Opciones con pérdida y color
+## t-42 — UI avanzada y persistencia
 
-**Descripción:** Completar el bloque avanzado con las opciones que el stack de códecs pueda aplicar de verdad: JPG (fondo para aplanar alfa y submuestreo/progresivo si se incorpora un encoder compatible), WebP (método/effort, calidad de alfa y modo lossless), AVIF (velocidad/effort y submuestreo si el encoder lo permite) y JPEG XL (esfuerzo y modo lossy cuando se añada). No se mostrarán controles simulados ni opciones de ICC, CMYK, 16 bits o Display P3.
+**Descripción:** Introducir opciones tipadas por formato, bloque `Avanzado` contextual, colapsado, con resumen y reset. Conectar las opciones de JPG/PNG/WebP/AVIF y el preprocesado con la UI, dejar el selector de salida en JPEG/PNG/WebP/AVIF/ICO retirando JPEG XL, persistir por formato en `config.ini` con migración compatible, añadir tooltips del glosario y mantener accesibilidad por teclado y lector de pantalla.
 
-## t-41 — Cierre, documentación y release
+## t-43 — Cierre 1.1: benchmark, documentación y release
 
-**Descripción:** Validar la ampliación completa: actualizar `docs/formatos.md`, README, proyecto y retomar; regenerar capturas; revisar contraste y accesibilidad; ejecutar pruebas, clippy y formato; validar builds Linux/Windows y macOS si hay build disponible; y preparar la release con la matriz de formatos y sus limitaciones.
+**Descripción:** Repetir el benchmark con los encoders finales y verificar las puertas de tamaño y velocidad. Actualizar `docs/objetivo-1.1-web.md`, `docs/formatos.md`, README, proyecto y retomar; regenerar capturas; revisar contraste y accesibilidad; ejecutar pruebas, clippy y formato; validar builds Linux/Windows y macOS si hay build; preparar la release 1.1 con la matriz web y sus limitaciones.

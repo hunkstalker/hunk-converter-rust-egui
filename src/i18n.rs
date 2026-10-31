@@ -276,6 +276,11 @@ catalogue! {
     ErrReadFile => ("No se pudo leer el archivo:", "No s'ha pogut llegir el fitxer:", "Could not read the file:"),
     ErrTooLarge => ("La imagen supera el límite de 200 MB.", "La imatge supera el límit de 200 MB.", "The image exceeds the 200 MB limit."),
     ErrUnsupported => ("El archivo no parece una imagen compatible.", "El fitxer no sembla una imatge compatible.", "The file does not look like a supported image."),
+    ErrUnsupportedTiff => (
+        "TIFF no soportado: se admiten RGB, RGBA, gris y gris con alfa de 8 bits.",
+        "TIFF no suportat: s'admeten RGB, RGBA, gris i gris amb alfa de 8 bits.",
+        "Unsupported TIFF: RGB, RGBA, grayscale and grayscale-alpha at 8 bits are supported."
+    ),
     ErrDecode => ("No se pudo decodificar la imagen:", "No s'ha pogut descodificar la imatge:", "Could not decode the image:"),
     ErrConfig => ("No se pudo guardar la configuración:", "No s'ha pogut desar la configuració:", "Could not save the configuration:"),
     ErrSvgParse => ("No se pudo interpretar el SVG:", "No s'ha pogut interpretar l'SVG:", "Could not parse the SVG:"),
@@ -402,6 +407,7 @@ fn present_load_error(lang: Lang, error: &LoadError) -> String {
         LoadError::Read { source, .. } => detail(lang, K::ErrReadFile, source),
         LoadError::TooLarge { .. } => t(lang, K::ErrTooLarge).to_owned(),
         LoadError::Unsupported => t(lang, K::ErrUnsupported).to_owned(),
+        LoadError::UnsupportedTiff => t(lang, K::ErrUnsupportedTiff).to_owned(),
         LoadError::Decode { source } => detail(lang, K::ErrDecode, source),
         LoadError::SvgParse { source } => detail(lang, K::ErrSvgParse, source),
         LoadError::SvgCanvas => t(lang, K::ErrSvgCanvas).to_owned(),

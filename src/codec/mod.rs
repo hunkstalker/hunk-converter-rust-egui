@@ -1,7 +1,7 @@
 use std::io::Cursor;
 use std::path::Path;
 
-use image::{ImageDecoder, ImageFormat, RgbaImage, imageops};
+use image::{ExtendedColorType, ImageDecoder, ImageFormat, RgbaImage, imageops};
 
 use crate::domain::error::{EncodeError, LoadError};
 
@@ -114,11 +114,18 @@ pub fn load_image_file(path: &Path) -> Result<LoadedImage, LoadError> {
 }
 
 fn decode_raster(bytes: &[u8], format: ImageFormat) -> Result<RgbaImage, LoadError> {
-    let mut decoder = image::ImageReader::with_format(Cursor::new(bytes), format)
-        .into_decoder()
-        .map_err(|source| LoadError::Decode {
-            source: Box::new(source),
-        })?;
+    let mut reader = image::ImageReader::with_format(Cursor::new(bytes), format);
+    reader.limits(image::Limits::default());
+
+    let mut decoder = reader.into_decoder().map_err(|source| LoadError::Decode {
+        source: Box::new(source),
+    })?;
+    let (width, height) = decoder.dimensions();
+    validate_dimensions(width, height)?;
+    if format == ImageFormat::Tiff {
+        validate_tiff_color_type(decoder.original_color_type())?;
+    }
+
     let orientation = decoder.orientation().map_err(|source| LoadError::Decode {
         source: Box::new(source),
     })?;
@@ -128,6 +135,16 @@ fn decode_raster(bytes: &[u8], format: ImageFormat) -> Result<RgbaImage, LoadErr
         })?;
     image.apply_orientation(orientation);
     Ok(image.to_rgba8())
+}
+
+fn validate_tiff_color_type(color_type: ExtendedColorType) -> Result<(), LoadError> {
+    match color_type {
+        ExtendedColorType::L8
+        | ExtendedColorType::La8
+        | ExtendedColorType::Rgb8
+        | ExtendedColorType::Rgba8 => Ok(()),
+        _ => Err(LoadError::UnsupportedTiff),
+    }
 }
 
 fn validate_dimensions(width: u32, height: u32) -> Result<(), LoadError> {
@@ -164,6 +181,7 @@ fn format_name(format: ImageFormat) -> &'static str {
         ImageFormat::WebP => "WEBP",
         ImageFormat::Bmp => "BMP",
         ImageFormat::Tga => "TGA",
+        ImageFormat::Tiff => "TIFF",
         _ => "IMG",
     }
 }
@@ -173,6 +191,8 @@ mod tests {
     use super::*;
     use image::codecs::jpeg::JpegEncoder;
     use image::{ExtendedColorType, ImageEncoder, Rgb, RgbImage, Rgba};
+    use tiff::encoder::{Compression, DeflateLevel, Predictor, TiffEncoder, colortype};
+    use tiff::tags::Tag;
 
     fn noise(width: u32, height: u32) -> RgbaImage {
         let mut seed = 0xA11CE_u32;
@@ -284,6 +304,184 @@ mod tests {
         let decoded = image::load_from_memory(&output.bytes).unwrap().to_rgba8();
         assert_eq!(decoded.get_pixel(2, 2).0[3], 128);
     }
+    fn tiff_rgb_pixels(width: u32, height: u32) -> Vec<u8> {
+        let mut pixels = Vec::with_capacity((width * height * 3) as usize);
+        for _ in 0..height {
+            for x in 0..width {
+                if x < width / 2 {
+                    pixels.extend_from_slice(&[220, 24, 24]);
+                } else {
+                    pixels.extend_from_slice(&[24, 24, 220]);
+                }
+            }
+        }
+        pixels
+    }
+
+    fn tiff_rgb_bytes(compression: Compression, predictor: Predictor) -> Vec<u8> {
+        let pixels = tiff_rgb_pixels(32, 20);
+        let mut bytes = Vec::new();
+        {
+            let mut encoder = TiffEncoder::new(Cursor::new(&mut bytes))
+                .unwrap()
+                .with_compression(compression)
+                .with_predictor(predictor);
+            encoder
+                .write_image::<colortype::RGB8>(32, 20, &pixels)
+                .unwrap();
+        }
+        bytes
+    }
+
+    fn tiff_orientation_bytes() -> Vec<u8> {
+        let width = 32;
+        let height = 20;
+        let pixels = tiff_rgb_pixels(width, height);
+        let mut bytes = Vec::new();
+        {
+            let mut encoder = TiffEncoder::new(Cursor::new(&mut bytes)).unwrap();
+            let mut directory = encoder.image_directory().unwrap();
+            let offset = directory.write_data(pixels.as_slice()).unwrap();
+            directory.write_tag(Tag::ImageWidth, width).unwrap();
+            directory.write_tag(Tag::ImageLength, height).unwrap();
+            directory
+                .write_tag(Tag::BitsPerSample, &[8u16, 8, 8][..])
+                .unwrap();
+            directory.write_tag(Tag::Compression, 1u16).unwrap();
+            directory
+                .write_tag(Tag::PhotometricInterpretation, 2u16)
+                .unwrap();
+            directory
+                .write_tag(Tag::StripOffsets, u32::try_from(offset).unwrap())
+                .unwrap();
+            directory.write_tag(Tag::SamplesPerPixel, 3u16).unwrap();
+            directory.write_tag(Tag::RowsPerStrip, height).unwrap();
+            directory
+                .write_tag(Tag::StripByteCounts, u32::try_from(pixels.len()).unwrap())
+                .unwrap();
+            directory.write_tag(Tag::PlanarConfiguration, 1u16).unwrap();
+            directory.write_tag(Tag::Orientation, 6u16).unwrap();
+            directory.finish().unwrap();
+        }
+        bytes
+    }
+
+    #[test]
+    fn loads_tiff_file_and_detects_format() {
+        let path = std::env::temp_dir().join(format!(
+            "hunk-converter-{}-{}.tiff",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::write(
+            &path,
+            tiff_rgb_bytes(Compression::Uncompressed, Predictor::None),
+        )
+        .unwrap();
+        let loaded = load_image_file(&path).unwrap();
+        let _ = std::fs::remove_file(&path);
+        assert_eq!(loaded.format, "TIFF");
+        assert_eq!(loaded.pixels.dimensions(), (32, 20));
+        assert_red(loaded.pixels.get_pixel(4, 10).0);
+        assert_blue(loaded.pixels.get_pixel(28, 10).0);
+    }
+
+    #[test]
+    fn tiff_compressions_decode() {
+        let cases = [
+            ("sin compresión", Compression::Uncompressed, Predictor::None),
+            ("LZW", Compression::Lzw, Predictor::Horizontal),
+            (
+                "Deflate",
+                Compression::Deflate(DeflateLevel::default()),
+                Predictor::Horizontal,
+            ),
+            ("PackBits", Compression::Packbits, Predictor::None),
+        ];
+        for (name, compression, predictor) in cases {
+            let image =
+                decode_raster(&tiff_rgb_bytes(compression, predictor), ImageFormat::Tiff).unwrap();
+            assert_eq!(image.dimensions(), (32, 20), "{name}");
+            assert_red(image.get_pixel(4, 10).0);
+            assert_blue(image.get_pixel(28, 10).0);
+        }
+    }
+
+    #[test]
+    fn tiff_grayscale_converts_to_rgba8() {
+        let pixels = vec![128u8; 16 * 8];
+        let mut bytes = Vec::new();
+        {
+            let mut encoder = TiffEncoder::new(Cursor::new(&mut bytes)).unwrap();
+            encoder
+                .write_image::<colortype::Gray8>(16, 8, &pixels)
+                .unwrap();
+        }
+        let image = decode_raster(&bytes, ImageFormat::Tiff).unwrap();
+        assert_eq!(image.get_pixel(0, 0).0, [128, 128, 128, 255]);
+    }
+
+    #[test]
+    fn tiff_rgba_preserves_alpha() {
+        let mut pixels = vec![255u8; 8 * 8 * 4];
+        pixels[..4].copy_from_slice(&[255, 0, 0, 128]);
+        let mut bytes = Vec::new();
+        {
+            let mut encoder = TiffEncoder::new(Cursor::new(&mut bytes)).unwrap();
+            encoder
+                .write_image::<colortype::RGBA8>(8, 8, &pixels)
+                .unwrap();
+        }
+        let image = decode_raster(&bytes, ImageFormat::Tiff).unwrap();
+        assert_eq!(image.get_pixel(0, 0).0, [255, 0, 0, 128]);
+    }
+
+    #[test]
+    fn tiff_applies_orientation() {
+        let image = decode_raster(&tiff_orientation_bytes(), ImageFormat::Tiff).unwrap();
+        assert_eq!(image.dimensions(), (20, 32));
+        assert_red(image.get_pixel(5, 5).0);
+        assert_blue(image.get_pixel(5, 26).0);
+    }
+
+    #[test]
+    fn tiff_loads_first_page_only() {
+        let first = tiff_rgb_pixels(32, 20);
+        let second = vec![0u8; 8 * 8 * 3];
+        let mut bytes = Vec::new();
+        {
+            let mut encoder = TiffEncoder::new(Cursor::new(&mut bytes)).unwrap();
+            encoder
+                .write_image::<colortype::RGB8>(32, 20, &first)
+                .unwrap();
+            encoder
+                .write_image::<colortype::RGB8>(8, 8, &second)
+                .unwrap();
+        }
+        let image = decode_raster(&bytes, ImageFormat::Tiff).unwrap();
+        assert_eq!(image.dimensions(), (32, 20));
+        assert_red(image.get_pixel(4, 10).0);
+    }
+
+    #[test]
+    fn tiff_16_bit_is_rejected() {
+        let pixels = vec![0u16; 8 * 8 * 4];
+        let mut bytes = Vec::new();
+        {
+            let mut encoder = TiffEncoder::new(Cursor::new(&mut bytes)).unwrap();
+            encoder
+                .write_image::<colortype::RGBA16>(8, 8, &pixels)
+                .unwrap();
+        }
+        assert!(matches!(
+            decode_raster(&bytes, ImageFormat::Tiff),
+            Err(LoadError::UnsupportedTiff)
+        ));
+    }
+
     fn jpeg_with_orientation(orientation: u8) -> Vec<u8> {
         let source = RgbImage::from_fn(32, 20, |x, _| {
             if x < 16 {

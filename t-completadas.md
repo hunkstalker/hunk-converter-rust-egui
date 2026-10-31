@@ -234,3 +234,10 @@
 
 **Completada:** 2026-10-31
 **Resultado:** Desplegable compacto con `Automático · formato` y selección fija; PNG/JPG/WebP resuelven al mismo formato y BMP/SVG usan WebP. La elección se guarda en `[output] format`, el reinicio vuelve a `Auto` y el aviso de recompresión aparece con entradas JPG/WebP. El selector permanece dentro del scroll, el menú muestra las siete opciones completas y el panel recupera la geometría de `HEAD` (x=30..389, hasta el footer). Suite de 36 pruebas, capturas regeneradas y builds Linux/Windows GNU actualizadas.
+
+## t-36 — Entrada TIFF
+
+**Descripción:** Abrir `.tif` y `.tiff`, limitados a la primera página y a RGB/RGBA/gris de 8 bits, con compresiones habituales, orientación y límites compartidos. La salida TIFF queda fuera del alcance web de 1.1.
+
+**Completada:** 2026-10-31
+**Resultado:** Entrada TIFF con detección por magic bytes y extensión, primera página, RGB/RGBA/gris/gris con alfa de 8 bits, LZW/Deflate/PackBits/sin compresión, orientación y rechazo controlado de 16 bits y CMYK. `Automático` usa WebP como fallback. Se añadieron pruebas unitarias de compresiones, predictor, alfa, orientación, multipágina y rechazo de 16 bits; matriz de integración de entradas PNG/JPG/WebP/BMP/TGA/TIFF/SVG; límites y archivos corruptos; y el CLI `check_tiff` con pack de validación. Suite de 47 pruebas.

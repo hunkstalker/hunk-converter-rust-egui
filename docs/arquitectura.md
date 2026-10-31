@@ -88,7 +88,7 @@ se traducen a errores de dominio antes de llegar a la interfaz.
 
 | Principio | Decisión concreta |
 | --- | --- |
-| **SRP** | `app.rs` se divide por responsabilidad: sesión, codificación, exportación, estado y componentes de UI. `settings` separa modelo y parser INI. `codec` separa carga, codificadores, ICO y SVG. |
+| **SRP** | `app.rs` se divide por responsabilidad: sesión, codificación, exportación, estado y componentes de UI. `settings` separa modelo y parser INI. `codec` separa carga, codificadores, ICO, SVG y TIFF. |
 | **OCP** | La política de formatos vive en `domain/format.rs` (extensión, pérdida, badge). Añadir un formato toca su política, su codificador y su traducción; no obliga a cambiar toda la UI. |
 | **LSP** | Todos los codificadores cumplen el mismo contrato: reciben `&RgbaImage` y `EncodeOptions`, devuelven `EncodedOutput` o `EncodeError`. No hay `panic!` ni ramas con un tipo de retorno distinto. |
 | **ISP** | No existe un servicio genérico de imagen. Las funciones y DTOs son pequeños: `EncodeOptions`, `SourceInput`, `FileCard`, `FormatCard`, `EyedropperButton`, `HistorySwatch`, `Badge`, `CanvasContext`, `ZoomInput`. |
@@ -246,14 +246,15 @@ La suite cubre:
 - política de formatos;
 - nombres de exportación y no sobrescritura atómica;
 - códecs WebP/JPG/PNG/AVIF/JPEG XL;
-- orientación EXIF 1, 3, 6 y 8;
-- transparencia PNG/JPEG XL y aplanado JPG;
+- entrada TIFF de una página, compresiones LZW/Deflate/PackBits y rechazo de 16 bits;
+- orientación EXIF y TIFF;
+- transparencia PNG/JPEG XL/TIFF y aplanado JPG;
 - rasterización SVG;
 - estructura ICO;
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **36 pruebas**, `cargo fmt --check` y
+Estado actual: **47 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas
