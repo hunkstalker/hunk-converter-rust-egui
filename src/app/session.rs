@@ -4,7 +4,7 @@ use eframe::egui;
 use image::{ImageFormat, RgbaImage};
 
 use crate::codec;
-use crate::domain::{AppError, ClipboardError, FormatSelection, OutputFormat};
+use crate::domain::{AppError, ClipboardError, FormatSelection, OutputFormat, apply_geometry};
 use crate::i18n;
 
 use super::HunkApp;
@@ -20,8 +20,12 @@ impl HunkApp {
                 OutputFormat::from_input_label(&input.format).unwrap_or(OutputFormat::Webp)
             }
         };
-        let (width, height) = input.pixels.dimensions();
-        let preview = resized_for_ui(&input.pixels, UI_PREVIEW_MAX);
+        let (input_width, input_height) = input.pixels.dimensions();
+        self.preprocess.reset_for_source(input_width, input_height);
+        let original = std::sync::Arc::new(input.pixels);
+        let processed = apply_geometry(&original, &self.preprocess);
+        let (width, height) = processed.dimensions();
+        let preview = resized_for_ui(&processed, UI_PREVIEW_MAX);
         let texture = upload_texture(ctx, &format!("source-{}", self.revision), &preview);
         self.source = Some(SourceImage {
             name: input.name,
@@ -30,7 +34,8 @@ impl HunkApp {
             file_bytes: input.file_bytes,
             width,
             height,
-            pixels: std::sync::Arc::new(input.pixels),
+            original,
+            pixels: std::sync::Arc::new(processed),
             texture,
         });
         self.format = resolved_format;
@@ -47,6 +52,38 @@ impl HunkApp {
         self.fit_scale = 1.0;
         self.screenshot_at = None;
         self.screenshot_requested = false;
+        self.request_encode(ctx, None);
+    }
+
+    pub(crate) fn refresh_preprocessed_source(&mut self, ctx: &egui::Context) {
+        let Some(original) = self
+            .source
+            .as_ref()
+            .map(|source| std::sync::Arc::clone(&source.original))
+        else {
+            return;
+        };
+        let processed = apply_geometry(&original, &self.preprocess);
+        let (width, height) = processed.dimensions();
+        let preview = resized_for_ui(&processed, UI_PREVIEW_MAX);
+        let texture = upload_texture(ctx, &format!("source-{}", self.revision), &preview);
+        if let Some(source) = self.source.as_mut() {
+            source.width = width;
+            source.height = height;
+            source.pixels = std::sync::Arc::new(processed);
+            source.texture = texture;
+        }
+        self.result = None;
+        self.eyedropper_active = false;
+        self.sampled_color = None;
+        self.sampled_position = None;
+        self.sample_pending_history = false;
+        self.split = 0.5;
+        self.zoom = FIT_ZOOM;
+        self.pan = egui::Vec2::ZERO;
+        self.actual_size = true;
+        self.pending_zoom = None;
+        self.fit_scale = 1.0;
         self.request_encode(ctx, None);
     }
 
@@ -177,6 +214,7 @@ impl HunkApp {
         self.result = None;
         self.format = OutputFormat::Webp;
         self.format_selection = FormatSelection::Auto;
+        self.preprocess = crate::domain::PreprocessOptions::default();
         self.quality = 82;
         self.ico_selected = [true; 6];
         self.split = 0.5;

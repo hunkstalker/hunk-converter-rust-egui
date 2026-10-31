@@ -275,6 +275,10 @@ JPG y PNG ya usan MozJPEG/OxiPNG. WebP acepta lossless, method y alpha quality,
 y AVIF acepta speed y alpha quality en el backend. Sus controles se expondrán en
 la UI en `t-42`. La tabla conserva el alcance completo.
 
+Preprocesado actual: resize Lanczos3 con proporción opcional, rotación en pasos
+de 90° y paleta de 2–256 colores con alfa conservado. Rotación y resize actualizan
+la vista previa de entrada; la paleta se aplica al resultado codificado.
+
 | Formato | Básico | Avanzado |
 | --- | --- | --- |
 | PNG | Sin pérdida | Compresión `Rápida / Equilibrada / Máxima`; filtro |

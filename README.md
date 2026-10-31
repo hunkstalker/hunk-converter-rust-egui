@@ -20,6 +20,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Orientación EXIF/TIFF:** las fotos de móvil y los TIFF se muestran, comparan, muestrean y exportan ya orientados.
 - **Salida:** WebP, AVIF, JPG, PNG, JPEG XL e ICO, con selector desplegable y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
+- **Preprocesado:** redimensionar con proporción, rotar en pasos de 90° y reducir la paleta a 2–256 colores conservando alfa.
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
 - **Zoom y paneo:** rueda del ratón sobre la imagen y clic derecho para desplazarte.
 - **Vista previa fiel al archivo final**: se decodifica el resultado codificado real.
@@ -213,7 +214,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 51 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa y AVIF speed/alfa, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 54 pruebas: codificación WebP/JPG/PNG/AVIF/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado de resize/rotate/paleta, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 

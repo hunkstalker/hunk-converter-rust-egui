@@ -152,6 +152,88 @@ impl HunkApp {
         } else {
             self.show_quality(ui, actions);
         }
+
+        self.show_preprocess(ui, card.dimensions, actions);
+    }
+
+    fn show_preprocess(
+        &mut self,
+        ui: &mut egui::Ui,
+        source_dimensions: (u32, u32),
+        actions: &mut Vec<AppAction>,
+    ) {
+        let before = self.preprocess.clone();
+        let title = T::eyebrow(self.t(K::Preprocess));
+        let resize_label = self.t(K::Resize);
+        let width_label = self.t(K::Width);
+        let height_label = self.t(K::Height);
+        let keep_aspect_label = self.t(K::KeepAspect);
+        let rotate_label = self.t(K::Rotate);
+        let palette_label = self.t(K::Palette);
+        let colors_label = self.t(K::Colors);
+        ui.add_space(10.0);
+        egui::CollapsingHeader::new(title)
+            .default_open(false)
+            .show(ui, |ui| {
+                ui.checkbox(&mut self.preprocess.resize_enabled, resize_label);
+                if self.preprocess.resize_enabled {
+                    if self.preprocess.width == 0 {
+                        self.preprocess.width = source_dimensions.0;
+                    }
+                    if self.preprocess.height == 0 {
+                        self.preprocess.height = source_dimensions.1;
+                    }
+                    ui.horizontal(|ui| {
+                        ui.label(width_label);
+                        ui.add(
+                            egui::DragValue::new(&mut self.preprocess.width)
+                                .range(1..=16_384)
+                                .speed(1),
+                        );
+                        ui.label(height_label);
+                        ui.add(
+                            egui::DragValue::new(&mut self.preprocess.height)
+                                .range(1..=16_384)
+                                .speed(1),
+                        );
+                    });
+                    ui.checkbox(&mut self.preprocess.keep_aspect, keep_aspect_label);
+                }
+
+                ui.horizontal(|ui| {
+                    ui.label(rotate_label);
+                    for (degrees, label) in
+                        [(0u16, "0°"), (90, "90°"), (180, "180°"), (270, "270°")]
+                    {
+                        ui.selectable_value(&mut self.preprocess.rotation, degrees, label);
+                    }
+                });
+
+                let mut palette_enabled = self.preprocess.palette_colors.is_some();
+                if ui.checkbox(&mut palette_enabled, palette_label).changed() {
+                    self.preprocess.palette_colors = palette_enabled.then_some(128);
+                }
+                if let Some(colors) = &mut self.preprocess.palette_colors {
+                    ui.horizontal(|ui| {
+                        ui.label(colors_label);
+                        ui.add(egui::DragValue::new(colors).range(2..=256).speed(1));
+                    });
+                }
+            });
+
+        if self.preprocess == before {
+            return;
+        }
+        let geometry_changed = self.preprocess.resize_enabled != before.resize_enabled
+            || self.preprocess.width != before.width
+            || self.preprocess.height != before.height
+            || self.preprocess.keep_aspect != before.keep_aspect
+            || self.preprocess.rotation != before.rotation;
+        if geometry_changed {
+            self.refresh_preprocessed_source(ui.ctx());
+        } else if self.preprocess.palette_colors != before.palette_colors {
+            actions.push(AppAction::RequestEncode(None));
+        }
     }
 
     pub(crate) fn show_export(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {

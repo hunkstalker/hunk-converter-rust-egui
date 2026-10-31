@@ -18,6 +18,7 @@
 - carga desde archivo de PNG, JPG, WebP, AVIF, BMP, TGA, TIFF y SVG;
 - dimensiones y etiqueta de formato;
 - alfa en PNG, WebP y TIFF;
+- preprocesado: rotación, resize con proporción y paleta con alfa;
 - rechazo de imágenes de más de 16 384 px por lado;
 - rechazo de archivos de más de 200 MB antes de leerlos;
 - error controlado con archivos corruptos.

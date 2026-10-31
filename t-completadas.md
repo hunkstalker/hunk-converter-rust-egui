@@ -262,3 +262,10 @@
 
 **Completada:** 2026-10-31
 **Resultado:** WebP usa `WebPConfig` con lossless, method y alpha quality. AVIF usa ravif directo con speed y alpha quality, manteniendo 8 bits. Los valores por defecto conservan la paridad anterior: WebP sigue generando los mismos bytes y AVIF mantiene su curva. Se descartó integrar AOM por ahora por coste y portabilidad; ravif es nativo y competitivo en velocidad. Suite de 51 pruebas con WebP lossless exacto y AVIF speed/alfa.
+
+## t-41 — Preprocesado: redimensionar, rotar y paleta
+
+**Descripción:** Añadir resize, rotación y reducción de paleta con previsualización y pruebas.
+
+**Completada:** 2026-10-31
+**Resultado:** Bloque `Preprocesado` en la barra lateral con resize Lanczos3 y proporción opcional, rotación 90/180/270 y paleta de 2–256 colores con alfa conservado. Rotación y resize actualizan la entrada y la vista previa; la paleta se aplica al resultado codificado. Se preserva la imagen original para recalcular geometría. Suite de 54 pruebas.

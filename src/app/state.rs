@@ -13,6 +13,7 @@ pub(super) struct SourceImage {
     pub file_bytes: u64,
     pub width: u32,
     pub height: u32,
+    pub original: Arc<RgbaImage>,
     pub pixels: Arc<RgbaImage>,
     pub texture: TextureHandle,
 }

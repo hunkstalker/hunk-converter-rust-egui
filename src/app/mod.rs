@@ -6,7 +6,8 @@ use eframe::egui::{self, TextureHandle};
 
 use crate::codec::{ICO_SIZES, OutputFormat};
 use crate::domain::{
-    AppError, FormatSelection, HistoryEntry, clear_unlocked, remember_color, toggle_lock,
+    AppError, FormatSelection, HistoryEntry, PreprocessOptions, clear_unlocked, remember_color,
+    toggle_lock,
 };
 use crate::i18n::{self, K, Lang};
 use crate::settings;
@@ -42,6 +43,7 @@ pub struct HunkApp {
     color_panel_height: f32,
     format: OutputFormat,
     format_selection: FormatSelection,
+    preprocess: PreprocessOptions,
     quality: u8,
     ico_selected: [bool; 6],
     eyedropper_active: bool,
@@ -105,6 +107,7 @@ impl HunkApp {
                 FormatSelection::Auto => OutputFormat::Webp,
             },
             format_selection: settings.output_format,
+            preprocess: PreprocessOptions::default(),
             quality: 82,
             ico_selected: [true; 6],
             eyedropper_active: false,

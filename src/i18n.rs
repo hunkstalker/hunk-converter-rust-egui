@@ -256,6 +256,14 @@ catalogue! {
         "Could not save the image:"
     ),
     ImagesFilter => ("Imágenes", "Imatges", "Images"),
+    Preprocess => ("PREPROCESADO", "PREPROCÉS", "PREPROCESS"),
+    Resize => ("Redimensionar", "Redimensiona", "Resize"),
+    Width => ("Ancho", "Amplada", "Width"),
+    Height => ("Alto", "Alçada", "Height"),
+    KeepAspect => ("Mantener proporción", "Mantén la proporció", "Keep aspect ratio"),
+    Rotate => ("Rotación", "Rotació", "Rotation"),
+    Palette => ("Reducir paleta", "Redueix la paleta", "Reduce palette"),
+    Colors => ("Colores", "Colors", "Colors"),
     FormatAuto => ("Automático", "Automàtic", "Automatic"),
     FormatAutoHint => (
         "Mismo formato que la entrada cuando sea posible; si no, WebP.",
