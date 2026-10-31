@@ -54,14 +54,13 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | AVIF | `.avif` | Con pérdida, calidad 1–100 | Sí | Compresión moderna |
 | JPG | `.jpg` | Con pérdida, calidad 1–100 | No; fondo blanco | Compatibilidad |
 | PNG | `.png` | Sin pérdida | Sí | Calidad pixel a pixel |
-| JPEG XL | `.jxl` | Sin pérdida | Sí | Alternativa moderna sin pérdida |
 | ICO | `.ico` | PNG por tamaño | Sí | Iconos de Windows |
 
 - Salida objetivo de 1.1: JPEG, PNG, WebP, AVIF e ICO. JPEG XL se retira del selector. La entrada es más amplia: JPEG, PNG, WebP, AVIF, SVG, BMP, TGA y TIFF.
 - Selector de salida desplegable con modo **Automático** (mismo formato que la entrada cuando existe salida equivalente; WebP como fallback).
 - Calidad inicial: **82 %**.
-- WebP, JPG y AVIF muestran deslizador de calidad; PNG y JPEG XL son sin pérdida y no muestran deslizador; ICO usa selección de tamaños.
-- AVIF y JPEG XL se añaden como formatos de salida. JPEG XL se codifica sin pérdida.
+- WebP, JPG y AVIF muestran deslizador de calidad; PNG es sin pérdida y no muestra deslizador; ICO usa selección de tamaños.
+- AVIF se añade como formato de salida. JPEG XL queda fuera del selector de 1.1.
 - JPG aplana la transparencia sobre blanco de forma predecible.
 - ICO incluye 16, 32, 48, 64, 128 y 256 px, ajustando la imagen centrada en un lienzo transparente sin recortar.
 - Se exige al menos un tamaño ICO seleccionado.
@@ -347,14 +346,14 @@ Resumen del contexto de referencia:
 - La aplicación Rust es drásticamente más pequeña y usa menos RAM.
 - El arranque a ventana es más rápido.
 - La interfaz no consume CPU de render en reposo: repinta bajo demanda.
-- WebP, JPG, PNG e ICO son más rápidos en la versión Rust; AVIF y JPEG XL se añaden como códecs nuevos.
+- WebP, JPG, PNG e ICO son más rápidos en la versión Rust; AVIF se añade como códec nuevo.
 - Las cifras absolutas de CPU en reposo de Godot están infladas por usar llvmpipe sin VSync; no representan vatios reales en una GPU.
 
 ## 8. Límites conocidos
 
 - No se conservan metadatos, pero la orientación EXIF se aplica a los píxeles al cargar.
 - Sin redimensionado, recorte ni procesamiento por lotes: fuera del alcance del producto.
-- HEIC no está soportado; queda fuera del alcance. AVIF y JPEG XL sí están disponibles como salida.
+- HEIC no está soportado; queda fuera del alcance. AVIF está disponible como salida y JXL se retira del selector.
 - No se conservan perfiles ICC.
 - La build macOS universal se genera en CI, pero no está firmada ni notarizada; la firma se descartó por falta de presupuesto.
 - El resultado ICO usa PNG dentro del contenedor, compatible con Windows moderno.

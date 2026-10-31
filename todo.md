@@ -8,12 +8,10 @@
 > 1. **Entrada y preparación:** TIFF (t-36, completada), AVIF (t-37, completada) y benchmark (completado).
 > 2. **Paridad con Squoosh:** MozJPEG/OxiPNG (t-39, completada), WebP/AVIF
 >    avanzados (t-40, completada), preprocesado (t-41, completada),
->    UI/persistencia (t-42, completada) y cierre (t-43).
+>    UI/persistencia (t-42, completada) y cierre (t-43, completada).
 >
 > t-38 (salida TGA/TIFF), la parte JPEG XL de t-37 y las ampliaciones de JPEG XL,
 > QOI y WebP2 quedan fuera del alcance web de 1.1. Ver
 > `docs/objetivo-1.1-web.md`.
 
-## t-43 — Cierre 1.1: benchmark, documentación y release
-
-**Descripción:** Repetir el benchmark con los encoders finales y verificar las puertas de tamaño y velocidad. Actualizar `docs/objetivo-1.1-web.md`, `docs/formatos.md`, README, proyecto y retomar; regenerar capturas; revisar contraste y accesibilidad; ejecutar pruebas, clippy y formato; validar builds Linux/Windows y macOS si hay build; preparar la release 1.1 con la matriz web y sus limitaciones.
+No hay tareas pendientes. La release 1.1.0 está preparada; queda push, tag y validación CI/Windows.

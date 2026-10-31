@@ -1,13 +1,13 @@
 # Retomar HUNK Converter
 
 > Punto de entrada para nuevas sesiones. Última actualización: **2026-10-31**.
-> Versión: **1.0.0** publicada · **1.1.0** en preparación · Plan de formatos para la siguiente release · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
+> Versión: **1.0.0** publicada · **1.1.0** preparada para publicar · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
 
 ## 1. Qué es este proyecto
 
 **HUNK Converter** es una aplicación de escritorio local-first para convertir, comprimir, comparar y exportar imágenes. Está hecha en **Rust + egui**, usa el renderizador **glow** y no requiere instalador.
 
-Puede exportar WebP, AVIF, JPG, PNG, JPEG XL e ICO. La vista previa compara el original con el archivo codificado real. Incluye un cuentagotas que obtiene colores de la imagen y muestra sus códigos HEX/RGB/RGBA/HSL. Los resultados se guardan en `export/`, junto al ejecutable.
+Puede exportar WebP, AVIF, JPG, PNG e ICO. La vista previa compara el original con el archivo codificado real. Incluye un cuentagotas que obtiene colores de la imagen y muestra sus códigos HEX/RGB/RGBA/HSL. Los resultados se guardan en `export/`, junto al ejecutable.
 
 Ruta principal: la raíz de este repositorio.
 
@@ -18,19 +18,19 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Interfaz en español, catalán e inglés, con detección del idioma del sistema y tema oscuro propio.
 - Carga por arrastre, selector nativo, argumento de línea de comandos o `Ctrl+V` desde el portapapeles.
 - Entrada: PNG, JPG, WebP, AVIF, BMP, TGA, TIFF y SVG. La orientación EXIF de JPG/WebP y la orientación TIFF se aplican al cargar. TIFF se limita a la primera página y a 8 bits RGB/RGBA/gris.
-- Salida actual: WebP, AVIF, JPG, PNG, JPEG XL e ICO. Salida objetivo de 1.1: WebP, AVIF, JPG, PNG e ICO; JPEG XL sale del selector.
+- Salida de 1.1: WebP, AVIF, JPG, PNG e ICO. JPEG XL sale del selector.
 - Selector de salida desplegable con modo Automático implementado y validado (t-35).
 - Objetivo 1.1: salida web JPEG/PNG/WebP/AVIF + ICO; entrada amplia JPEG/PNG/WebP/AVIF/SVG/BMP/TGA/TIFF; preprocesado de redimensionado, rotación y reducción de paleta. TIFF de entrada forma parte de 1.1. Ver `docs/objetivo-1.1-web.md`.
 - Camino único de 1.1.0: **bloque 1** entrada TIFF/AVIF + benchmark; **bloque 2** paridad con Squoosh (MozJPEG, OxiPNG, WebP/AVIF avanzados, preprocesado y UI). Sin release intermedia.
 - Benchmark HUNK vs Squoosh: WebP empata, JPEG queda en paridad práctica (2,5× más rápido), PNG comprime igual o mejor (3,2× más rápido) y AVIF sigue cerca pero necesita ajuste. Ver `docs/benchmark-squoosh-2026-10-31.md`.
 - Preprocesado: resize Lanczos3 con proporción, rotación 90/180/270 y paleta 2–256 colores con alfa.
-- Planificado: UI avanzada, persistencia y release. JPEG XL, QOI, WebP2 y salidas TIFF/TGA/BMP quedan fuera del núcleo web.
-- Calidad 1–100 para WebP/JPG/AVIF; PNG y JPEG XL sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG.
+- Opciones avanzadas y persistencia implementadas: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado. Queda preparar y publicar 1.1.
+- Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG.
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %.
 - Cuentagotas con muestra del píxel original, coordenadas, códigos HEX/RGB/RGBA/HSL, botones de copia y aviso de confirmación. La tarjeta reserva el espacio de coordenadas y códigos para no cambiar de altura.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
 - Arquitectura modular: dominio puro, acciones explícitas, errores tipados y UI dividida por componentes. Ver `docs/arquitectura.md`.
-- Idioma, historial, bloqueos, estado maximizado, formato de salida, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
+- Idioma, historial, bloqueos, estado maximizado, formato de salida, opciones avanzadas, preprocesado, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
 - Pie con enlace directo a `github.com/hunkstalker/hunk-converter`, abierto en el navegador.
@@ -42,7 +42,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
 - **55 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
-- Versión **1.0.0** publicada; release validada en Windows 10/11.
+- Versión **1.0.0** publicada; **1.1.0** preparada, pendiente de push, tag y validación CI/Windows.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
 
 ## 3. Comandos
@@ -95,7 +95,7 @@ Builds portables:
 - **JPG:** transparencia compuesta sobre blanco.
 - **ICO:** frames PNG, contenedor manual, ajuste centrado sin recorte, al menos un tamaño.
 - **Calidad inicial:** 82 %.
-- **PNG y JPEG XL:** sin pérdida y sin deslizador de calidad.
+- **PNG:** sin pérdida y sin deslizador de calidad.
 - **AVIF:** salida con pérdida y control de calidad; vista previa decodificada con `avif-decode`.
 - **Badges del comparador:** el formato de salida va a la izquierda y `ORIGINAL` a la derecha, igual que las mitades visibles.
 - **Reinicio:** restablece formato, calidad, tamaños y muestra de color.
@@ -129,12 +129,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `todo.md` (t-43: benchmark final, documentación y release).
-- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37, t-39, t-40, t-41 y t-42).
+- Pendientes: ninguno. La release 1.1.0 está preparada.
+- Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37, t-39, t-40, t-41, t-42 y t-43).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso recomendado: **t-43 — cierre 1.1, benchmark final y release**.
+Siguiente paso: **push de main, tag v1.1.0 y validación del artefacto Windows MSVC del CI**.
 
 ## 7. Benchmarks y límites
 

@@ -2,6 +2,9 @@
 
 > Estado: especificación de producto · Fecha: 2026-10-31
 > Versión de desarrollo: 1.1.0 · Selector automático validado (`t-35`) · Entrada TIFF implementada (`t-36`) · Alcance 1.1: [objetivo-1.1-web.md](objetivo-1.1-web.md) · Plan histórico: [plan-formatos-y-opciones.md](plan-formatos-y-opciones.md)
+>
+> En 1.1 el selector solo ofrece JPEG, PNG, WebP, AVIF e ICO. Las filas de JPEG
+> XL, TGA y TIFF de salida describen el análisis histórico, no la UI actual.
 
 ## 1. Principios
 
