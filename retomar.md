@@ -134,7 +134,7 @@ t-completadas.md            Tareas cerradas
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso: **t-44 — cerrar la brecha AVIF**. Después, t-45 y el cierre t-43. No etiquetar v1.1.0 hasta entonces.
+Siguiente paso: **t-44 — cerrar la brecha AVIF** y revisión de AVIF. Después, **t-45 — resize/UI** y revisión de resize, seguido del resto de features una por una. No etiquetar v1.1.0 hasta completar esas revisiones y el cierre t-43.
 
 ## 7. Benchmarks y límites
 
