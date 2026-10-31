@@ -8,7 +8,7 @@
 
 **Descripción:** Repetir el benchmark final, regenerar capturas, actualizar documentación, validar builds y preparar la release 1.1.
 
-**Estado:** bloqueada por AVIF. No etiquetar `v1.1.0` hasta cerrar `t-44` y repetir el benchmark final.
+**Estado:** bloqueada por AVIF y por la revisión incremental de features. No etiquetar `v1.1.0` hasta cerrar `t-44`, aplicar `t-45` y revisar cada feature con el usuario; después se repetirá el benchmark final.
 
 ## t-44 — Cerrar la brecha de compresión AVIF
 

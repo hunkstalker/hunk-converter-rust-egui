@@ -20,30 +20,54 @@ que se recalcula o se vuelve a editar. Lo mismo ocurre al revés.
 - Test de UI/estado que compruebe ambos campos, no solo las dimensiones del
   resultado.
 
-## 1.1. Falta referencia del tamaño original
+## 1.1. Referencia del tamaño original en el canvas
 
-**Propuesta:** mostrar junto a los campos algo como:
+**Decisión:** no añadir más texto a la barra lateral. La referencia será un
+marco visual en el canvas que represente el tamaño original frente al tamaño de
+trabajo actual.
 
-```text
-Original 1600 × 1000  →  800 × 500
-```
+**Propuesta:**
 
-Debe verse sin tener que recordar la ficha de la imagen. Si no hay resize, se
-puede mostrar solo `Original 1600 × 1000`.
+- Dibujar un marco discontinuo o fantasma con la extensión del original.
+- Centrarlo respecto al encuadre actual y recortarlo contra el canvas.
+- Sin etiqueta de texto; el marco debe explicarse por sí mismo.
+- Si no hay resize, no dibujar el marco.
+- Mantener el marco visible al hacer zoom y pan.
 
-## 1.2. Arrastrar el Ancho hacia la izquierda choca con el panel
+## 1.2. Arrastre numérico vertical
 
 **Reproducción:** el campo Ancho está cerca del borde izquierdo. Al arrastrar
 para reducirlo, el cursor se queda sin recorrido antes de completar el cambio.
 
+**Decisión:** sustituir el arrastre horizontal por una caja numérica con
+arrastre vertical, sin barras de slider.
+
 **Propuesta:**
 
-- No usar un `DragValue` puro como único control.
-- Ofrecer entrada numérica + botones `−`/`+` y, opcionalmente, un slider en un
-  popover o modal de resize.
-- Si se mantiene el arrastre, capturar el puntero y permitir movimiento fuera
-  del panel sin perder el gesto.
-- Mantener edición por teclado.
+- Clic mantenido y arrastre vertical: arriba aumenta, abajo reduce.
+- El gesto no depende del borde del panel.
+- Mantener edición directa por teclado.
+- Evitar sliders y evitar botones `−`/`+` como control principal.
+
+### 1.2.1. Entrada de expresiones estilo Blender
+
+**Decisión:** la caja numérica acepta operaciones sencillas antes de confirmar.
+
+Ejemplos:
+
+```text
+1600x2
+1600/4
+1600*2
+1600-200
+```
+
+- Al pulsar `Enter`, se evalúa y se aplica el resultado.
+- `Esc` cancela y restaura el valor anterior.
+- Si la proporción está activa, el otro campo se recalcula en el mismo frame.
+- Resultado entero, limitado a 1–16 384 px; si la expresión no es válida, se
+  mantiene el valor anterior y se muestra un estado de error discreto.
+- No se aceptan expresiones arbitrarias ni código; solo operadores básicos.
 
 ## 1.3. Rendimiento del resize
 
