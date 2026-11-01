@@ -31,7 +31,8 @@ Fecha: 2026-11-01 · Referencia: `temp/HUNK converter.png`
 - Los pesos original/resultado y el botón de exportar quedan fijos al pie del
   panel derecho. El texto de ayuda de exportación conserva un margen inferior
   visible antes del pie global.
-- El pie global se conserva.
+- El pie global se conserva con la identidad del producto y la versión:
+  `HUNK Converter · v1.1.0`.
 
 ## Persistencia
 

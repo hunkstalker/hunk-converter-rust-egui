@@ -16,12 +16,9 @@ impl HunkApp {
             .show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(
-                        RichText::new(format!(
-                            "Rust + egui · Open Source · v{}",
-                            env!("CARGO_PKG_VERSION")
-                        ))
-                        .size(T::SMALL_TEXT_SIZE)
-                        .color(T::TEXT_FAINT),
+                        RichText::new(format!("HUNK Converter · v{}", env!("CARGO_PKG_VERSION")))
+                            .size(T::SMALL_TEXT_SIZE)
+                            .color(T::TEXT_FAINT),
                     );
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         let response = ui
