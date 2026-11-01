@@ -40,7 +40,7 @@ el host.
 
 - `bash -n scripts/setup_dev.sh` correcto.
 - `setup_dev.sh` comprobado en modo inspección sobre el Linux del entorno.
-- `cargo fmt --check`, clippy y las 68 pruebas siguen pasando.
+- `cargo fmt --check`, clippy y las 70 pruebas siguen pasando.
 - El build de la imagen no se pudo ejecutar dentro de este contenedor porque no
   tiene Docker instalado. La validación final de `docker compose build` queda
   para una máquina con Docker.

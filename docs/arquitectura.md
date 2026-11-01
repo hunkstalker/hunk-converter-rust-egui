@@ -274,10 +274,11 @@ La suite cubre:
 - rasterización SVG;
 - estructura ICO;
 - recorte antes de codificar, presets de proporción y conversión a píxeles;
+- colocación de las herramientas y del flyout de recorte según el espacio;
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **68 pruebas**, `cargo fmt --check` y
+Estado actual: **70 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

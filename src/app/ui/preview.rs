@@ -1,5 +1,6 @@
 use eframe::egui::{
-    self, Align, Align2, CornerRadius, Frame, Layout, Margin, Order, RichText, Sense, Stroke, vec2,
+    self, Align, Align2, CornerRadius, Frame, Layout, Margin, Order, Rect, RichText, Sense, Stroke,
+    pos2, vec2,
 };
 
 use crate::codec::OutputFormat;
@@ -10,7 +11,18 @@ use super::super::HunkApp;
 use super::super::actions::AppAction;
 use super::super::state::CropPreset;
 use super::canvas::CanvasContext;
-use super::icons::{EyedropperButton, QuickTool, eyedropper_button, quick_tool_button};
+use super::icons::{
+    EyedropperButton, QUICK_TOOL_GAP, QUICK_TOOL_SIZE, QuickTool, eyedropper_button,
+    quick_tool_button,
+};
+
+const QUICK_TOOLS_GAP: f32 = 8.0;
+const QUICK_TOOL_COUNT: f32 = 5.0;
+const QUICK_TOOLS_HEIGHT: f32 =
+    QUICK_TOOL_COUNT * QUICK_TOOL_SIZE + (QUICK_TOOL_COUNT - 1.0) * QUICK_TOOL_GAP;
+const CROP_PRESETS_GAP: f32 = 8.0;
+const CROP_PRESETS_WIDTH: f32 = 250.0;
+const CROP_PRESETS_HEIGHT: f32 = 140.0;
 
 impl HunkApp {
     pub(crate) fn show_preview(&mut self, root: &mut egui::Ui) -> Vec<AppAction> {
@@ -72,21 +84,38 @@ impl HunkApp {
                     ctx: &ctx,
                 }));
 
-                egui::Area::new(egui::Id::unique("color_panel_overlay"))
-                    .anchor(Align2::LEFT_BOTTOM, vec2(56.0, -92.0))
+                let content_rect = ctx.content_rect();
+                let mut color_area = egui::Area::new(egui::Id::unique("color_panel_overlay"))
                     .order(Order::Foreground)
-                    .show(&ctx, |ui| {
-                        ui.set_width(300.0);
-                        actions.extend(self.show_color_panel(ui));
-                    });
+                    .constrain_to(content_rect);
+                if let Some(position) = self.color_panel_pos {
+                    color_area = color_area.fixed_pos(position);
+                } else {
+                    color_area = color_area.anchor(Align2::LEFT_BOTTOM, vec2(56.0, -92.0));
+                }
+                let color_panel = color_area.show(&ctx, |ui| {
+                    ui.set_width(300.0);
+                    actions.extend(self.show_color_panel(ui));
+                });
+                let panel_rect = color_panel.response.rect;
+                self.color_panel_size = panel_rect.size();
+                if self.color_panel_pos.is_none() {
+                    self.color_panel_pos = Some(pos2(
+                        content_rect.left() + 56.0,
+                        (content_rect.bottom() - 92.0 - panel_rect.height())
+                            .max(content_rect.top()),
+                    ));
+                }
 
+                let (tools_pos, tools_on_left) = quick_tools_position(panel_rect, content_rect);
                 let mut crop_button_rect = None;
                 egui::Area::new(egui::Id::unique("canvas_quick_tools"))
-                    .anchor(Align2::LEFT_BOTTOM, vec2(368.0, -92.0))
+                    .fixed_pos(tools_pos)
                     .order(Order::Foreground)
+                    .constrain_to(content_rect)
                     .show(&ctx, |ui| {
-                        ui.set_width(38.0);
-                        ui.spacing_mut().item_spacing.y = 6.0;
+                        ui.set_width(QUICK_TOOL_SIZE);
+                        ui.spacing_mut().item_spacing.y = QUICK_TOOL_GAP;
                         let icon_mode = self.format == OutputFormat::Ico;
                         let crop_editing = self.crop_edit.is_some();
 
@@ -182,9 +211,11 @@ impl HunkApp {
                 if let Some(anchor) = crop_button_rect
                     && self.crop_edit.is_some()
                 {
+                    let presets_pos = crop_presets_position(anchor, content_rect, tools_on_left);
                     egui::Area::new(egui::Id::unique("crop_presets"))
-                        .fixed_pos(anchor.right_top() + vec2(8.0, 0.0))
+                        .fixed_pos(presets_pos)
                         .order(Order::Foreground)
+                        .constrain_to(content_rect)
                         .show(&ctx, |ui| {
                             self.show_crop_presets(ui, &mut actions);
                         });
@@ -357,5 +388,86 @@ impl HunkApp {
             actions.push(AppAction::PersistSettings);
             actions.push(AppAction::RequestRepaint);
         }
+    }
+}
+
+fn quick_tools_position(panel: Rect, content: Rect) -> (egui::Pos2, bool) {
+    let right_room = content.right() - panel.right() - QUICK_TOOLS_GAP;
+    let left_room = panel.left() - content.left() - QUICK_TOOLS_GAP;
+    let tools_on_left = right_room < QUICK_TOOL_SIZE && left_room > right_room;
+    let x = if tools_on_left {
+        panel.left() - QUICK_TOOLS_GAP - QUICK_TOOL_SIZE
+    } else {
+        panel.right() + QUICK_TOOLS_GAP
+    };
+    let x = x.clamp(
+        content.left(),
+        (content.right() - QUICK_TOOL_SIZE).max(content.left()),
+    );
+    let y = (panel.bottom() - QUICK_TOOLS_HEIGHT).clamp(
+        content.top(),
+        (content.bottom() - QUICK_TOOLS_HEIGHT).max(content.top()),
+    );
+    (pos2(x, y), tools_on_left)
+}
+
+fn crop_presets_position(anchor: Rect, content: Rect, tools_on_left: bool) -> egui::Pos2 {
+    let right_room = content.right() - anchor.right() - CROP_PRESETS_GAP;
+    let left_room = anchor.left() - content.left() - CROP_PRESETS_GAP;
+    let open_left = if tools_on_left {
+        left_room >= CROP_PRESETS_WIDTH || left_room > right_room
+    } else {
+        right_room < CROP_PRESETS_WIDTH && left_room > right_room
+    };
+    let x = if open_left {
+        anchor.left() - CROP_PRESETS_GAP - CROP_PRESETS_WIDTH
+    } else {
+        anchor.right() + CROP_PRESETS_GAP
+    };
+    let x = x.clamp(
+        content.left(),
+        (content.right() - CROP_PRESETS_WIDTH).max(content.left()),
+    );
+    let y = anchor.top().clamp(
+        content.top(),
+        (content.bottom() - CROP_PRESETS_HEIGHT).max(content.top()),
+    );
+    pos2(x, y)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn content() -> Rect {
+        Rect::from_min_size(pos2(0.0, 0.0), vec2(1280.0, 1000.0))
+    }
+
+    #[test]
+    fn quick_tools_flip_when_the_panel_reaches_the_right_edge() {
+        let default_panel = Rect::from_min_size(pos2(56.0, 456.0), vec2(300.0, 473.0));
+        let (default_pos, on_left) = quick_tools_position(default_panel, content());
+        assert!(!on_left);
+        assert_eq!(default_pos, pos2(364.0, 715.0));
+
+        let right_panel = Rect::from_min_size(pos2(958.0, 356.0), vec2(300.0, 473.0));
+        let (right_pos, on_left) = quick_tools_position(right_panel, content());
+        assert!(on_left);
+        assert_eq!(right_pos, pos2(912.0, 615.0));
+    }
+
+    #[test]
+    fn crop_presets_open_away_from_the_tools() {
+        let left_anchor = Rect::from_min_size(pos2(916.0, 660.0), vec2(38.0, 38.0));
+        assert_eq!(
+            crop_presets_position(left_anchor, content(), true),
+            pos2(658.0, 660.0)
+        );
+
+        let right_anchor = Rect::from_min_size(pos2(362.0, 660.0), vec2(38.0, 38.0));
+        assert_eq!(
+            crop_presets_position(right_anchor, content(), false),
+            pos2(408.0, 660.0)
+        );
     }
 }

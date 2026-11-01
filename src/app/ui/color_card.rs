@@ -23,7 +23,23 @@ impl HunkApp {
         T::floating_frame().show(ui, |ui| {
             ui.set_width(ui.available_width());
 
-            ui.label(T::section_label(self.t(K::History)));
+            ui.horizontal(|ui| {
+                ui.label(T::section_label(self.t(K::History)));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    let handle = move_handle(ui, self.t(K::MoveColorPanel));
+                    if handle.dragged() {
+                        if let Some(position) = self.color_panel_pos.as_mut() {
+                            let delta = ui.ctx().input(|input| input.pointer.delta());
+                            *position += delta;
+                            let bounds = ui.ctx().content_rect();
+                            let max = bounds.max - self.color_panel_size;
+                            position.x = position.x.clamp(bounds.left(), max.x.max(bounds.left()));
+                            position.y = position.y.clamp(bounds.top(), max.y.max(bounds.top()));
+                        }
+                        ui.ctx().request_repaint();
+                    }
+                });
+            });
             ui.add_space(6.0);
 
             let content_width = ui.available_width();
@@ -220,6 +236,35 @@ impl HunkApp {
         });
         actions
     }
+}
+
+fn move_handle(ui: &mut egui::Ui, label: &str) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(vec2(20.0, 20.0), Sense::drag());
+    let color = if response.hovered() || response.dragged() {
+        T::TEXT
+    } else {
+        T::TEXT_FAINT
+    };
+    let center = rect.center();
+    for offset_x in [-3.5, 3.5] {
+        for offset_y in [-4.0, 0.0, 4.0] {
+            ui.painter()
+                .circle_filled(center + vec2(offset_x, offset_y), 1.3, color);
+        }
+    }
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label.to_owned()));
+    let dragged = response.dragged();
+    let response = response
+        .on_hover_cursor(if dragged {
+            CursorIcon::Grabbing
+        } else {
+            CursorIcon::Grab
+        })
+        .on_hover_text(label);
+    if response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), rect, 6);
+    }
+    response
 }
 
 fn code_value(ui: &mut egui::Ui, value: &str, enabled: bool) -> egui::Response {

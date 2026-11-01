@@ -118,6 +118,6 @@ Fecha: 2026-11-01 · Referencia: `temp/HUNK converter.png`
   entrar en edición, el zoom con rueda sobre el recorte y el tooltip único de
   `Recortar`.
 - Estado vacío sin cabecera, con selector de idioma arriba a la derecha.
-- Suite de **68 pruebas**, `cargo fmt --check` y clippy limpios.
+- Suite de **70 pruebas**, `cargo fmt --check` y clippy limpios.
 - Validación visual e interactiva completada; los cambios se incluyen en el
   commit de la revisión de UI y recorte. La release sigue sin etiquetar.

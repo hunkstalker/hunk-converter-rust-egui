@@ -41,7 +41,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **68 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **70 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; **1.1.0** pendiente de cerrar `t-43` (benchmark final, CI y release). No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.

@@ -160,6 +160,7 @@ catalogue! {
         "Press the eyedropper and choose a pixel."
     ),
     History => ("HISTORIAL", "HISTORIAL", "HISTORY"),
+    MoveColorPanel => ("Arrastrar para mover", "Arrossega per moure", "Drag to move"),
     ClearHistory => ("Limpiar recientes", "Neteja els recents", "Clear recent"),
     HistoryFull => (
         "Historial lleno: libera un color para guardarlo.",

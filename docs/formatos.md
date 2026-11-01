@@ -395,9 +395,11 @@ limpia al cargar otra imagen, reiniciar o girar 90°.
 
 - El panel de ajustes está a la derecha y no llega al borde superior: encima
   quedan el selector de idioma y `Reiniciar`.
-- El historial y el cuentagotas flotan abajo a la izquierda del lienzo.
+- El historial y el cuentagotas viven en una tarjeta flotante que se puede mover
+  con un handle y queda por encima del lienzo y del panel derecho.
 - Los botones rápidos de borrar historial, recortar, cuentagotas, invertir y
-  girar quedan en una columna junto a esa tarjeta, por encima del footer.
+  girar quedan en una columna junto a esa tarjeta. La columna y el desplegable
+  de recorte se colocan a la izquierda o a la derecha según el espacio libre.
 - El recorte es no destructivo: muestra el exterior atenuado, limita el
   comparador a la zona recortada y se aplica antes de codificar. Con un recorte
   aplicado, `0`/`F` encuadra el recorte y `1` lo muestra a escala real.

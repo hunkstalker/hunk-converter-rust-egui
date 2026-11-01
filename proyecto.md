@@ -94,7 +94,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 ### 3.4 Cuentagotas
 
-- Icono de **cuentagotas** en la tarjeta flotante inferior izquierda.
+- Icono de **cuentagotas** en la tarjeta flotante movible.
 - Un clic activa o desactiva el modo; después basta con hacer clic sobre la imagen.
 - También se puede pulsar el icono y arrastrar hasta el píxel: se muestrea mientras se arrastra y se conserva el último color al soltar.
 - `Esc` o clic derecho sobre la imagen desactivan el modo sin alterar la muestra.
@@ -176,7 +176,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - Tamaño de ventana por defecto 1280 × 800; mínimo 1024 × 800.
 - Vista previa a pantalla completa con el selector de idioma y el botón de reinicio arriba a la derecha, sobre el lienzo. Los controles de ventana son los nativos.
 - Panel de ajustes a la derecha, con scroll vertical cuando no cabe. Incluye archivo, formato en cuadrícula, calidad o tamaños ICO, preprocesado, avanzado, pesos y exportación.
-- Historial y cuentagotas en una tarjeta flotante abajo a la izquierda del lienzo, con botones rápidos de invertir colores y girar 90°.
+- Historial y cuentagotas en una tarjeta flotante movible con handle, con botones rápidos de recortar, invertir colores y girar 90°. Las herramientas y el desplegable de recorte se recolocan a izquierda o derecha según el espacio.
 - Pie global con estado del proyecto, versión y enlace al repositorio.
 
 ### Render bajo demanda
@@ -371,7 +371,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **68 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **70 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

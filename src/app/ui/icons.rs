@@ -113,6 +113,9 @@ pub(crate) enum QuickTool {
     Trash,
 }
 
+pub(crate) const QUICK_TOOL_SIZE: f32 = 38.0;
+pub(crate) const QUICK_TOOL_GAP: f32 = 6.0;
+
 pub(crate) fn quick_tool_button(
     ui: &mut egui::Ui,
     tool: QuickTool,
@@ -121,7 +124,7 @@ pub(crate) fn quick_tool_button(
     label: &str,
 ) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(
-        vec2(38.0, 38.0),
+        vec2(QUICK_TOOL_SIZE, QUICK_TOOL_SIZE),
         if enabled {
             Sense::click()
         } else {

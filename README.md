@@ -44,7 +44,8 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 
 - Vista previa a pantalla completa con el **panel de ajustes a la derecha**.
 - Formato de salida en una cuadrícula de tarjetas: WebP, JPG, PNG, AVIF, Auto e ICO.
-- Historial y cuentagotas flotantes en la esquina inferior izquierda del lienzo.
+- Historial y cuentagotas en una tarjeta flotante que se puede mover con un handle.
+- Las herramientas rápidas y el desplegable de recorte se colocan a la derecha o a la izquierda de la tarjeta según el espacio disponible.
 - Botones rápidos **Recortar**, **Invertir colores** y **Girar 90°** junto a la tarjeta de color.
 
 ## Cuentagotas
@@ -68,6 +69,7 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 - Cuando el historial está lleno, se sustituye el color no fijado más antiguo.
 - Si todos los colores están fijados, el color nuevo se muestra pero no entra al historial; aparece un aviso.
 - El botón de papelera limpia los colores no fijados.
+- La tarjeta se mueve con el handle de la cabecera. Su posición dura la sesión y no se guarda en `config.ini`.
 - El historial y el estado de cada candado se conservan en `config.ini`, junto al ejecutable. Al reiniciar, los colores fijados siguen fijados.
 
 ## Idiomas y configuración
@@ -250,7 +252,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 68 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantificador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 70 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantificador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 
