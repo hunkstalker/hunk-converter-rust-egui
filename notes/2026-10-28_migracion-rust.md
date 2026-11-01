@@ -4,7 +4,7 @@
 
 ## Decisión
 
-La aplicación principal pasa a ser el proyecto Rust + egui. El prototipo Godot queda archivado en `../Prototipo/`, con una nota `ARCHIVADO.md`. La carpeta activa es `/workspace/hunk-converter`.
+La aplicación principal pasa a ser el proyecto Rust + egui. El prototipo Godot queda archivado en `../Prototipo/`, con una nota `ARCHIVADO.md`. La carpeta activa es `/workspace/hunk-converter-rust-egui`.
 
 La decisión se apoya en el benchmark comparativo: enorme reducción de tamaño y memoria, arranque más rápido, codificación más rápida y, sobre todo, una UI event-driven sin repintado continuo a 60 FPS.
 
