@@ -73,6 +73,9 @@ El script local equivalente es:
 ./scripts/build_dist.sh macos
 ```
 
+Para preparar un entorno de desarrollo local o en contenedor, consulta
+[`docs/desarrollo.md`](desarrollo.md).
+
 ## Estado de la release 1.0.0
 
 La release [`v1.0.0`](https://github.com/hunkstalker/hunk-converter-rust-egui/releases/tag/v1.0.0)

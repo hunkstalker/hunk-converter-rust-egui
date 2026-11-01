@@ -381,10 +381,14 @@ Resumen del contexto de referencia:
 Comandos:
 
 ```bash
+./scripts/setup_dev.sh --install
 cargo run --release -- /ruta/a/imagen.jpg
 cargo test
 cargo clippy --all-targets -- -D warnings
 ./scripts/build_dist.sh all
+
+# Alternativa reproducible
+docker compose run --rm dev cargo test
 ```
 
 ## 10. Tareas y documentación
@@ -393,6 +397,7 @@ cargo clippy --all-targets -- -D warnings
 - `t-completadas.md`: tareas cerradas.
 - `retomar.md`: contexto para nuevas sesiones.
 - `notes/AAAA-MM-DD_asunto.md`: evidencia fechada e inmutable.
+- `docs/desarrollo.md`: entorno local, dependencias por sistema y contenedor.
 - `docs/benchmark-2026-10-28.md`: resultados de rendimiento y metodología.
 
 Al preguntar por las tareas, se debe devolver toda la información de cada tarea pendiente de `todo.md`, sin omitir descripciones.

@@ -1,0 +1,8 @@
+target
+dist
+temp
+.git
+.github
+notes
+*.zip
+config.ini

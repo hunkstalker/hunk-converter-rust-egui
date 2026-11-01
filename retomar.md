@@ -49,6 +49,10 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 ## 3. Comandos
 
 ```bash
+# Entorno local o contenedor (ver docs/desarrollo.md)
+./scripts/setup_dev.sh --install
+docker compose run --rm dev cargo test
+
 cargo run --release -- /ruta/a/imagen.jpg
 cargo run --release
 

@@ -1,7 +1,5 @@
 # HUNK Converter
 
-[Repositorio](https://github.com/hunkstalker/hunk-converter-rust-egui) · [Release 1.0.0](https://github.com/hunkstalker/hunk-converter-rust-egui/releases/tag/v1.0.0)
-
 **Convierte, comprime, compara, recorta, muestrea colores y exporta imágenes sin salir de tu equipo.**
 
 HUNK Converter es una aplicación de escritorio local-first escrita en **Rust + egui**. Arrastra una imagen, elige el formato de salida, ajusta la calidad y comprueba el resultado real con un comparador deslizante antes de guardarlo. También genera iconos `.ico` multirresolución.
@@ -126,22 +124,20 @@ conserva y se puede quitar al volver a otro formato.
 
 Las capturas usan imágenes de muestra generadas por el propio proyecto.
 
-## Ejecutar desde el código
+## Desarrollo
 
-Requisitos:
+Guía completa: [docs/desarrollo.md](docs/desarrollo.md).
 
-- **Rust 1.99.1** (fijado en `rust-toolchain.toml`).
-- Un compilador de C y **CMake** para `libwebp-sys` y `libavif`/AOM.
-- **NASM** en x86/x86_64 para `rav1d` y AOM.
-- En Linux, las bibliotecas gráficas habituales de X11/OpenGL.
-- En Windows, MSVC Build Tools o un toolchain GNU. Al compilar para Windows GNU desde Linux/macOS, `scripts/build_dist.sh windows` configura CMake para el target; necesitas definir `CC_x86_64_pc_windows_gnu`, `CXX_x86_64_pc_windows_gnu` y `AR_x86_64_pc_windows_gnu`.
-- En macOS, Xcode Command Line Tools y Rust con los targets `aarch64-apple-darwin` y `x86_64-apple-darwin`.
+- **Local:** `./scripts/setup_dev.sh --install` en Linux/macOS o
+  `.\scripts\setup_dev.ps1 -Install` en Windows.
+- **Contenedor:** `docker compose run --rm dev cargo test` o **Reopen in
+  Container** en VS Code.
+- **Verificación:** `cargo test`, `cargo clippy --all-targets -- -D warnings` y
+  `cargo fmt --all -- --check`.
+- **GUI:** `cargo run --release`. Dentro del contenedor requiere X11; el
+  diálogo nativo de guardado puede no estar disponible sin portal/DBus.
 
-```bash
-cargo run --release -- /ruta/a/imagen.jpg
-# o abre la ventana y arrastra una imagen
-cargo run --release
-```
+La guía detalla dependencias por sistema, Xvfb, UID/GID y solución de problemas.
 
 ## Uso
 
@@ -163,8 +159,8 @@ Al exportar se abre el explorador nativo para elegir la carpeta y el nombre. Si 
 | `Ctrl+V` | Pegar una imagen del portapapeles |
 | `Ctrl+S` | Exportar |
 | `Ctrl+R` | Reiniciar la aplicación |
-| `0` / `F` | Ajustar imagen a la ventana |
-| `1` | Tamaño real 1:1 |
+| `0` / `F` | Ajustar la imagen o el recorte a la ventana |
+| `1` | Tamaño real 1:1 y centrar el recorte aplicado |
 | `+` / `-` | Aumentar o reducir zoom |
 | `←` / `→` | Mover el divisor del comparador |
 | `Inicio` / `Fin` | Llevar el divisor a un extremo |
@@ -268,11 +264,15 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 
 ```text
 .
+├── .devcontainer/          Integración con VS Code/Codespaces
 ├── assets/                 Iconos, tipografía y licencias
-├── docs/                   Capturas, benchmark, arquitectura, CI, formatos y plan
+├── docker/dev.Dockerfile   Imagen de desarrollo reproducible
+├── docs/                   Capturas, benchmark, arquitectura, CI, formatos y guías
 ├── notes/                  Evidencia fechada de las sesiones
 ├── build.rs                Icono embebido del .exe de Windows
+├── compose.yaml            Servicio dev y volúmenes de Cargo
 ├── scripts/build_dist.sh   Empaquetado portable
+├── scripts/setup_dev.*     Dependencias locales en Linux/macOS/Windows
 ├── src/
 │   ├── app/                Shell, estado, acciones y componentes egui
 │   │   ├── actions.rs      Efectos explícitos devueltos por la UI
@@ -302,6 +302,7 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 - [todo.md](todo.md) — tareas pendientes.
 - [t-completadas.md](t-completadas.md) — tareas cerradas.
 - [retomar.md](retomar.md) — estado y contexto para continuar.
+- [docs/desarrollo.md](docs/desarrollo.md) — entorno local, dependencias por sistema y contenedor.
 - [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md) — objetivo y alcance web de 1.1.
 - [docs/formatos.md](docs/formatos.md) — matriz de formatos, entrada/salida y opciones avanzadas.
 - [docs/plan-formatos-y-opciones.md](docs/plan-formatos-y-opciones.md) — plan histórico de ampliación de formatos.
