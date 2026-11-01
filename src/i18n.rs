@@ -88,9 +88,9 @@ catalogue! {
     ),
     EmptyTitle => ("Suelta una imagen.\nHazla tuya.", "Deixa anar una imatge.\nFes-la teva.", "Drop an image.\nMake it yours."),
     EmptySubtitle => (
-        "Convierte, comprime y exporta sin salir de tu equipo.",
-        "Converteix, comprimeix i exporta sense sortir del teu equip.",
-        "Convert, compress and export without leaving your computer."
+        "Convierte, comprime, recorta y exporta sin salir de tu equipo.",
+        "Converteix, comprimeix, retalla i exporta sense sortir del teu equip.",
+        "Convert, compress, crop and export without leaving your computer."
     ),
     SelectImage => ("Seleccionar una imagen", "Selecciona una imatge", "Select an image"),
     PrivacyNote => (
@@ -283,6 +283,20 @@ catalogue! {
     ),
     Rotate => ("Rotación", "Rotació", "Rotation"),
     RotateQuick => ("Girar 90°", "Gira 90°", "Rotate 90°"),
+    Crop => ("Recortar", "Retalla", "Crop"),
+    CropFree => ("Libre", "Lliure", "Free"),
+    CropOriginal => ("Original", "Original", "Original"),
+    CropSquare => ("1:1", "1:1", "1:1"),
+    CropFourThree => ("4:3", "4:3", "4:3"),
+    CropSixteenNine => ("16:9", "16:9", "16:9"),
+    CropApply => ("Aplicar", "Aplica", "Apply"),
+    CropCancel => ("Cancelar", "Cancel·la", "Cancel"),
+    RemoveCrop => ("Quitar recorte", "Treu el retall", "Remove crop"),
+    CropUnavailableIco => (
+        "El recorte no está disponible en ICO.",
+        "El retall no està disponible a ICO.",
+        "Cropping is not available for ICO."
+    ),
     InvertColors => ("Invertir colores", "Inverteix els colors", "Invert colors"),
     Palette => ("Reducir paleta", "Redueix la paleta", "Reduce palette"),
     Colors => ("Colores", "Colors", "Colors"),

@@ -1,4 +1,5 @@
 pub mod color;
+pub mod crop;
 pub mod error;
 pub mod export_name;
 pub mod format;
@@ -6,6 +7,7 @@ pub mod history;
 pub mod preprocess;
 
 pub use color::{color_codes, flatten_rgba, hex_rgba, parse_hex_rgba};
+pub use crop::{CropPixels, CropRect, crop_rgba};
 pub use error::{
     AppError, ClipboardError, ConfigError, EncodeError, ExportError, IcoError, LoadError,
 };

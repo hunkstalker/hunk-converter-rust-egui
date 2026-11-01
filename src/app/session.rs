@@ -14,6 +14,7 @@ use super::{FIT_ZOOM, UI_PREVIEW_MAX};
 
 impl HunkApp {
     pub(crate) fn set_source(&mut self, input: SourceInput, ctx: &egui::Context) {
+        self.clear_crop();
         let resolved_format = match self.format_selection {
             FormatSelection::Fixed(format) => format,
             FormatSelection::Auto => {
@@ -198,6 +199,7 @@ impl HunkApp {
     pub(crate) fn reset(&mut self, ctx: &egui::Context) {
         self.source = None;
         self.result = None;
+        self.clear_crop();
         self.preprocess_pending_since = None;
         self.preprocess_worker = None;
         self.preprocess_revision = self.preprocess_revision.wrapping_add(1);
@@ -247,6 +249,7 @@ impl HunkApp {
         self.format = format;
         if format == OutputFormat::Ico {
             self.eyedropper_active = false;
+            self.cancel_crop();
         }
         self.result = None;
         true

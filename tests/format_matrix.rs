@@ -5,7 +5,7 @@ use image::{DynamicImage, Rgba, RgbaImage};
 use tiff::encoder::{TiffEncoder, colortype};
 
 use hunk_converter::codec::{self, EncodeOptions, OutputFormat};
-use hunk_converter::domain::LoadError;
+use hunk_converter::domain::{CropRect, LoadError, crop_rgba};
 
 const WIDTH: u32 = 64;
 const HEIGHT: u32 = 48;
@@ -131,6 +131,24 @@ fn loads_all_supported_input_formats() {
     assert!(loaded.pixels.get_pixel(0, 0).0[3].abs_diff(128) <= 4);
 
     std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn crop_is_applied_before_encoding() {
+    let source = source();
+    let crop = CropRect {
+        x: 0.25,
+        y: 0.25,
+        width: 0.5,
+        height: 0.5,
+    };
+    let cropped = crop_rgba(&source, crop);
+    assert_eq!(cropped.dimensions(), (WIDTH / 2, HEIGHT / 2));
+
+    let encoded = codec::encode(&cropped, &options(OutputFormat::Png)).unwrap();
+    let decoded = image::load_from_memory(&encoded.bytes).unwrap().to_rgba8();
+    assert_eq!(decoded.dimensions(), (WIDTH / 2, HEIGHT / 2));
+    assert_eq!(decoded.get_pixel(0, 0), cropped.get_pixel(0, 0));
 }
 
 #[test]

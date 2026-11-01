@@ -2,7 +2,7 @@
 
 [Repositorio](https://github.com/hunkstalker/hunk-converter-rust-egui) · [Release 1.0.0](https://github.com/hunkstalker/hunk-converter-rust-egui/releases/tag/v1.0.0)
 
-**Convierte, comprime, compara, muestrea colores y exporta imágenes sin salir de tu equipo.**
+**Convierte, comprime, compara, recorta, muestrea colores y exporta imágenes sin salir de tu equipo.**
 
 HUNK Converter es una aplicación de escritorio local-first escrita en **Rust + egui**. Arrastra una imagen, elige el formato de salida, ajusta la calidad y comprueba el resultado real con un comparador deslizante antes de guardarlo. También genera iconos `.ico` multirresolución.
 
@@ -22,6 +22,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
 - **AVIF de referencia:** libavif/AOM con YUV420 y alfa; paridad práctica con Squoosh y más velocidad.
 - **Preprocesado:** resize enlazado con proporción, marco del tamaño original en el canvas, rotación con el botón rápido de 90° y paleta de 2–256 colores. Los campos numéricos aceptan arrastre vertical y expresiones como `1600/4`.
+- **Recorte no destructivo:** máscara con tiradores y presets Libre, Original, 1:1, 4:3 y 16:9. El exterior se atenúa, el comparador se limita al recorte y la exportación usa solo esa zona; el recorte se puede quitar después.
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
 - **Zoom y paneo:** rueda del ratón en cualquier punto del visor y clic derecho para desplazarte.
 - **Vista previa fiel al archivo final**: se decodifica el resultado codificado real.
@@ -46,7 +47,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - Vista previa a pantalla completa con el **panel de ajustes a la derecha**.
 - Formato de salida en una cuadrícula de tarjetas: WebP, JPG, PNG, AVIF, Auto e ICO.
 - Historial y cuentagotas flotantes en la esquina inferior izquierda del lienzo.
-- Botones rápidos **Invertir colores** y **Girar 90°** junto a la tarjeta de color.
+- Botones rápidos **Recortar**, **Invertir colores** y **Girar 90°** junto a la tarjeta de color.
 
 ## Cuentagotas
 
@@ -82,12 +83,40 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 
 - **La imagen se abre al 100 %.**
 - **Rueda o pinza** sobre la imagen: acerca y aleja manteniendo el punto bajo el cursor.
-- **Atajos:** `+`/`-` ajustan el zoom por pasos; `1` activa el tamaño real 1:1 y `0`/`F` vuelve al encuadre completo.
+- **Atajos:** `+`/`-` ajustan el zoom por pasos; `1` activa el tamaño real 1:1 y `0`/`F` ajusta el contenido visible. Sin recorte encuadra la imagen completa; con un recorte aplicado encuadra el propio recorte.
 - **Clic derecho y arrastra**: desplaza la imagen cuando está ampliada.
 - El porcentaje de zoom refleja la escala real de la imagen y se resalta en lima solo al 100 %. La vista previa no tiene botones de zoom: se controla con teclado, rueda o pinza en cualquier punto del visor.
+- Con un recorte aplicado, el zoom, el paneo y el ajuste usan el recorte como referencia; `1` lo centra a escala real. Al entrar o salir de la edición se conserva la escala si estabas ampliado.
 - El divisor y el cuentagotas siguen funcionando con cualquier zoom.
 
 ![Zoom y paneo de HUNK Converter](docs/hunk-converter-zoom.png)
+
+## Recorte
+
+1. Pulsa el icono de **Recortar** en la columna flotante, entre la papelera y el
+   cuentagotas.
+2. Ajusta el marco con los ocho tiradores o elige un preset: **Libre**,
+   **Original**, **1:1**, **4:3** o **16:9**. Al arrastrar un tirador el preset
+   pasa a **Libre**; arrastrar dentro del marco lo desplaza sin cambiar su
+   tamaño.
+3. Pulsa **Aplicar** o `Enter`. Con **Cancelar** o `Esc` se descarta el borrador.
+
+Mientras editas, el visor muestra la imagen de origen con la máscara y el
+exterior atenuado. Al aplicar, dentro del recorte se compara el resultado real
+con el original y fuera se mantiene la imagen completa atenuada; el divisor solo
+recorre la zona recortada. La tarjeta de la imagen muestra las dimensiones de
+salida y el tamaño del resultado se recalcula al aplicar. Si estabas en modo
+ajuste, al aplicar el visor pasa a encuadrar el recorte; `0`/`F` lo reajusta y
+`1` lo muestra a escala real centrado.
+
+El recorte es una máscara normalizada: no modifica los píxeles de origen y se
+aplica antes de codificar, así que la exportación guarda exactamente la zona
+recortada. Para quitarlo, vuelve a abrir **Recortar** y usa **Quitar recorte**.
+No se guarda en `config.ini`; se mantiene al cambiar de formato dentro de la
+sesión. En la vista ICO el botón está desactivado, pero el recorte aplicado se
+conserva y se puede quitar al volver a otro formato.
+
+![Recorte no destructivo en HUNK Converter](docs/hunk-converter-recorte.png)
 
 ## Capturas
 
@@ -119,9 +148,10 @@ cargo run --release
 1. Arrastra una imagen a la ventana, pulsa **Seleccionar una imagen** o usa `Ctrl+V`.
 2. Elige **WebP**, **AVIF**, **JPG**, **PNG** o **ICO**.
 3. Ajusta la calidad o los tamaños del icono.
-4. Arrastra el divisor para comparar. Usa la rueda para acercar y el clic derecho para moverte por la imagen.
-5. Activa el cuentagotas si necesitas extraer colores.
-6. Pulsa **Exportar** o `Ctrl+S`.
+4. Recorta si lo necesitas con **Recortar**; el marco se aplica al resultado y a la exportación.
+5. Arrastra el divisor para comparar. Usa la rueda para acercar y el clic derecho para moverte por la imagen.
+6. Activa el cuentagotas si necesitas extraer colores.
+7. Pulsa **Exportar** o `Ctrl+S`.
 
 Al exportar se abre el explorador nativo para elegir la carpeta y el nombre. Si no escribes extensión, se añade la del formato actual.
 
@@ -143,6 +173,7 @@ Al exportar se abre el explorador nativo para elegir la carpeta y el nombre. Si 
 | `↑` / `↓` | Desplazar la imagen verticalmente cuando está ampliada |
 | `Shift+←` / `Shift+→` | Desplazar la imagen horizontalmente cuando está ampliada |
 | `L` | Bloquear o desbloquear el color enfocado del historial |
+| `Enter` / `Esc` | Aplicar o cancelar el recorte en edición |
 | `Esc` | Cancelar el cuentagotas |
 
 `Ctrl+E` sigue funcionando como alias de exportación.
@@ -186,7 +217,7 @@ Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como 
 Cada build es una carpeta autocontenida. Al exportar se elige la ruta con el diálogo nativo; si existe, se propone la carpeta `export/` junto al ejecutable.
 
 ```text
-hunk-converter-1.0.0-windows-x86_64/
+hunk-converter-1.1.0-windows-x86_64/
 ├── hunk-converter.exe
 ├── config.ini          (se crea al primer arranque)
 ├── export/
@@ -223,7 +254,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 62 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 68 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantificador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 
@@ -245,13 +276,14 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 ├── src/
 │   ├── app/                Shell, estado, acciones y componentes egui
 │   │   ├── actions.rs      Efectos explícitos devueltos por la UI
+│   │   ├── crop.rs         Estado y acciones del recorte no destructivo
 │   │   ├── encoding.rs     Worker de codificación y revisiones
-│   │   ├── export.rs       Exportación portable sin sobrescritura
+│   │   ├── export.rs       Exportación mediante diálogo nativo
 │   │   ├── session.rs      Carga, pegado, reinicio y formato
-│   │   ├── state.rs        SourceImage, RenderedResult, Toast
+│   │   ├── state.rs        SourceImage, RenderedResult, CropRect y Toast
 │   │   └── ui/             Panel derecho, color flotante, preview y widgets
 │   ├── codec/              WebP, JPG, PNG, AVIF, JPEG XL, ICO, SVG y TIFF
-│   ├── domain/             Formatos, color, historial y errores tipados
+│   ├── domain/             Formatos, recorte, color, historial y errores tipados
 │   ├── settings/           config.ini, idioma, historial y maximizado
 │   ├── bin/                Benchmarks, muestra y generador de icono
 │   ├── demo.rs             Imagen sintética para capturas

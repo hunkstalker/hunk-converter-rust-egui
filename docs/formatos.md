@@ -1,7 +1,7 @@
 # Formatos de entrada, salida y opciones avanzadas
 
-> Estado: especificación de producto · Fecha: 2026-10-31
-> Versión de desarrollo: 1.1.0 · Selector automático validado (`t-35`) · Entrada TIFF implementada (`t-36`) · Alcance 1.1: [objetivo-1.1-web.md](objetivo-1.1-web.md) · Plan histórico: [plan-formatos-y-opciones.md](plan-formatos-y-opciones.md)
+> Estado: especificación de producto · Fecha: 2026-11-01
+> Versión de desarrollo: 1.1.0 · Selector automático validado (`t-35`) · Entrada TIFF implementada (`t-36`) · Recorte no destructivo validado (`t-46`) · Alcance 1.1: [objetivo-1.1-web.md](objetivo-1.1-web.md) · Plan histórico: [plan-formatos-y-opciones.md](plan-formatos-y-opciones.md)
 >
 > En 1.1 el selector solo ofrece JPEG, PNG, WebP, AVIF e ICO. Las filas de JPEG
 > XL, TGA y TIFF de salida describen el análisis histórico, no la UI actual.
@@ -46,7 +46,7 @@
 | JPG | `.jpg` | Con pérdida | Calidad 1–100; progresivo; submuestreo automático; fondo blanco fijo |
 | PNG | `.png` | Sin pérdida | OxiPNG nivel 2 |
 | AVIF | `.avif` | Con pérdida | Calidad 1–100; velocidad; calidad alfa; YUV420 fijo |
-| JPEG XL | `.jxl` | Sin pérdida | Sin opciones |
+| JPEG XL (oculto en 1.1) | `.jxl` | Sin pérdida | Sin opciones |
 | ICO | `.ico` | Sin pérdida | Tamaños 16–256 px |
 
 JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. WebP usa libwebp avanzado. AVIF usa libavif/AOM con YUV420, BT.601, cuantizador directo, speed y alpha quality. Los controles están expuestos en el bloque `Avanzado` y no se persisten.
@@ -237,12 +237,8 @@ FormatSelection::Fixed(OutputFormat)
 | PNG | PNG |
 | JPG | JPG |
 | WebP | WebP |
-| TGA | TGA, cuando exista salida TGA |
-| TIFF | TIFF, cuando exista salida TIFF |
 | AVIF | AVIF |
-| JPEG XL | JPEG XL |
-| BMP | WebP |
-| SVG | WebP |
+| BMP, TGA, TIFF y SVG | WebP |
 
 Si no hay salida equivalente se usa **WebP** y se explica en la línea de ayuda.
 
@@ -253,10 +249,10 @@ Autoseleccionar el mismo formato puede implicar recomprimir:
 - PNG → PNG es seguro.
 - JPG → JPG puede degradar la imagen.
 - WebP → WebP puede degradar si el modo es lossy.
-- TIFF/TGA sin pérdida son seguros.
+- AVIF → AVIF puede degradar la imagen.
 
-Cuando el formato resuelto sea JPG o WebP lossy, la UI mostrará un aviso
-discreto junto a la calidad:
+Cuando el formato resuelto sea JPG, WebP o AVIF con pérdida, la UI mostrará un
+aviso discreto junto a la calidad:
 
 > Recompresión con pérdida: ajusta la calidad si quieres conservar más detalle.
 
@@ -368,9 +364,11 @@ aplicarse de forma fiable.
 
 ### 7.4 Persistencia
 
-La persistencia de Preprocesado y Avanzado está descartada. `config.ini` solo
-guarda `[general]`, `[output]`, `[window]` y `[history]`; las claves antiguas de
-`[advanced]` se ignoran y esos bloques arrancan con sus valores por defecto.
+La persistencia de Preprocesado, Avanzado y del recorte está descartada.
+`config.ini` solo guarda `[general]`, `[output]`, `[window]` y `[history]`; las
+claves antiguas de `[advanced]` se ignoran y esos bloques arrancan con sus
+valores por defecto. El recorte se aplica en memoria antes de codificar y se
+limpia al cargar otra imagen, reiniciar o girar 90°.
 
 - `format=auto` es el valor inicial.
 - Los valores inválidos generan advertencia y no rompen el arranque.
@@ -398,8 +396,11 @@ guarda `[general]`, `[output]`, `[window]` y `[history]`; las claves antiguas de
 - El panel de ajustes está a la derecha y no llega al borde superior: encima
   quedan el selector de idioma y `Reiniciar`.
 - El historial y el cuentagotas flotan abajo a la izquierda del lienzo.
-- Los botones rápidos de invertir y girar quedan junto a esa tarjeta, por encima
-  del footer.
+- Los botones rápidos de borrar historial, recortar, cuentagotas, invertir y
+  girar quedan en una columna junto a esa tarjeta, por encima del footer.
+- El recorte es no destructivo: muestra el exterior atenuado, limita el
+  comparador a la zona recortada y se aplica antes de codificar. Con un recorte
+  aplicado, `0`/`F` encuadra el recorte y `1` lo muestra a escala real.
 - La cuadrícula de formato y el bloque avanzado deben funcionar a 1024×800 y
   con escalado 125–200 %.
 - El desplegable, el bloque avanzado y los grupos de opciones deben ser
@@ -412,8 +413,8 @@ guarda `[general]`, `[output]`, `[window]` y `[history]`; las claves antiguas de
 - Límite superado: tamaño, lado o megapíxeles.
 - Memoria insuficiente o decodificación demasiado grande: error controlado, no
   cierre de la app.
-- Exportación: errores de carpeta/escritura ya existentes.
-- Nunca se sobrescribe un archivo; se mantiene la numeración atómica.
+- Exportación: errores de carpeta/escritura ya existentes. La ruta se elige en
+  el diálogo nativo y el sistema gestiona la confirmación de sobrescritura.
 
 ## 10. Pruebas y criterios de aceptación
 
@@ -438,7 +439,7 @@ guarda `[general]`, `[output]`, `[window]` y `[history]`; las claves antiguas de
   aplique.
 - Exportar cada formato y reabrirlo.
 - Verificar que `Auto` no cambia una selección fija.
-- Verificar el aviso de recompresión JPG/WebP.
+- Verificar el aviso de recompresión JPG/WebP/AVIF.
 - Revisar 100 %, 125 % y 150 % de escalado.
 - Validación visual en Linux y Windows; macOS si hay build disponible.
 - Comprobación con lector de pantalla de los controles nuevos.

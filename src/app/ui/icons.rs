@@ -107,6 +107,7 @@ pub(crate) fn paint_eyedropper(painter: &egui::Painter, rect: Rect, color: Color
 
 #[derive(Clone, Copy)]
 pub(crate) enum QuickTool {
+    Crop,
     Invert,
     Rotate,
     Trash,
@@ -157,6 +158,7 @@ pub(crate) fn quick_tool_button(
         StrokeKind::Inside,
     );
     match tool {
+        QuickTool::Crop => paint_crop_icon(ui.painter(), rect, icon),
         QuickTool::Invert => paint_invert_icon(ui.painter(), rect, icon),
         QuickTool::Rotate => paint_rotate_icon(ui.painter(), rect, icon),
         QuickTool::Trash => paint_trash_icon(ui.painter(), rect.shrink(9.0), icon),
@@ -172,6 +174,21 @@ pub(crate) fn quick_tool_button(
             .on_hover_text(label)
     } else {
         response
+    }
+}
+
+fn paint_crop_icon(painter: &egui::Painter, rect: Rect, color: Color32) {
+    let inner = rect.shrink(9.0);
+    let len = inner.width() * 0.32;
+    let stroke = Stroke::new(1.7, color);
+    for (corner, dx, dy) in [
+        (inner.left_top(), 1.0, 1.0),
+        (inner.right_top(), -1.0, 1.0),
+        (inner.left_bottom(), 1.0, -1.0),
+        (inner.right_bottom(), -1.0, -1.0),
+    ] {
+        painter.line_segment([corner, corner + vec2(dx * len, 0.0)], stroke);
+        painter.line_segment([corner, corner + vec2(0.0, dy * len)], stroke);
     }
 }
 

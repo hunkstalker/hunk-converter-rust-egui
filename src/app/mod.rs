@@ -6,13 +6,14 @@ use eframe::egui::{self, TextureHandle};
 
 use crate::codec::{ICO_SIZES, OutputFormat};
 use crate::domain::{
-    AppError, FormatSelection, HistoryEntry, clear_unlocked, remember_color, toggle_lock,
+    AppError, CropRect, FormatSelection, HistoryEntry, clear_unlocked, remember_color, toggle_lock,
 };
 use crate::i18n::{self, K, Lang};
 use crate::settings;
 use crate::theme as T;
 
 mod actions;
+mod crop;
 mod encoding;
 mod export;
 mod preprocess;
@@ -21,7 +22,9 @@ mod state;
 mod ui;
 
 use actions::AppAction;
-use state::{EncodeJobResult, PreprocessJobResult, RenderedResult, SourceImage, Toast};
+use state::{
+    CropDrag, CropPreset, EncodeJobResult, PreprocessJobResult, RenderedResult, SourceImage, Toast,
+};
 
 pub const ENCODE_DELAY_MS: u64 = 160;
 pub const PREPROCESS_DELAY_MS: u64 = 120;
@@ -49,6 +52,11 @@ pub struct HunkApp {
     eyedropper_active: bool,
     sampled_color: Option<[u8; 4]>,
     sampled_position: Option<(u32, u32)>,
+    crop: Option<CropRect>,
+    crop_edit: Option<CropRect>,
+    crop_preset: CropPreset,
+    crop_drag: Option<CropDrag>,
+    view_content: Option<CropRect>,
     split: f32,
     zoom: f32,
     pan: egui::Vec2,
@@ -115,6 +123,11 @@ impl HunkApp {
             eyedropper_active: false,
             sampled_color: None,
             sampled_position: None,
+            crop: None,
+            crop_edit: None,
+            crop_preset: CropPreset::Free,
+            crop_drag: None,
+            view_content: None,
             split: 0.5,
             zoom: FIT_ZOOM,
             pan: egui::Vec2::ZERO,
@@ -388,6 +401,22 @@ impl eframe::App for HunkApp {
             && ctx.input(|input| input.modifiers.command && input.key_released(egui::Key::V))
         {
             self.paste_clipboard_image(&ctx);
+        }
+
+        if !text_input_active && self.crop_edit.is_some() {
+            let (cancel, apply) = ctx.input(|input| {
+                (
+                    input.key_pressed(egui::Key::Escape),
+                    input.key_pressed(egui::Key::Enter),
+                )
+            });
+            if cancel {
+                self.cancel_crop();
+                ctx.request_repaint();
+            } else if apply && self.apply_crop() {
+                self.result = None;
+                self.request_encode(&ctx, None);
+            }
         }
 
         if !text_input_active

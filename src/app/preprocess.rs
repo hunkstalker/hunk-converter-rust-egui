@@ -16,6 +16,7 @@ impl HunkApp {
         if self.source.is_none() {
             return;
         }
+        self.clear_crop();
         self.advanced.preprocess.rotation = (self.advanced.preprocess.rotation + 90) % 360;
         if self.advanced.preprocess.resize_enabled {
             std::mem::swap(

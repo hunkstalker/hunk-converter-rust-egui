@@ -70,7 +70,7 @@ impl HunkApp {
                             }
                             ui.add_space(16.0);
                             ui.label(
-                                RichText::new("PNG · JPG · WEBP · BMP · TGA · SVG")
+                                RichText::new("PNG · JPG · WEBP · AVIF · BMP · TGA · TIFF · SVG")
                                     .size(9.0)
                                     .color(T::TEXT_FAINT)
                                     .strong(),

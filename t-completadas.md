@@ -275,7 +275,7 @@
 **Descripción:** Exponer las opciones tipadas, persistirlas y dejar el selector de salida en web+ICO.
 
 **Completada:** 2026-10-31
-**Resultado:** Bloque `Avanzado` contextual y colapsado con resumen y reset: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa y AVIF speed/alfa. JPEG XL sale del selector. Las opciones y el preprocesado se guardan en `[advanced]` de `config.ini`, con migración de configuraciones antiguas. Suite de 55 pruebas.
+**Resultado:** Bloque `Avanzado` contextual y colapsado con resumen y reset: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa y AVIF speed/alfa. JPEG XL sale del selector. Las opciones y el preprocesado se guardan en `[advanced]` de `config.ini`, con migración de configuraciones antiguas. Suite de 55 pruebas. La persistencia de `[advanced]` se retiró después en el rediseño de 1.1; `config.ini` solo conserva idioma, historial, formato y ventana.
 
 ## t-44 — Cerrar la brecha de compresión AVIF
 
@@ -283,3 +283,17 @@
 
 **Completada:** 2026-10-31
 **Resultado:** ravif se sustituye por `libavif-sys` con AOM 3.11 estático: RGBA8 → YUV420, BT.601, `end-usage=q`, `cq-level`, alfa y `tune=ssim` para cuantizadores ≤ 32. A igual SSIMULACRA2, el tamaño mediano es 0,994× frente a Squoosh (0,704–1,069); la UI queda en 0,705–0,960× y la velocidad es 1,82× en UI y 4,58× de mediana. El peor caso es el icono con alfa en calidad alta (+6,9 %). Suite de 57 pruebas; build Linux y Windows GNU validados localmente. La release sigue sin etiquetarse hasta la revisión de AVIF, `t-45` y el cierre `t-43`.
+
+## t-45 — Correcciones de resize y UI
+
+**Descripción:** Aplicar la revisión de la UI de preprocesado/avanzado: sincronizar ancho y alto con la proporción, sustituir la referencia textual por un marco del tamaño original en el canvas, usar cajas numéricas con arrastre vertical y expresiones estilo Blender, y unificar el diseño de los desplegables.
+
+**Completada:** 2026-11-01
+**Resultado:** Rediseño con panel derecho, cuadrícula de formato, tarjeta flotante de historial/cuentagotas, botones rápidos y tipografía centralizada. Resize con proporción enlazada, marco del original en el canvas, campos con arrastre y expresiones, y desplegables consistentes. Validación visual bajo Xvfb y revisión incremental del usuario. Suite de 68 pruebas, `cargo fmt --check` y clippy limpios.
+
+## t-46 — Recorte no destructivo
+
+**Descripción:** Añadir un recorte no destructivo con máscara normalizada, tiradores, presets de proporción y comparador limitado a la zona recortada. Debe aplicarse antes de codificar, afectar a la exportación y poder quitarse después sin tocar la imagen de origen. En ICO el recorte no se edita.
+
+**Completada:** 2026-11-01
+**Resultado:** `CropRect` normalizado en `domain/crop.rs` y estado/acciones en `app/crop.rs`. Ocho tiradores, movimiento del marco, presets `Libre`/`Original`/`1:1`/`4:3`/`16:9`, exterior atenuado y comparador limitado al recorte con el resultado real dentro. `Enter` aplica, `Esc` cancela y `Quitar recorte` restaura la imagen completa. El recorte se aplica antes de la paleta y del encoder, no modifica los píxeles de origen y no se persiste. Con recorte aplicado, `0`/`F` encuadra el recorte, `1` lo centra a escala real y rueda/paneo usan el recorte como contenido; en ICO el botón se desactiva y un borrador se cancela. Suite de 68 pruebas y builds Linux/Windows GNU regenerados.

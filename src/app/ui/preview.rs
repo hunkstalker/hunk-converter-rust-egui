@@ -8,6 +8,7 @@ use crate::theme as T;
 
 use super::super::HunkApp;
 use super::super::actions::AppAction;
+use super::super::state::CropPreset;
 use super::canvas::CanvasContext;
 use super::icons::{EyedropperButton, QuickTool, eyedropper_button, quick_tool_button};
 
@@ -79,12 +80,15 @@ impl HunkApp {
                         actions.extend(self.show_color_panel(ui));
                     });
 
+                let mut crop_button_rect = None;
                 egui::Area::new(egui::Id::unique("canvas_quick_tools"))
                     .anchor(Align2::LEFT_BOTTOM, vec2(368.0, -92.0))
                     .order(Order::Foreground)
                     .show(&ctx, |ui| {
                         ui.set_width(38.0);
                         ui.spacing_mut().item_spacing.y = 6.0;
+                        let icon_mode = self.format == OutputFormat::Ico;
+                        let crop_editing = self.crop_edit.is_some();
 
                         let has_unlocked = self.history.iter().any(|entry| !entry.locked);
                         let clear_label = self.t(K::ClearHistory);
@@ -94,12 +98,30 @@ impl HunkApp {
                             actions.push(AppAction::ClearHistory);
                         }
 
-                        let icon_mode = self.format == OutputFormat::Ico;
+                        let crop_label = self.t(K::Crop);
+                        let crop_response = quick_tool_button(
+                            ui,
+                            QuickTool::Crop,
+                            crop_editing,
+                            !icon_mode,
+                            crop_label,
+                        );
+                        let crop_response = if icon_mode {
+                            crop_response.on_hover_text(self.t(K::CropUnavailableIco))
+                        } else {
+                            crop_response
+                        };
+                        if crop_response.clicked() {
+                            self.toggle_crop();
+                        }
+                        crop_button_rect = Some(crop_response.rect);
+                        let crop_editing = self.crop_edit.is_some();
+
                         let eyedropper = eyedropper_button(
                             ui,
                             EyedropperButton {
                                 active: self.eyedropper_active,
-                                enabled: !icon_mode,
+                                enabled: !icon_mode && !crop_editing,
                                 label: self.t(K::Eyedropper),
                             },
                         );
@@ -111,7 +133,7 @@ impl HunkApp {
                             self.t(K::EnableEyedropper)
                         };
                         let eyedropper = eyedropper.on_hover_text(eyedropper_hint);
-                        if !icon_mode {
+                        if !icon_mode && !crop_editing {
                             if eyedropper.drag_started() {
                                 self.eyedropper_active = true;
                                 actions.push(AppAction::RequestRepaint);
@@ -136,7 +158,7 @@ impl HunkApp {
                             ui,
                             QuickTool::Invert,
                             invert_active,
-                            true,
+                            !crop_editing,
                             invert_label,
                         )
                         .clicked()
@@ -144,12 +166,29 @@ impl HunkApp {
                             actions.push(AppAction::ToggleInvert);
                         }
                         let rotate_label = self.t(K::RotateQuick);
-                        if quick_tool_button(ui, QuickTool::Rotate, false, true, rotate_label)
-                            .clicked()
+                        if quick_tool_button(
+                            ui,
+                            QuickTool::Rotate,
+                            false,
+                            !crop_editing,
+                            rotate_label,
+                        )
+                        .clicked()
                         {
                             actions.push(AppAction::RotateQuick);
                         }
                     });
+
+                if let Some(anchor) = crop_button_rect
+                    && self.crop_edit.is_some()
+                {
+                    egui::Area::new(egui::Id::unique("crop_presets"))
+                        .fixed_pos(anchor.right_top() + vec2(8.0, 0.0))
+                        .order(Order::Foreground)
+                        .show(&ctx, |ui| {
+                            self.show_crop_presets(ui, &mut actions);
+                        });
+                }
 
                 egui::Area::new(egui::Id::unique("top_controls_overlay"))
                     .anchor(Align2::RIGHT_TOP, vec2(-24.0, 12.0))
@@ -163,6 +202,99 @@ impl HunkApp {
                     });
             });
         actions
+    }
+
+    fn show_crop_presets(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {
+        egui::Frame::new()
+            .fill(T::SURFACE)
+            .stroke(Stroke::new(1.0, T::BORDER))
+            .corner_radius(CornerRadius::same(12))
+            .inner_margin(Margin::same(10))
+            .show(ui, |ui| {
+                ui.set_width(230.0);
+                ui.label(T::section_label(self.t(K::Crop)));
+                ui.add_space(4.0);
+
+                ui.scope(|ui| {
+                    ui.spacing_mut().button_padding = vec2(5.0, 4.0);
+                    ui.spacing_mut().item_spacing.x = 4.0;
+                    ui.horizontal_wrapped(|ui| {
+                        for (preset, label) in [
+                            (CropPreset::Free, K::CropFree),
+                            (CropPreset::Original, K::CropOriginal),
+                            (CropPreset::Square, K::CropSquare),
+                            (CropPreset::FourThree, K::CropFourThree),
+                            (CropPreset::SixteenNine, K::CropSixteenNine),
+                        ] {
+                            let selected = self.crop_preset == preset;
+                            let button = egui::Button::new(
+                                RichText::new(self.t(label)).size(10.5).color(if selected {
+                                    T::ACCENT_INK
+                                } else {
+                                    T::TEXT
+                                }),
+                            )
+                            .fill(if selected { T::ACCENT } else { T::SURFACE_2 })
+                            .stroke(Stroke::new(
+                                1.0,
+                                if selected { T::ACCENT } else { T::BORDER },
+                            ))
+                            .corner_radius(CornerRadius::same(8))
+                            .min_size(vec2(0.0, 26.0));
+                            if ui.add(button).clicked() {
+                                self.set_crop_preset(preset);
+                            }
+                        }
+                    });
+                });
+
+                ui.add_space(6.0);
+                ui.horizontal(|ui| {
+                    let apply = egui::Button::new(
+                        RichText::new(self.t(K::CropApply))
+                            .size(11.0)
+                            .color(T::ACCENT_INK)
+                            .strong(),
+                    )
+                    .fill(T::ACCENT)
+                    .stroke(Stroke::new(1.0, T::ACCENT))
+                    .corner_radius(CornerRadius::same(8))
+                    .min_size(vec2(100.0, 28.0));
+                    if ui.add(apply).clicked() && self.apply_crop() {
+                        self.result = None;
+                        actions.push(AppAction::RequestEncode(None));
+                    }
+                    let cancel = egui::Button::new(
+                        RichText::new(self.t(K::CropCancel))
+                            .size(11.0)
+                            .color(T::TEXT_MUTED),
+                    )
+                    .fill(T::SURFACE_2)
+                    .stroke(Stroke::new(1.0, T::BORDER))
+                    .corner_radius(CornerRadius::same(8))
+                    .min_size(vec2(100.0, 28.0));
+                    if ui.add(cancel).clicked() {
+                        self.cancel_crop();
+                    }
+                });
+
+                if self.crop.is_some() {
+                    ui.add_space(4.0);
+                    let remove = egui::Button::new(
+                        RichText::new(self.t(K::RemoveCrop))
+                            .size(10.5)
+                            .color(T::DANGER),
+                    )
+                    .fill(T::SURFACE_2)
+                    .stroke(Stroke::new(1.0, T::BORDER))
+                    .corner_radius(CornerRadius::same(8))
+                    .min_size(vec2(ui.available_width(), 26.0));
+                    if ui.add(remove).clicked() && self.remove_crop() {
+                        self.result = None;
+                        actions.push(AppAction::RequestEncode(None));
+                    }
+                }
+            });
     }
 
     pub(crate) fn show_top_controls(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {

@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 use eframe::egui;
 
 use crate::codec::{self, EncodeOptions};
-use crate::domain::{AppError, OutputFormat, apply_palette};
+use crate::domain::{AppError, OutputFormat, apply_palette, crop_rgba};
 use crate::i18n::K;
 
 use super::HunkApp;
@@ -54,6 +54,7 @@ impl HunkApp {
 
         let revision = self.revision;
         let pixels = Arc::clone(&source.pixels);
+        let crop = self.crop;
         let palette = self.advanced.preprocess.palette_colors;
         let options = EncodeOptions {
             format: self.format,
@@ -74,9 +75,13 @@ impl HunkApp {
         let thread_ctx = ctx.clone();
         std::thread::spawn(move || {
             let started = Instant::now();
-            let encoded_pixels = match palette {
-                Some(colors) => apply_palette(&pixels, colors),
+            let cropped = match crop {
+                Some(crop) => crop_rgba(&pixels, crop),
                 None => (*pixels).clone(),
+            };
+            let encoded_pixels = match palette {
+                Some(colors) => apply_palette(&cropped, colors),
+                None => cropped,
             };
             let result = codec::encode(&encoded_pixels, &options);
             let elapsed = started.elapsed();

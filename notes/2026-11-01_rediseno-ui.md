@@ -64,7 +64,7 @@ Fecha: 2026-11-01 · Referencia: `temp/HUNK converter.png`
 - `Vista previa` y el porcentaje de zoom se agrandan.
 - La tarjeta de color gana aire: códigos mayores, sin iconos de copia y con
   filas OKLCH/OKLAB antes de HEX. Los valores quedan alineados en una columna.
-- La columna flotante ordena borrar, cuentagotas, invertir y girar; el
+- La columna flotante ordena borrar, recortar, cuentagotas, invertir y girar; el
   cuentagotas usa un icono de pipeta dibujado a mano y mide 38 px.
 - Se elimina el texto de ayuda del cuentagotas inactivo. Al hacer clic en un
   código se copia el valor; con Ctrl, HEX copia `HEX#...` y el resto mantiene su
@@ -77,11 +77,47 @@ Fecha: 2026-11-01 · Referencia: `temp/HUNK converter.png`
   elide por el centro conservando la cola y la extensión; el nombre completo
   queda en el tooltip.
 
+## Recorte no destructivo
+
+- El estado vive como `Option<CropRect>` en coordenadas normalizadas; la imagen
+  de origen nunca se recorta ni se reemplaza. La codificación y la exportación
+  recortan los píxeles justo antes de aplicar la paleta y el encoder.
+- Edición: se muestra la imagen completa, la máscara con ocho tiradores, la
+  cuadrícula de tercios y el exterior atenuado. El resultado y el divisor se
+  ocultan mientras se edita.
+- Aplicado: el comparador se limita a la zona recortada. Dentro se pinta el
+  resultado real a la izquierda del divisor y el original a la derecha; fuera se
+  mantiene la imagen completa atenuada. El divisor y sus etiquetas solo ocupan
+  el recorte.
+- Presets en un desplegable a la derecha del botón: `Libre`, `Original`, `1:1`,
+  `4:3` y `16:9`. Los presets tienen en cuenta la proporción de la fuente;
+  arrastrar un tirador cambia el preset a `Libre`. Arrastrar dentro del marco lo
+  mueve sin redimensionarlo.
+- `Aplicar`/`Enter` confirma; `Cancelar`/`Esc` descarta. Tras aplicar,
+  `Quitar recorte` vuelve a la imagen completa sin tocar el original.
+- El recorte se limpia al cargar otra imagen, reiniciar o girar 90°. No se
+  persiste en `config.ini`.
+- En ICO el botón se desactiva y un borrador abierto se cancela, pero un recorte
+  ya aplicado se conserva; se puede quitar al volver a otro formato.
+- Con recorte aplicado, `0`/`F` encuadra el recorte y `1` lo centra a escala
+  real. La rueda, el paneo y el porcentaje de zoom usan el recorte como
+  contenido cuando no se está editando. Al entrar o salir de la edición se
+  conserva la escala y el centro del recorte si la vista estaba ampliada; en
+  modo ajuste se reencuadra el nuevo contenido.
+
 ## Verificación
 
 - Capturas Xvfb a 1280×1000 y 1280×800 con el panel derecho, la cuadrícula de
   formato y la tarjeta flotante.
 - Comprobado el cuentagotas sobre el lienzo con la tarjeta flotante encima.
 - Comprobados `Invertir colores` y `Girar 90°`.
+- Recorte comprobado con presets `1:1`, `4:3` y `16:9`, arrastre de tiradores y
+  movimiento del marco, `Aplicar`, `Quitar recorte`, `Enter`, `Esc`, el botón
+  `Cancelar` y el cambio a ICO durante la edición.
+- Comprobados `0`/`F` y `1` con recorte aplicado, el reencuadre al aplicar y al
+  entrar en edición, el zoom con rueda sobre el recorte y el tooltip único de
+  `Recortar`.
 - Estado vacío sin cabecera, con selector de idioma arriba a la derecha.
-- Suite de **62 pruebas**, `cargo fmt --check` y clippy limpios.
+- Suite de **68 pruebas**, `cargo fmt --check` y clippy limpios.
+- Validación visual e interactiva completada; los cambios se incluyen en el
+  commit de la revisión de UI y recorte. La release sigue sin etiquetar.

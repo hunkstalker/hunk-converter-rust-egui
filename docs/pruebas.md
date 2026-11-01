@@ -1,6 +1,6 @@
 # Pruebas y automatización
 
-> Estado: 2026-10-31 · `t-45` implementada, pendiente de revisión con el usuario
+> Estado: 2026-11-01 · `t-45` y `t-46` completadas; pendiente el cierre `t-43`
 
 ## 1. Capas
 
@@ -20,6 +20,8 @@
 - alfa en PNG, WebP y TIFF;
 - codificación AVIF con AOM, cuantizador directo y alfa;
 - preprocesado: rotación, resize con proporción, paleta con alfa e inversión de color;
+- recorte antes de codificar: dimensiones del resultado y píxeles exactos tras decodificar;
+- presets de proporción `1:1`, `4:3` y `16:9`, conversión a píxeles y redondeo de bordes;
 - expresiones de tamaño `1600x2`, `1600/4`, `1600*2`, `1600-200`, límites y errores;
 - proporción enlazada y dimensiones rotadas;
 - opciones avanzadas y preprocesado sin persistencia; `config.ini` solo guarda idioma, historial, formato y ventana;
@@ -55,9 +57,10 @@ La regla es que **ninguna funcionalidad de carga, codificación, configuración 
 exportación** dependa de una validación manual. Lo manual queda para lo visual y
 lo específico de plataforma.
 
-Estado actual: **62 pruebas**, incluidas las expresiones de tamaño, la
-proporción enlazada, la conversión OKLab/OKLCH y el copiado completo con Ctrl.
-La interacción de arrastre y el marco del canvas se validan visualmente.
+Estado actual: **68 pruebas**, incluidas las expresiones de tamaño, la
+proporción enlazada, la conversión OKLab/OKLCH, el recorte antes de codificar,
+los presets de proporción y el copiado completo con Ctrl. La interacción de
+arrastre, el marco del canvas y los tiradores del recorte se validan visualmente.
 
 ## 5. Comandos
 

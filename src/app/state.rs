@@ -1,10 +1,11 @@
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use eframe::egui::TextureHandle;
+use eframe::egui::{Pos2, Rect, TextureHandle};
 use image::RgbaImage;
 
 use crate::codec::{EncodedOutput, OutputFormat};
+use crate::domain::CropRect;
 
 pub(super) struct SourceImage {
     pub name: String,
@@ -16,6 +17,36 @@ pub(super) struct SourceImage {
     pub original: Arc<RgbaImage>,
     pub pixels: Arc<RgbaImage>,
     pub texture: TextureHandle,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum CropPreset {
+    Free,
+    Original,
+    Square,
+    FourThree,
+    SixteenNine,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum CropHandle {
+    Move,
+    North,
+    South,
+    East,
+    West,
+    NorthWest,
+    NorthEast,
+    SouthWest,
+    SouthEast,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(super) struct CropDrag {
+    pub handle: CropHandle,
+    pub start: CropRect,
+    pub start_pointer: Pos2,
+    pub start_image_rect: Rect,
 }
 
 pub(super) struct RenderedResult {

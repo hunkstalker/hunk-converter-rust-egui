@@ -1,13 +1,14 @@
 # Arquitectura de HUNK Converter
 
-> Estado: aceptada · Fecha: 2026-10-29 · Versión: 1.0.0
+> Estado: aceptada · Fecha: 2026-11-01 · Versión: 1.1.0 en preparación
 
 ## 1. Contexto
 
 HUNK Converter es una aplicación de escritorio terminada: convierte, comprime,
-compara y muestrea imágenes. Tiene unos 4.300 líneas de Rust y seis formatos de
-salida en 1.1.0. La ampliación de formatos y opciones avanzadas está planificada
-en `docs/formatos.md` y `docs/plan-formatos-y-opciones.md`.
+compara, recorta y muestrea imágenes. Ronda las 9.800 líneas de Rust y tiene
+cinco formatos de salida visibles en 1.1.0; JPEG XL se conserva internamente
+pero está oculto en el selector. La matriz de formatos y opciones está en
+`docs/formatos.md`; el plan histórico, en `docs/plan-formatos-y-opciones.md`.
 
 El objetivo de esta arquitectura no es preparar la aplicación para una escala
 que no va a tener. Es conseguir que el código sea fácil de leer, probar y
@@ -23,8 +24,9 @@ imperativo**.
 main.rs
   └── app/                  shell: composición, estado y eframe::App
         ├── actions.rs      efectos explícitos que devuelve la UI
+        ├── crop.rs         estado y acciones del recorte no destructivo
         ├── encoding.rs     worker de codificación y revisiones
-        ├── export.rs       escritura portable y nombres únicos
+        ├── export.rs       diálogo nativo y escritura del resultado
         ├── preprocess.rs   worker de resize/rotación
         ├── session.rs      carga, pegado, reinicio y formato
         ├── state.rs        DTOs de estado de la aplicación
@@ -46,6 +48,7 @@ main.rs
 
 domain/                     lógica pura y tipos del negocio
   ├── color.rs
+  ├── crop.rs
   ├── error.rs
   ├── export_name.rs
   ├── format.rs
@@ -119,10 +122,13 @@ devuelven como acciones explícitas:
 ```rust
 enum AppAction {
     RequestEncode(Option<Duration>),
+    RequestPreprocess(Option<Duration>),
     PersistSettings,
     Export,
     OpenFileDialog,
     Reset,
+    RotateQuick,
+    ToggleInvert,
     RememberColor([u8; 4]),
     ToggleHistoryLock(usize),
     ClearHistory,
@@ -173,13 +179,14 @@ guardado se registran en `stderr`.
 
 - Identificadores de código en inglés; textos de interfaz en `i18n`.
 - Nombres de dominio explícitos: `SourceImage`, `RenderedResult`,
-  `EncodeCompletion`, `HistoryEntry`, `OutputFormat`.
+  `EncodeCompletion`, `HistoryEntry`, `OutputFormat`, `CropRect`.
 - Nada de nombres genéricos como `data`, `manager`, `helper` o `process`.
 
 ### Estado
 
 - `SourceImage`: imagen original, metadatos y textura.
 - `RenderedResult`: resultado codificado y textura de preview.
+- `CropRect` / `CropPreset`: máscara normalizada del recorte y preset activo.
 - `EncodeJobResult` / `EncodeCompletion`: mensajes del worker.
 - `Toast`: aviso temporal.
 - La revisión (`revision`) descarta resultados obsoletos cuando el usuario
@@ -234,6 +241,8 @@ Decisiones:
 - `[advanced]` no se escribe. Las claves antiguas de opciones avanzadas o
   preprocesado se ignoran al cargar y esos bloques vuelven a sus valores por
   defecto en cada sesión.
+- El recorte tampoco se persiste: vive en memoria, se aplica antes de codificar
+  y se limpia al cargar otra imagen, reiniciar o girar 90°.
 - `[window]` guarda posición y tamaño de la ventana cuando no está maximizada.
   Al restaurar se usa la posición guardada; el sistema operativo la corrige si
   el monitor ya no existe.
@@ -250,7 +259,7 @@ La suite cubre:
 - compatibilidad con `fullscreen`;
 - advertencias de configuración inválida;
 - política de formatos;
-- nombres de exportación y no sobrescritura atómica;
+- nombres de exportación saneados; el diálogo nativo gestiona la sobrescritura;
 - códecs WebP/JPG/PNG/AVIF/JPEG XL;
 - JPG progresivo y submuestreo automático; PNG OxiPNG sin pérdida exacta;
 - WebP lossless/method/alfa y AVIF con AOM (YUV420, cuantizador y alfa);
@@ -264,10 +273,11 @@ La suite cubre:
 - transparencia PNG/AVIF/JPEG XL/TIFF y aplanado JPG;
 - rasterización SVG;
 - estructura ICO;
+- recorte antes de codificar, presets de proporción y conversión a píxeles;
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **62 pruebas**, `cargo fmt --check` y
+Estado actual: **68 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

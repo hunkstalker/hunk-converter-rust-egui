@@ -1,23 +1,24 @@
 # Proyecto — HUNK Converter
 
-> Documento vivo. Última actualización: 2026-10-31.
+> Documento vivo. Última actualización: 2026-11-01.
 > Versión actual: **1.0.0** publicada · Versión en preparación: **1.1.0** · Estado: **aplicación principal Rust + egui, portable y funcional**.
 
 ## 1. Visión
 
-HUNK Converter es una aplicación de escritorio local-first para convertir, comprimir, comparar y exportar imágenes. También genera iconos `.ico` multirresolución para Windows.
+HUNK Converter es una aplicación de escritorio local-first para convertir, comprimir, comparar, recortar y exportar imágenes. También genera iconos `.ico` multirresolución para Windows.
 
-El producto está diseñado para hacer tres operaciones sin fricción:
+El producto está diseñado para hacer cuatro operaciones sin fricción:
 
 1. Convertir una imagen a otro formato.
 2. Reducir su peso ajustando la calidad.
-3. Comprobar visualmente el resultado antes de guardarlo.
+3. Recortar la zona que se exporta sin modificar la imagen original.
+4. Comprobar visualmente el resultado antes de guardarlo.
 
 La interacción principal es arrastrar, ajustar y comparar en una sola ventana. No hay cuentas, subidas, telemetría ni pasos de configuración inicial.
 
 La versión actual está construida en **Rust + egui**. El prototipo original de Godot se conserva como material histórico en `../Prototipo`.
 
-El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md): núcleo web JPEG/PNG/WebP/AVIF, SVG como entrada, ICO como extra y preprocesado de redimensionado, rotación y paleta.
+El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md): núcleo web JPEG/PNG/WebP/AVIF, SVG como entrada, ICO como extra y preprocesado de redimensionado, rotación, paleta y recorte no destructivo.
 
 ## 2. Principios de producto
 
@@ -78,6 +79,8 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - **Modo 1:1** con `1` para ver la imagen a escala real; `0`/`F` vuelve al encuadre completo.
 - **Paneo con clic derecho** cuando la imagen está ampliada, con límites para no perderla de vista.
 - El porcentaje de zoom refleja la escala real. No hay botones de zoom en la vista previa: se controla con teclado, rueda o pinza.
+- **Recorte no destructivo** con máscara normalizada, ocho tiradores, cuadrícula de tercios y presets `Libre`, `Original`, `1:1`, `4:3` y `16:9`. El exterior se atenúa; al aplicar, el comparador se limita al recorte y el resultado real se pinta dentro. `Enter` aplica, `Esc` cancela y `Quitar recorte` restaura la imagen completa.
+- El recorte se aplica antes de codificar y afecta a la exportación, pero no modifica los píxeles de origen ni se guarda en `config.ini`. Se limpia al cargar otra imagen, reiniciar o girar 90°. En ICO el botón se desactiva; un recorte aplicado se conserva y puede quitarse al volver a otro formato.
 - El divisor, su círculo y el cuentagotas se adaptan al zoom y al desplazamiento.
 - La vista previa se limita a 2048 px de lado; la exportación conserva la resolución completa.
 
@@ -196,7 +199,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - `webp`/libwebp para codificación WebP.
 - `png` 0.18 para la codificación PNG.
 - `avif-decode`/rav1d para decodificar AVIF y `avif-parse` para comprobar dimensiones antes de decodificar.
-- `zune-jpegxl` para codificación JPEG XL y `jxl-oxide` para su vista previa.
+- `zune-jpegxl` para codificación JPEG XL y `jxl-oxide` para su vista previa; en 1.1 el formato sigue oculto en el selector.
 - `resvg` 0.49 para SVG.
 - `sys-locale` para detectar el idioma del sistema.
 - Icono de máscara de gas en `assets/branding/hunk-converter.png`, con fuente editable `.af`; `make_icons` genera `icon_256.png`, `icon.ico` e `icon.icns`.
@@ -211,17 +214,19 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | `src/main.rs` | Arranque de eframe, ventana, icono e inicialización |
 | `src/app/mod.rs` | Shell: composición, estado y `eframe::App` |
 | `src/app/actions.rs` | `AppAction`: efectos explícitos devueltos por la UI |
+| `src/app/crop.rs` | Estado y acciones del recorte no destructivo |
 | `src/app/encoding.rs` | Worker de codificación, revisiones y previews |
-| `src/app/export.rs` | Exportación portable y nombres sin sobrescritura |
+| `src/app/export.rs` | Diálogo nativo y escritura del resultado |
 | `src/app/session.rs` | Carga, pegado, reinicio, demo y formato |
-| `src/app/state.rs` | `SourceImage`, `RenderedResult`, `Toast` y mensajes del worker |
+| `src/app/state.rs` | `SourceImage`, `RenderedResult`, `CropRect`, `Toast` y mensajes del worker |
 | `src/app/ui/` | Componentes egui: panel derecho, color flotante, canvas, avisos |
+| `src/domain/crop.rs` | `CropRect`, presets de proporción y recorte de píxeles |
 | `src/domain/format.rs` | Política de formatos, extensiones y badges |
 | `docs/formatos.md` | Matriz de entrada/salida y opciones avanzadas |
 | `docs/plan-formatos-y-opciones.md` | Plan de desarrollo de formatos y opciones |
 | `src/domain/color.rs` | Códigos de color, HSL y aplanado RGBA |
 | `src/domain/history.rs` | Historial, límite, bloqueos y limpieza |
-| `src/domain/export_name.rs` | Saneado y numeración de nombres de salida |
+| `src/domain/export_name.rs` | Saneado y generación de nombres de salida |
 | `src/domain/error.rs` | Errores tipados de carga, codificación, exportación y configuración |
 | `src/codec/mod.rs` | Carga, validación y dispatcher de codificación |
 | `src/codec/encoders.rs` | WebP, JPG, PNG y JPEG XL |
@@ -323,7 +328,7 @@ Archivo local
 ### Estructura de la build
 
 ```text
-hunk-converter-1.0.0-windows-x86_64/
+hunk-converter-1.1.0-windows-x86_64/
 ├── hunk-converter.exe
 ├── config.ini          (se crea al primer arranque)
 ├── export/
@@ -358,7 +363,7 @@ Resumen del contexto de referencia:
 ## 8. Límites conocidos
 
 - No se conservan metadatos, pero la orientación EXIF se aplica a los píxeles al cargar.
-- Sin recorte ni procesamiento por lotes: fuera del alcance del producto.
+- Procesamiento por lotes fuera del alcance; el recorte no destructivo de una imagen sí está incluido.
 - HEIC no está soportado; queda fuera del alcance. AVIF está disponible como salida y JXL se retira del selector.
 - No se conservan perfiles ICC.
 - La build macOS universal se genera en CI, pero no está firmada ni notarizada; la firma se descartó por falta de presupuesto.
@@ -366,7 +371,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **62 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **68 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

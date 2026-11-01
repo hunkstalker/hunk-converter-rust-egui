@@ -32,22 +32,25 @@ common_files() {
 	cat >"$folder/LEEME.txt" <<'TXT'
 HUNK Converter
 ==============
-Convierte, comprime, compara y exporta imágenes sin salir de tu equipo.
+Convierte, comprime, compara, recorta y exporta imágenes sin salir de tu equipo.
 
 CÓMO USAR
 - Arrastra una imagen a la ventana, pulsa "Seleccionar una imagen" o pega con Ctrl+V.
-- Elige WebP, AVIF, JPG, PNG, JPEG XL o ICO.
+- Elige WebP, AVIF, JPG, PNG o ICO.
 - Ajusta la calidad o los tamaños del icono.
+- Usa "Recortar" si quieres limitar la salida a una zona; el exterior se atenúa
+  y el recorte se puede quitar después.
 - Activa el cuentagotas y haz clic sobre la imagen para obtener sus códigos de color.
-- Pulsa "Exportar" o Ctrl+E.
+- Pulsa "Exportar" o Ctrl+S.
 
-Las imágenes se guardan en la carpeta "export/" que está junto a este
-programa. No se sobrescriben: si el nombre ya existe se añade -2, -3, etc.
+Al exportar se abre el diálogo nativo para elegir carpeta y nombre. Si no
+escribes extensión, se añade la del formato actual.
 
-El idioma, el historial de colores, sus bloqueos, el estado maximizado y la
-posición/tamaño de la ventana se guardan en config.ini, también junto al
-programa. Puedes cambiar
-entre español, catalán e inglés desde la cabecera.
+El idioma, el historial de colores, sus bloqueos, el formato de salida, el
+estado maximizado y la posición/tamaño de la ventana se guardan en config.ini,
+también junto al programa. Puedes cambiar entre español, catalán e inglés desde
+el selector superior derecho. Las opciones de preprocesado, avanzadas y el
+recorte no se guardan.
 
 - La aplicación no necesita instalación ni conexión a internet.
 - En Linux se requieren las bibliotecas gráficas habituales (X11/OpenGL).

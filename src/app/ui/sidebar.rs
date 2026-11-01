@@ -32,7 +32,7 @@ impl HunkApp {
         let name = source.name.clone();
         let format = source.format.clone();
         let file_bytes = source.file_bytes;
-        let dimensions = (source.width, source.height);
+        let dimensions = self.crop_output_dimensions(source.width, source.height);
         let original_dimensions = source.original.dimensions();
         let card = FileCard {
             texture,

@@ -74,7 +74,9 @@ Además de los códecs, la 1.1 incluye:
 - **redimensionar** con métodos de calidad y conservación de proporción;
 - **rotar** en pasos de 90°;
 - **reducir paleta** para PNG y WebP cuando el usuario quiera un resultado
-  indexed/palette.
+  indexed/palette;
+- **recortar** de forma no destructiva, con presets de proporción y máscara que
+  afecta al resultado y a la exportación.
 
 El preprocesado se aplica antes de codificar y debe verse en la vista previa.
 
@@ -128,8 +130,9 @@ directo. A igual SSIMULACRA2, el tamaño mediano es **0,994×** frente a Squoosh
 (0,704–1,069), la UI queda entre **0,705× y 0,960×** y la velocidad es **1,82×**
 en UI y **4,58×** de mediana. La puerta de AVIF se cumple.
 
-**1.1.0 sigue sin publicarse** hasta revisar `t-45` (resize/UI), revisar cada
-feature con el usuario y cerrar `t-43`. El bloqueo ya no es AVIF.
+**1.1.0 sigue sin publicarse** hasta cerrar `t-43`: benchmark final, validación
+de los artefactos del CI y release. Las revisiones incrementales de AVIF, UI,
+resize y recorte ya están completadas. El bloqueo ya no es AVIF.
 
 ## 4. Encoders de referencia
 
@@ -161,9 +164,10 @@ Todo pertenece a la misma release. No hay una 1.2 ni un bloque sin numerar.
 - Preprocesado: redimensionar, rotar y reducir paleta (`t-41`, completada).
 - UI, selector web+ICO y persistencia (`t-42`, completada).
 - Cerrar la brecha AVIF (`t-44`, completada).
-- Correcciones de resize y UI (`t-45`, implementada; pendiente de revisión).
-- Cierre, benchmark final y release (`t-43`, bloqueada por la revisión
-  incremental de resize y del resto de features).
+- Correcciones de resize y UI (`t-45`, completada).
+- Recorte no destructivo (`t-46`, completada).
+- Cierre, benchmark final y release (`t-43`; pendiente el benchmark final, la
+  validación del CI y el push/tag).
 
 El bloque 2 no se publica aparte: es la segunda mitad de 1.1.0.
 
