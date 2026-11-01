@@ -33,7 +33,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Idioma, historial, bloqueos, estado maximizado, formato de salida, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. Las opciones de Preprocesado y Avanzado no se guardan y vuelven a sus valores por defecto al reiniciar.
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
-- Pie con enlace directo a `github.com/hunkstalker/hunk-converter`, abierto en el navegador.
+- Pie con enlace directo a `github.com/hunkstalker/hunk-converter-rust-egui`, abierto en el navegador.
 - Exportación mediante diálogo nativo, con nombre saneado y confirmación de sobrescritura del sistema.
 - Procesamiento en hilo aparte con debounce y descarte de resultados obsoletos.
 - Reinicio, atajos y avisos de error.

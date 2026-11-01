@@ -13,7 +13,7 @@ Fecha: 2026-10-29
   haya una muestra. El mensaje se limita a una línea y el bloque de códigos
   mantiene filas de altura fija. El separador entre el historial y el
   cuentagotas pasa de 4 px a 10 px por cada lado.
-- El pie muestra `github.com/hunkstalker/hunk-converter` a la derecha de la
+- El pie muestra `github.com/hunkstalker/hunk-converter-rust-egui` a la derecha de la
   versión. El enlace usa `OpenUrl` de egui y abre el navegador del sistema.
 
 ## Verificación
@@ -24,7 +24,7 @@ Fecha: 2026-10-29
 - A 1280 × 800 la tarjeta también conserva sus bordes en `y=387` y `y=655`
   con y sin muestra.
 - El enlace se probó con un navegador simulado vía `BROWSER`; recibió
-  `https://github.com/hunkstalker/hunk-converter` al hacer clic.
+  `https://github.com/hunkstalker/hunk-converter-rust-egui` al hacer clic.
 - `cargo fmt --check`, `cargo test` (13 pruebas) y
   `cargo clippy --all-targets -- -D warnings` limpios.
 - Paquetes regenerados: Linux 16.847.272 B; Windows 15.398.912 B. El enlace

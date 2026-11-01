@@ -58,7 +58,7 @@ Fecha: 2026-11-01 · Referencia: `temp/HUNK converter.png`
   `T::SMALL_TEXT_SIZE`.
 - `Cambiar` pasa a ser un botón secundario debajo de la información de la
   imagen, con hover y sin estado pulsado, justo encima del separador.
-- El botón de exportar incorpora `Ctrl+E` y desaparece el texto de ayuda
+- El botón de exportar incorpora `Ctrl+S` (con `Ctrl+E` como alias) y desaparece el texto de ayuda
   inferior.
 - `Vista previa` y el porcentaje de zoom se agrandan.
 - La tarjeta de color gana aire: códigos mayores, sin iconos de copia y con

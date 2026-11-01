@@ -497,7 +497,7 @@ impl HunkApp {
     pub(crate) fn show_export(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {
         let enabled = self.can_export();
         let label = format!(
-            "{}   Ctrl+E",
+            "{}   Ctrl+S",
             i18n::export_label(self.language, self.format.extension())
         );
         let button = egui::Button::new(

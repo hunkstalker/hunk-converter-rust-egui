@@ -75,7 +75,7 @@ El script local equivalente es:
 
 ## Estado de la release 1.0.0
 
-La release [`v1.0.0`](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0)
+La release [`v1.0.0`](https://github.com/hunkstalker/hunk-converter-rust-egui/releases/tag/v1.0.0)
 se publicó correctamente y se validó en Windows 10/11, incluido el icono del
 ejecutable.
 

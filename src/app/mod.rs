@@ -401,7 +401,7 @@ impl eframe::App for HunkApp {
         let (export_shortcut, reset_shortcut, open_shortcut) = ctx.input(|input| {
             let command = input.modifiers.command;
             (
-                command && input.key_pressed(egui::Key::E),
+                command && (input.key_pressed(egui::Key::S) || input.key_pressed(egui::Key::E)),
                 command && input.key_pressed(egui::Key::R),
                 command && input.key_pressed(egui::Key::O),
             )

@@ -176,9 +176,9 @@ catalogue! {
     Copied => ("Copiado", "Copiat", "Copied"),
     Export => ("Exportar", "Exporta", "Export"),
     ExportHint => (
-        "Elige la ruta al exportar.  Ctrl+E",
-        "Tria la ruta en exportar.  Ctrl+E",
-        "Choose the path when exporting.  Ctrl+E"
+        "Elige la ruta al exportar.  Ctrl+S",
+        "Tria la ruta en exportar.  Ctrl+S",
+        "Choose the path when exporting.  Ctrl+S"
     ),
     SaveImageAs => ("Guardar imagen como", "Desa la imatge com", "Save image as"),
     Calculating => ("Calculando el resultado…", "Calculant el resultat…", "Calculating result…"),

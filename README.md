@@ -1,6 +1,6 @@
 # HUNK Converter
 
-[Repositorio](https://github.com/hunkstalker/hunk-converter) · [Release 1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0)
+[Repositorio](https://github.com/hunkstalker/hunk-converter-rust-egui) · [Release 1.0.0](https://github.com/hunkstalker/hunk-converter-rust-egui/releases/tag/v1.0.0)
 
 **Convierte, comprime, compara, muestrea colores y exporta imágenes sin salir de tu equipo.**
 
@@ -39,7 +39,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Portable:** builds de Linux, Windows 10/11 y macOS universal, sin instalador.
 - **Local y privado:** cero llamadas de red.
 - **Render bajo demanda:** sin CPU de UI en reposo.
-- **Enlace al repositorio:** el pie abre `github.com/hunkstalker/hunk-converter` en el navegador.
+- **Enlace al repositorio:** el pie abre `github.com/hunkstalker/hunk-converter-rust-egui` en el navegador.
 
 ## Interfaz
 
@@ -121,7 +121,7 @@ cargo run --release
 3. Ajusta la calidad o los tamaños del icono.
 4. Arrastra el divisor para comparar. Usa la rueda para acercar y el clic derecho para moverte por la imagen.
 5. Activa el cuentagotas si necesitas extraer colores.
-6. Pulsa **Exportar** o `Ctrl+E`.
+6. Pulsa **Exportar** o `Ctrl+S`.
 
 Al exportar se abre el explorador nativo para elegir la carpeta y el nombre. Si no escribes extensión, se añade la del formato actual.
 
@@ -131,7 +131,7 @@ Al exportar se abre el explorador nativo para elegir la carpeta y el nombre. Si 
 | --- | --- |
 | `Ctrl+O` | Abrir imagen |
 | `Ctrl+V` | Pegar una imagen del portapapeles |
-| `Ctrl+E` | Exportar |
+| `Ctrl+S` | Exportar |
 | `Ctrl+R` | Reiniciar la aplicación |
 | `0` / `F` | Ajustar imagen a la ventana |
 | `1` | Tamaño real 1:1 |
@@ -144,6 +144,8 @@ Al exportar se abre el explorador nativo para elegir la carpeta y el nombre. Si 
 | `Shift+←` / `Shift+→` | Desplazar la imagen horizontalmente cuando está ampliada |
 | `L` | Bloquear o desbloquear el color enfocado del historial |
 | `Esc` | Cancelar el cuentagotas |
+
+`Ctrl+E` sigue funcionando como alias de exportación.
 
 Con el cuentagotas activo y el lienzo enfocado, las flechas mueven el punto de
 muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.

@@ -113,7 +113,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 ### 3.6 Exportación
 
-- Botón principal **Exportar .ext** y atajo `Ctrl+E`.
+- Botón principal **Exportar .ext** y atajo `Ctrl+S`.
 - Al pulsar se abre el **explorador nativo** para elegir carpeta y nombre.
 - Si existe, se propone la carpeta `export/` junto al ejecutable como destino inicial.
 - Si no se escribe extensión, se añade la del formato actual.
@@ -126,7 +126,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | --- | --- |
 | `Ctrl+O` | Abrir imagen |
 | `Ctrl+V` | Pegar una imagen del portapapeles |
-| `Ctrl+E` | Exportar |
+| `Ctrl+S` | Exportar |
 | `Ctrl+R` | Reiniciar la sesión |
 | `0` / `F` | Ajustar a la ventana |
 | `1` | Tamaño real 1:1 |
@@ -139,6 +139,8 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | `Shift+←` / `Shift+→` | Paneo horizontal con la imagen ampliada |
 | `L` | Bloquear el color enfocado del historial |
 | `Esc` | Cancelar el cuentagotas |
+
+`Ctrl+E` sigue funcionando como alias de exportación.
 
 ### Accesibilidad
 
@@ -338,7 +340,7 @@ hunk-converter-1.0.0-windows-x86_64/
 - Compilar requiere un compilador de C y CMake para libwebp y libavif/AOM; en x86/x86_64 también NASM para `rav1d` y AOM.
 - AVIF enlaza AOM de forma estática; no añade DLLs de runtime.
 - La build Windows importa únicamente DLLs del sistema; no necesita DLLs de MinGW.
-- La release [v1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0) está publicada y validada en Windows 10/11, con icono en Explorer y barra de tareas.
+- La release [v1.0.0](https://github.com/hunkstalker/hunk-converter-rust-egui/releases/tag/v1.0.0) está publicada y validada en Windows 10/11, con icono en Explorer y barra de tareas.
 - El CI de GitHub ejecuta pruebas en `main` y PR, y compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal solo al empujar un tag `*.*.*` o `v*.*.*`, o al lanzarlo manualmente. Los jobs usan `rust-cache`; `sccache` se evaluó y se descartó por ahora.
 
 ## 7. Rendimiento y recursos

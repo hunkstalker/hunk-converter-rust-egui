@@ -134,7 +134,7 @@
 **Descripción:** Quitar el botón propio de maximizar/restaurar y dejar los controles nativos de la ventana, reservar el espacio de coordenadas y códigos en la tarjeta del cuentagotas para que no cambie de altura al muestrear, y añadir un enlace al repositorio en el pie que abra el navegador.
 
 **Completada:** 2026-10-29
-**Resultado:** La cabecera conserva solo el selector de idioma y el reinicio. La tarjeta reserva siempre la línea de coordenadas y los códigos mantienen una fila fija, por lo que muestrear o elegir un color no desplaza el panel. El separador entre el historial y el cuentagotas tiene 10 px de margen por cada lado. El pie enlaza `github.com/hunkstalker/hunk-converter` y lo abre en el navegador. Verificado con capturas comparadas y un navegador simulado.
+**Resultado:** La cabecera conserva solo el selector de idioma y el reinicio. La tarjeta reserva siempre la línea de coordenadas y los códigos mantienen una fila fija, por lo que muestrear o elegir un color no desplaza el panel. El separador entre el historial y el cuentagotas tiene 10 px de margen por cada lado. El pie enlaza `github.com/hunkstalker/hunk-converter-rust-egui` y lo abre en el navegador. Verificado con capturas comparadas y un navegador simulado.
 
 ## t-31 — Refactorización de arquitectura y bloqueos persistentes
 
@@ -169,7 +169,7 @@
 **Descripción:** Extender la integración continua para ejecutar la suite, compilar las builds portables y publicar artefactos con checksums al crear una etiqueta de versión. Mantener la build sin instalador y la carpeta `export/` junto al ejecutable.
 
 **Completada:** 2026-10-29
-**Resultado:** Workflow único `.github/workflows/ci.yml` con pruebas, builds Linux/Windows/macOS, checksums y GitHub Release en tags. NASM instalado en el job de pruebas y acciones actualizadas a Node 24. La release [v1.0.0](https://github.com/hunkstalker/hunk-converter/releases/tag/v1.0.0) se publicó correctamente con los tres paquetes y `SHA256SUMS.txt`.
+**Resultado:** Workflow único `.github/workflows/ci.yml` con pruebas, builds Linux/Windows/macOS, checksums y GitHub Release en tags. NASM instalado en el job de pruebas y acciones actualizadas a Node 24. La release [v1.0.0](https://github.com/hunkstalker/hunk-converter-rust-egui/releases/tag/v1.0.0) se publicó correctamente con los tres paquetes y `SHA256SUMS.txt`.
 
 ## t-23 — Validar la build Windows 10/11 de la release
 

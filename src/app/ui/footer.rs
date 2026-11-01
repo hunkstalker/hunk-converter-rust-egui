@@ -26,10 +26,10 @@ impl HunkApp {
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         let response = ui
                             .hyperlink_to(
-                                RichText::new("github.com/hunkstalker/hunk-converter")
+                                RichText::new("github.com/hunkstalker/hunk-converter-rust-egui")
                                     .size(T::SMALL_TEXT_SIZE)
                                     .color(T::TEXT_MUTED),
-                                "https://github.com/hunkstalker/hunk-converter",
+                                "https://github.com/hunkstalker/hunk-converter-rust-egui",
                             )
                             .on_hover_text(self.t(K::OpenRepository));
                         if response.has_focus() {
