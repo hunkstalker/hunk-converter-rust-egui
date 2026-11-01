@@ -9,7 +9,7 @@ use crate::theme as T;
 use super::super::HunkApp;
 use super::super::actions::AppAction;
 use super::canvas::CanvasContext;
-use super::icons::{QuickTool, quick_tool_button};
+use super::icons::{EyedropperButton, QuickTool, eyedropper_button, quick_tool_button};
 
 impl HunkApp {
     pub(crate) fn show_preview(&mut self, root: &mut egui::Ui) -> Vec<AppAction> {
@@ -24,7 +24,7 @@ impl HunkApp {
             }))
             .show(root, |ui| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new(self.t(K::Preview)).size(17.0).color(T::TEXT));
+                    ui.label(RichText::new(self.t(K::Preview)).size(20.0).color(T::TEXT));
                     ui.add_space(4.0);
                     if self.format != OutputFormat::Ico {
                         ui.add_space(6.0);
@@ -39,15 +39,15 @@ impl HunkApp {
                             T::TEXT_FAINT
                         };
                         ui.allocate_ui_with_layout(
-                            vec2(76.0, 22.0),
+                            vec2(88.0, 26.0),
                             Layout::top_down(Align::Min),
                             |ui| {
                                 // Caja de altura fija y desplazamiento óptico para que el
-                                // porcentaje quede centrado con el título de 17 px.
-                                ui.add_space(7.0);
+                                // porcentaje quede centrado con el título de 20 px.
+                                ui.add_space(8.0);
                                 ui.label(
                                     RichText::new(format!("Zoom {actual_percent:.0} %"))
-                                        .size(9.5)
+                                        .size(11.5)
                                         .color(zoom_color),
                                 );
                             },
@@ -85,15 +85,68 @@ impl HunkApp {
                     .show(&ctx, |ui| {
                         ui.set_width(38.0);
                         ui.spacing_mut().item_spacing.y = 6.0;
+
+                        let has_unlocked = self.history.iter().any(|entry| !entry.locked);
+                        let clear_label = self.t(K::ClearHistory);
+                        if quick_tool_button(ui, QuickTool::Trash, false, has_unlocked, clear_label)
+                            .clicked()
+                        {
+                            actions.push(AppAction::ClearHistory);
+                        }
+
+                        let icon_mode = self.format == OutputFormat::Ico;
+                        let eyedropper = eyedropper_button(
+                            ui,
+                            EyedropperButton {
+                                active: self.eyedropper_active,
+                                enabled: !icon_mode,
+                                label: self.t(K::Eyedropper),
+                            },
+                        );
+                        let eyedropper_hint = if icon_mode {
+                            self.t(K::EyedropperUnavailable)
+                        } else if self.eyedropper_active {
+                            self.t(K::DisableEyedropper)
+                        } else {
+                            self.t(K::EnableEyedropper)
+                        };
+                        let eyedropper = eyedropper.on_hover_text(eyedropper_hint);
+                        if !icon_mode {
+                            if eyedropper.drag_started() {
+                                self.eyedropper_active = true;
+                                actions.push(AppAction::RequestRepaint);
+                            } else if eyedropper.clicked()
+                                || (self.eyedropper_active
+                                    && eyedropper.clicked_by(egui::PointerButton::Secondary))
+                            {
+                                self.eyedropper_active = !self.eyedropper_active;
+                                actions.push(AppAction::RequestRepaint);
+                            }
+                            if self.eyedropper_active {
+                                ui.ctx().memory_mut(|memory| {
+                                    memory
+                                        .request_focus(egui::Id::unique(super::canvas::CANVAS_ID));
+                                });
+                            }
+                        }
+
                         let invert_label = self.t(K::InvertColors);
                         let invert_active = self.advanced.preprocess.invert;
-                        if quick_tool_button(ui, QuickTool::Invert, invert_active, invert_label)
-                            .clicked()
+                        if quick_tool_button(
+                            ui,
+                            QuickTool::Invert,
+                            invert_active,
+                            true,
+                            invert_label,
+                        )
+                        .clicked()
                         {
                             actions.push(AppAction::ToggleInvert);
                         }
                         let rotate_label = self.t(K::RotateQuick);
-                        if quick_tool_button(ui, QuickTool::Rotate, false, rotate_label).clicked() {
+                        if quick_tool_button(ui, QuickTool::Rotate, false, true, rotate_label)
+                            .clicked()
+                        {
                             actions.push(AppAction::RotateQuick);
                         }
                     });

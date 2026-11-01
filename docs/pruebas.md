@@ -55,9 +55,9 @@ La regla es que **ninguna funcionalidad de carga, codificación, configuración 
 exportación** dependa de una validación manual. Lo manual queda para lo visual y
 lo específico de plataforma.
 
-Estado actual: **60 pruebas**, incluidas las expresiones de tamaño y la
-proporción enlazada. La interacción de arrastre y el marco del canvas se validan
-visualmente.
+Estado actual: **62 pruebas**, incluidas las expresiones de tamaño, la
+proporción enlazada, la conversión OKLab/OKLCH y el copiado completo con Ctrl.
+La interacción de arrastre y el marco del canvas se validan visualmente.
 
 ## 5. Comandos
 

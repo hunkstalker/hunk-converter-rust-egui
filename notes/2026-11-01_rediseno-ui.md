@@ -52,6 +52,29 @@ Fecha: 2026-11-01 · Referencia: `temp/HUNK converter.png`
   propone como destino inicial.
 - En formatos sin pérdida el deslizador de calidad permanece visible, atenuado y
   bloqueado.
+- Las etiquetas de sección (`IMAGEN`, `FORMATO DE SALIDA`, `CALIDAD`,
+  `HISTORIAL`, `CUENTAGOTAS`) suben a 12 px. También pasan a 12 px los badges
+  del canvas, toda la línea de pesos y el footer. El tamaño vive en
+  `T::SMALL_TEXT_SIZE`.
+- `Cambiar` pasa a ser un botón secundario debajo de la información de la
+  imagen, con hover y sin estado pulsado, justo encima del separador.
+- El botón de exportar incorpora `Ctrl+E` y desaparece el texto de ayuda
+  inferior.
+- `Vista previa` y el porcentaje de zoom se agrandan.
+- La tarjeta de color gana aire: códigos mayores, sin iconos de copia y con
+  filas OKLCH/OKLAB antes de HEX. Los valores quedan alineados en una columna.
+- La columna flotante ordena borrar, cuentagotas, invertir y girar; el
+  cuentagotas usa un icono de pipeta dibujado a mano y mide 38 px.
+- Se elimina el texto de ayuda del cuentagotas inactivo. Al hacer clic en un
+  código se copia el valor; con Ctrl, HEX copia `HEX#...` y el resto mantiene su
+  función CSS completa.
+- El aviso de recompresión con pérdida sube a 12 px.
+- `Auto` pasa a la primera tarjeta del selector de formato.
+- Se elimina la etiqueta de muestra/coordenadas del cuentagotas; queda un swatch
+  compacto junto al título y los códigos siguen copiándose al hacer clic.
+- El nombre del archivo se limita a dos líneas. Si es extremadamente largo, se
+  elide por el centro conservando la cola y la extensión; el nombre completo
+  queda en el tooltip.
 
 ## Verificación
 
@@ -60,4 +83,4 @@ Fecha: 2026-11-01 · Referencia: `temp/HUNK converter.png`
 - Comprobado el cuentagotas sobre el lienzo con la tarjeta flotante encima.
 - Comprobados `Invertir colores` y `Girar 90°`.
 - Estado vacío sin cabecera, con selector de idioma arriba a la derecha.
-- Suite de **60 pruebas**, `cargo fmt --check` y clippy limpios.
+- Suite de **62 pruebas**, `cargo fmt --check` y clippy limpios.

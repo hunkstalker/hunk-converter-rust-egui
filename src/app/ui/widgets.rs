@@ -12,18 +12,23 @@ pub(crate) const HISTORY_COLUMNS: usize = 7;
 pub(crate) const SWATCH_SIZE: f32 = 32.0;
 pub(crate) const SWATCH_GAP: f32 = 4.0;
 
-pub(crate) fn small_text_button(ui: &mut egui::Ui, label: &str) -> egui::Response {
-    let font = FontId::proportional(10.5);
+pub(crate) fn secondary_text_button(ui: &mut egui::Ui, label: &str) -> egui::Response {
+    let font = FontId::proportional(11.5);
     let galley = ui
         .painter()
         .layout_no_wrap(label.to_owned(), font, T::TEXT_MUTED);
-    let size = vec2(galley.size().x + 18.0, 26.0);
+    let size = vec2(galley.size().x + 28.0, 32.0);
     let (rect, response) = ui.allocate_exact_size(size, Sense::click());
     let hovered = response.hovered();
-    if hovered {
-        ui.painter()
-            .rect_filled(rect, CornerRadius::same(8), T::SURFACE_3);
-    }
+    let fill = if hovered { T::SURFACE_3 } else { T::SURFACE_2 };
+    let border = if hovered { T::BORDER_STRONG } else { T::BORDER };
+    ui.painter().rect(
+        rect,
+        CornerRadius::same(12),
+        fill,
+        Stroke::new(1.0, border),
+        StrokeKind::Inside,
+    );
     ui.painter().galley(
         rect.center() - galley.size() * 0.5,
         galley,
@@ -31,7 +36,7 @@ pub(crate) fn small_text_button(ui: &mut egui::Ui, label: &str) -> egui::Respons
     );
     response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label.to_owned()));
     if response.has_focus() {
-        paint_focus_ring(ui.painter(), rect, 8);
+        paint_focus_ring(ui.painter(), rect, 12);
     }
     if hovered {
         response.on_hover_cursor(CursorIcon::PointingHand)
@@ -144,7 +149,11 @@ pub(crate) fn paint_badge(painter: &egui::Painter, badge: Badge<'_>) {
         background,
         foreground,
     } = badge;
-    let galley = painter.layout_no_wrap(text.to_owned(), FontId::proportional(9.0), foreground);
+    let galley = painter.layout_no_wrap(
+        text.to_owned(),
+        FontId::proportional(T::SMALL_TEXT_SIZE),
+        foreground,
+    );
     let size = galley.size() + vec2(16.0, 9.0);
     let rect = align.anchor_size(anchor, size);
     painter.rect_filled(rect, CornerRadius::same(7), background);

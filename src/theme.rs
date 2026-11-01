@@ -16,6 +16,7 @@ pub const TEXT: Color32 = Color32::from_rgb(241, 245, 242);
 pub const TEXT_MUTED: Color32 = Color32::from_rgb(146, 158, 170);
 pub const TEXT_FAINT: Color32 = Color32::from_rgb(132, 144, 156);
 pub const TEXT_DISABLED: Color32 = Color32::from_rgb(103, 115, 127);
+pub const SMALL_TEXT_SIZE: f32 = 12.0;
 pub const ACCENT: Color32 = Color32::from_rgb(200, 244, 109);
 pub const ACCENT_HOVER: Color32 = Color32::from_rgb(216, 255, 144);
 pub const ACCENT_PRESSED: Color32 = Color32::from_rgb(180, 226, 87);
@@ -183,12 +184,19 @@ pub fn eyebrow(text: &str) -> egui::RichText {
         .strong()
 }
 
+pub fn section_label(text: &str) -> egui::RichText {
+    egui::RichText::new(text)
+        .size(SMALL_TEXT_SIZE)
+        .color(TEXT_FAINT)
+        .strong()
+}
+
 pub fn section_title(text: &str) -> egui::RichText {
     egui::RichText::new(text).size(17.0).color(TEXT)
 }
 
 pub fn bullet_separator(ui: &mut egui::Ui) {
-    let (rect, _) = ui.allocate_exact_size(egui::vec2(1.0, 14.0), egui::Sense::hover());
+    let (rect, _) = ui.allocate_exact_size(egui::vec2(1.0, 16.0), egui::Sense::hover());
     ui.painter().rect_filled(rect, 0.0, BORDER);
 }
 

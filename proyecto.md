@@ -95,9 +95,9 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - Un clic activa o desactiva el modo; después basta con hacer clic sobre la imagen.
 - También se puede pulsar el icono y arrastrar hasta el píxel: se muestrea mientras se arrastra y se conserva el último color al soltar.
 - `Esc` o clic derecho sobre la imagen desactivan el modo sin alterar la muestra.
-- Se muestran las coordenadas del píxel muestreado.
+- El color muestreado se refleja en los códigos OKLCH/OKLAB/HEX/RGB/RGBA/HSL.
 - La marca visual de muestreo solo se dibuja mientras el cuentagotas está activo.
-- Códigos simultáneos: **HEX, RGB, RGBA y HSL**, cada uno con botón de icono para copiar y aviso de confirmación.
+- Códigos simultáneos: **OKLCH, OKLAB, HEX, RGB, RGBA y HSL**. Al hacer clic en el propio código se copia el valor; con `Ctrl`, HEX copia `HEX#...` y el resto conserva su función CSS completa.
 - El muestreo no mueve el divisor del comparador.
 - En modo ICO se desactiva, porque la vista no representa la imagen original.
 - La muestra y el zoom se reinician al cargar otra imagen o reiniciar la sesión.
@@ -364,7 +364,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **60 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **62 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

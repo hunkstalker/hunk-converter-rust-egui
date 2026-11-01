@@ -1,9 +1,7 @@
 use eframe::egui::{
-    self, Align, Color32, CornerRadius, CursorIcon, FontId, Layout, RichText, Sense, Stroke,
-    StrokeKind, vec2,
+    self, Color32, CornerRadius, CursorIcon, FontId, RichText, Sense, Stroke, StrokeKind, vec2,
 };
 
-use crate::codec::OutputFormat;
 use crate::domain::{HISTORY_LIMIT, color_codes, hex_rgba};
 use crate::i18n::{self, K};
 use crate::theme as T;
@@ -11,17 +9,13 @@ use crate::theme as T;
 use super::super::HunkApp;
 use super::super::actions::AppAction;
 use super::history::{HistorySwatch, paint_history_swatch};
-use super::icons::{EyedropperButton, IconAction, eyedropper_button, icon_action_button};
 use super::widgets::{HISTORY_COLUMNS, SWATCH_GAP, SWATCH_SIZE, hline, paint_checker};
 
 impl HunkApp {
     pub(crate) fn show_color_panel(&mut self, ui: &mut egui::Ui) -> Vec<AppAction> {
         let mut actions = Vec::new();
-        let icon_mode = self.format == OutputFormat::Ico;
         let sample = self.sampled_color;
-        let sampled_position = self.sampled_position;
         let history = self.history.clone();
-        let has_unlocked = history.iter().any(|entry| !entry.locked);
         let entry_count = history.len();
         let focus_index = self.history_focus.min(entry_count.saturating_sub(1));
         self.history_focus = focus_index;
@@ -29,19 +23,8 @@ impl HunkApp {
         T::floating_frame().show(ui, |ui| {
             ui.set_width(ui.available_width());
 
-            ui.horizontal(|ui| {
-                ui.label(T::eyebrow(self.t(K::History)));
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    let clear_label = self.t(K::ClearHistory);
-                    let response =
-                        icon_action_button(ui, IconAction::Trash, has_unlocked, clear_label)
-                            .on_hover_text(clear_label);
-                    if has_unlocked && response.clicked() {
-                        actions.push(AppAction::ClearHistory);
-                    }
-                });
-            });
-            ui.add_space(4.0);
+            ui.label(T::section_label(self.t(K::History)));
+            ui.add_space(6.0);
 
             let content_width = ui.available_width();
             let rows = HISTORY_LIMIT.div_ceil(HISTORY_COLUMNS);
@@ -163,135 +146,138 @@ impl HunkApp {
                     ui.add_space(SWATCH_GAP);
                 }
             }
-            ui.add_space(10.0);
+            ui.add_space(12.0);
             hline(ui);
-            ui.add_space(10.0);
+            ui.add_space(12.0);
 
-            ui.spacing_mut().interact_size.y = 20.0;
             ui.horizontal(|ui| {
-                ui.label(T::eyebrow(self.t(K::Eyedropper)));
-                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    let response = eyedropper_button(
-                        ui,
-                        EyedropperButton {
-                            active: self.eyedropper_active,
-                            enabled: !icon_mode,
-                            label: self.t(K::Eyedropper),
-                        },
-                    );
-                    let hint = if icon_mode {
-                        self.t(K::EyedropperUnavailable)
-                    } else if self.eyedropper_active {
-                        self.t(K::DisableEyedropper)
-                    } else {
-                        self.t(K::EnableEyedropper)
-                    };
-                    let response = response.on_hover_text(hint);
-                    if !icon_mode {
-                        if response.drag_started() {
-                            self.eyedropper_active = true;
-                            actions.push(AppAction::RequestRepaint);
-                        } else if response.clicked()
-                            || (self.eyedropper_active
-                                && response.clicked_by(egui::PointerButton::Secondary))
-                        {
-                            self.eyedropper_active = !self.eyedropper_active;
-                            actions.push(AppAction::RequestRepaint);
-                        }
-                        if self.eyedropper_active {
-                            ui.ctx().memory_mut(|memory| {
-                                memory.request_focus(egui::Id::unique(super::canvas::CANVAS_ID));
-                            });
-                        }
+                ui.label(T::section_label(self.t(K::Eyedropper)));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    let (rect, _) = ui.allocate_exact_size(vec2(32.0, 22.0), Sense::hover());
+                    let painter = ui.painter();
+                    paint_checker(painter, rect);
+                    if let Some(rgba) = sample {
+                        painter.rect_filled(
+                            rect,
+                            CornerRadius::same(5),
+                            Color32::from_rgba_unmultiplied(rgba[0], rgba[1], rgba[2], rgba[3]),
+                        );
                     }
-                });
-            });
-            ui.add_space(3.0);
-
-            ui.horizontal(|ui| {
-                let (rect, _) = ui.allocate_exact_size(vec2(36.0, 24.0), Sense::hover());
-                let painter = ui.painter();
-                paint_checker(painter, rect);
-                if let Some(rgba) = sample {
-                    painter.rect_filled(
+                    painter.rect_stroke(
                         rect,
                         CornerRadius::same(5),
-                        Color32::from_rgba_unmultiplied(rgba[0], rgba[1], rgba[2], rgba[3]),
-                    );
-                }
-                painter.rect_stroke(
-                    rect,
-                    CornerRadius::same(5),
-                    Stroke::new(1.0, T::BORDER_STRONG),
-                    StrokeKind::Inside,
-                );
-                ui.add_space(2.0);
-                ui.vertical(|ui| {
-                    ui.spacing_mut().item_spacing.y = 1.0;
-                    let message = if icon_mode {
-                        self.t(K::EyedropperIcoHint)
-                    } else if self.eyedropper_active {
-                        if sample.is_some() {
-                            self.t(K::SampleCapturedChoose)
-                        } else {
-                            self.t(K::SampleClickOrDrag)
-                        }
-                    } else if sample.is_some() && sampled_position.is_none() {
-                        self.t(K::SampleFromHistory)
-                    } else if sample.is_some() {
-                        self.t(K::SampleCaptured)
-                    } else {
-                        self.t(K::EyedropperIdle)
-                    };
-                    ui.add(
-                        egui::Label::new(RichText::new(message).size(9.5).color(T::TEXT_MUTED))
-                            .truncate(),
-                    );
-                    let coords = sampled_position
-                        .map(|(x, y)| i18n::pixel_coords(self.language, x, y))
-                        .unwrap_or_else(|| "\u{00A0}".to_owned());
-                    ui.label(
-                        RichText::new(coords)
-                            .font(FontId::monospace(8.5))
-                            .color(T::TEXT_FAINT),
+                        Stroke::new(1.0, T::BORDER_STRONG),
+                        StrokeKind::Inside,
                     );
                 });
             });
-            ui.add_space(2.0);
+            ui.add_space(6.0);
 
-            ui.spacing_mut().interact_size.y = 14.0;
-            ui.spacing_mut().item_spacing.y = 1.0;
             let codes = sample.map(color_codes).unwrap_or_else(|| {
                 [
+                    ("OKLCH", "—".to_owned()),
+                    ("OKLAB", "—".to_owned()),
                     ("HEX", "—".to_owned()),
                     ("RGB", "—".to_owned()),
                     ("RGBA", "—".to_owned()),
                     ("HSL", "—".to_owned()),
                 ]
             });
-            for (label, value) in codes {
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new(label).size(9.0).color(T::TEXT_FAINT).strong());
-                    ui.label(
-                        RichText::new(&value)
-                            .font(FontId::monospace(10.0))
-                            .color(T::TEXT_MUTED),
-                    );
-                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        let tooltip = i18n::copy_tooltip(self.language, label);
-                        let response =
-                            icon_action_button(ui, IconAction::Copy, sample.is_some(), &tooltip)
-                                .on_hover_text(tooltip);
-                        if sample.is_some() && response.clicked() {
-                            actions.push(AppAction::CopyColor {
-                                label: label.to_owned(),
-                                text: value.clone(),
-                            });
+            let control = ui.input(|input| input.modifiers.command);
+            let clickable = sample.is_some();
+            egui::Grid::new("color_codes_grid")
+                .num_columns(2)
+                .spacing(vec2(10.0, 4.0))
+                .show(ui, |ui| {
+                    for (label, value) in codes {
+                        ui.label(
+                            RichText::new(label)
+                                .size(T::SMALL_TEXT_SIZE)
+                                .color(T::TEXT_FAINT)
+                                .strong(),
+                        );
+                        if clickable {
+                            let tooltip = i18n::copy_code_tooltip(self.language, label);
+                            let response =
+                                code_value(ui, &value, true).on_hover_text(tooltip.as_str());
+                            if response.clicked() {
+                                actions.push(AppAction::CopyColor {
+                                    label: label.to_owned(),
+                                    text: code_copy_text(label, &value, control),
+                                });
+                            }
+                        } else {
+                            ui.label(
+                                RichText::new(&value)
+                                    .font(FontId::monospace(T::SMALL_TEXT_SIZE))
+                                    .color(T::TEXT_DISABLED),
+                            );
                         }
-                    });
+                        ui.end_row();
+                    }
                 });
-            }
+            ui.add_space(2.0);
         });
         actions
+    }
+}
+
+fn code_value(ui: &mut egui::Ui, value: &str, enabled: bool) -> egui::Response {
+    let color = if enabled {
+        T::TEXT_MUTED
+    } else {
+        T::TEXT_DISABLED
+    };
+    let galley = ui.painter().layout_no_wrap(
+        value.to_owned(),
+        FontId::monospace(T::SMALL_TEXT_SIZE),
+        color,
+    );
+    let padding = vec2(5.0, 2.0);
+    let (rect, response) = ui.allocate_exact_size(
+        galley.size() + padding * 2.0,
+        if enabled {
+            Sense::click()
+        } else {
+            Sense::hover()
+        },
+    );
+    if enabled && response.hovered() {
+        ui.painter()
+            .rect_filled(rect, CornerRadius::same(5), T::SURFACE_3);
+    }
+    let text_color = if enabled && response.hovered() {
+        T::TEXT
+    } else {
+        color
+    };
+    ui.painter().galley(rect.min + padding, galley, text_color);
+    if enabled {
+        response.on_hover_cursor(CursorIcon::PointingHand)
+    } else {
+        response
+    }
+}
+
+fn code_copy_text(label: &str, value: &str, control: bool) -> String {
+    if control && label == "HEX" {
+        format!("HEX{value}")
+    } else {
+        value.to_owned()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ctrl_copy_keeps_css_functions_and_prefixes_hex() {
+        assert_eq!(code_copy_text("HEX", "#605342", false), "#605342");
+        assert_eq!(code_copy_text("HEX", "#605342", true), "HEX#605342");
+        assert_eq!(
+            code_copy_text("RGBA", "rgba(96, 83, 66, 1.00)", true),
+            "rgba(96, 83, 66, 1.00)"
+        );
     }
 }

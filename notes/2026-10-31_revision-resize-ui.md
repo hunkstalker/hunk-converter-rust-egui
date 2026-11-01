@@ -125,7 +125,7 @@ mezcla `·` y resúmenes como `Máxima · —`, que resultan confusos.
   apertura y se retira después, sin bloquear el scroll manual.
 - Los atajos globales (`0`, `1`, `F`, etc.) se ignoran mientras un campo de texto
   tiene el foco.
-- Suite de **60 pruebas** y validación visual bajo Xvfb: enlace en ambos
+- Suite de **62 pruebas** y validación visual bajo Xvfb: enlace en ambos
   sentidos, arrastre vertical, expresión, rotación, marco original y secciones.
 
 ## Actualización 2026-11-01

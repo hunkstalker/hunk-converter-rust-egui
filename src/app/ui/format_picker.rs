@@ -19,11 +19,11 @@ pub(super) fn format_grid(ui: &mut egui::Ui, spec: FormatSelector<'_>) -> Option
         source_format,
     } = spec;
     let options = [
+        FormatSelection::Auto,
         FormatSelection::Fixed(OutputFormat::Webp),
         FormatSelection::Fixed(OutputFormat::Jpg),
         FormatSelection::Fixed(OutputFormat::Png),
         FormatSelection::Fixed(OutputFormat::Avif),
-        FormatSelection::Auto,
         FormatSelection::Fixed(OutputFormat::Ico),
     ];
     let gap = 6.0;
@@ -50,7 +50,7 @@ pub(super) fn format_grid(ui: &mut egui::Ui, spec: FormatSelector<'_>) -> Option
     if input_matches && current.is_lossy() {
         ui.label(
             RichText::new(i18n::t(language, K::RecompressWarning))
-                .size(9.0)
+                .size(T::SMALL_TEXT_SIZE)
                 .color(T::WARNING),
         );
     }
@@ -106,7 +106,7 @@ fn format_card(
         rect.left_top() + vec2(10.0, 9.0),
         egui::Align2::LEFT_TOP,
         label,
-        FontId::proportional(12.0),
+        FontId::proportional(T::SMALL_TEXT_SIZE),
         T::TEXT,
     );
     painter.text(

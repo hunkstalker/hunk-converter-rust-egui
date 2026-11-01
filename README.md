@@ -23,10 +23,10 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **AVIF de referencia:** libavif/AOM con YUV420 y alfa; paridad práctica con Squoosh y más velocidad.
 - **Preprocesado:** resize enlazado con proporción, marco del tamaño original en el canvas, rotación con el botón rápido de 90° y paleta de 2–256 colores. Los campos numéricos aceptan arrastre vertical y expresiones como `1600/4`.
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
-- **Zoom y paneo:** rueda del ratón sobre la imagen y clic derecho para desplazarte.
+- **Zoom y paneo:** rueda del ratón en cualquier punto del visor y clic derecho para desplazarte.
 - **Vista previa fiel al archivo final**: se decodifica el resultado codificado real.
-- **Cuentagotas:** pulsa el icono y haz clic o arrastra sobre la imagen para capturar un color. La tarjeta mantiene una altura fija al mostrar coordenadas y códigos.
-- **Códigos simultáneos:** HEX, RGB, RGBA y HSL, con botones de copia y confirmación visual.
+- **Cuentagotas:** pulsa el icono y haz clic o arrastra sobre la imagen para capturar un color. La tarjeta muestra los códigos del color capturado.
+- **Códigos simultáneos:** OKLCH, OKLAB, HEX, RGB, RGBA y HSL. Al hacer clic en un código se copia su valor; con Ctrl, HEX copia `HEX#...` para conservar la etiqueta.
 - **Historial de colores:** 21 colores en tres filas de siete, con bloqueo y limpieza.
 - **Idiomas:** español, catalán e inglés, con detección del sistema y preferencia guardada.
 - **Ventana maximizada:** se abre maximizada; los controles nativos permiten maximizar o restaurar y el estado se guarda.
@@ -53,7 +53,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 1. Carga una imagen.
 2. Pulsa el **icono de cuentagotas** en la tarjeta flotante inferior izquierda.
 3. Haz clic sobre la imagen o arrastra desde el icono hasta el píxel que quieras.
-4. Copia cualquiera de sus códigos con el icono de portapapeles.
+4. Copia un código haciendo clic sobre él. Con `Ctrl` pulsado, HEX copia `HEX#...`.
 
 El icono vuelve a pulsarse para desactivar el modo. También puedes cancelarlo con `Esc` o con clic derecho sobre la imagen. La marca de muestreo solo se muestra mientras el cuentagotas está activo.
 
@@ -221,7 +221,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 60 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 62 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 

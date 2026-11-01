@@ -267,7 +267,7 @@ La suite cubre:
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **60 pruebas**, `cargo fmt --check` y
+Estado actual: **62 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

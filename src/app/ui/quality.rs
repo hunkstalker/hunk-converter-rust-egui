@@ -18,14 +18,14 @@ impl HunkApp {
             self.t(K::LosslessHint)
         };
         let header = ui.horizontal(|ui| {
-            ui.label(T::eyebrow(self.t(K::Quality)));
+            ui.label(T::section_label(self.t(K::Quality)));
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                 let value = if lossy {
                     format!("{} %", self.quality)
                 } else {
                     self.t(K::Lossless).to_owned()
                 };
-                ui.label(RichText::new(value).size(12.0).color(T::TEXT));
+                ui.label(RichText::new(value).size(T::SMALL_TEXT_SIZE).color(T::TEXT));
             });
         });
         header.response.on_hover_text(hint);

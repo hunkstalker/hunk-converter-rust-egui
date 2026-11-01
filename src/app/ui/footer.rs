@@ -20,14 +20,14 @@ impl HunkApp {
                             "Rust + egui · Open Source · v{}",
                             env!("CARGO_PKG_VERSION")
                         ))
-                        .size(9.5)
+                        .size(T::SMALL_TEXT_SIZE)
                         .color(T::TEXT_FAINT),
                     );
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         let response = ui
                             .hyperlink_to(
                                 RichText::new("github.com/hunkstalker/hunk-converter")
-                                    .size(9.5)
+                                    .size(T::SMALL_TEXT_SIZE)
                                     .color(T::TEXT_MUTED),
                                 "https://github.com/hunkstalker/hunk-converter",
                             )

@@ -353,6 +353,14 @@ pub fn copy_tooltip(lang: Lang, label: &str) -> String {
     }
 }
 
+pub fn copy_code_tooltip(lang: Lang, label: &str) -> String {
+    match lang {
+        Lang::Es => format!("Copiar {label} · Ctrl+clic copia el texto completo"),
+        Lang::Ca => format!("Copia {label} · Ctrl+clic copia el text complet"),
+        Lang::En => format!("Copy {label} · Ctrl+click copies the full text"),
+    }
+}
+
 pub fn copied_message(lang: Lang, label: &str) -> String {
     match lang {
         Lang::Es => format!("{label} copiado."),

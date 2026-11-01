@@ -47,7 +47,7 @@ pub(super) fn dimension_fields(
     let mut width_state = load_state(ui, width_id);
     let mut height_state = load_state(ui, height_id);
 
-    let label_font = FontId::proportional(12.0);
+    let label_font = FontId::proportional(T::SMALL_TEXT_SIZE);
     let width_label =
         ui.painter()
             .layout_no_wrap(labels.width.to_owned(), label_font.clone(), T::TEXT_MUTED);

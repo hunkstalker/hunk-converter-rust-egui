@@ -7,7 +7,7 @@
 
 **HUNK Converter** es una aplicación de escritorio local-first para convertir, comprimir, comparar y exportar imágenes. Está hecha en **Rust + egui**, usa el renderizador **glow** y no requiere instalador.
 
-Puede exportar WebP, AVIF, JPG, PNG e ICO. La vista previa compara el original con el archivo codificado real. Incluye un cuentagotas que obtiene colores de la imagen y muestra sus códigos HEX/RGB/RGBA/HSL. Al exportar se abre el explorador nativo para elegir la ruta.
+Puede exportar WebP, AVIF, JPG, PNG e ICO. La vista previa compara el original con el archivo codificado real. Incluye un cuentagotas que obtiene colores de la imagen y muestra sus códigos OKLCH/OKLAB/HEX/RGB/RGBA/HSL. Al exportar se abre el explorador nativo para elegir la ruta.
 
 Ruta principal: la raíz de este repositorio.
 
@@ -27,7 +27,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Opciones avanzadas implementadas sin persistencia: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado. Se reinician en cada sesión. Queda revisar resize/UI y el resto de features antes de publicar 1.1.
 - Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG; AVIF usa libavif/AOM.
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %, salvo con resize activo, que encuadra el original para mostrar el marco.
-- Cuentagotas con muestra del píxel original, coordenadas, códigos HEX/RGB/RGBA/HSL, botones de copia y aviso de confirmación. La tarjeta reserva el espacio de coordenadas y códigos para no cambiar de altura.
+- Cuentagotas con muestra del píxel original y códigos OKLCH/OKLAB/HEX/RGB/RGBA/HSL. El código se copia al hacer clic; con Ctrl, HEX añade la etiqueta.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
 - Arquitectura modular: dominio puro, acciones explícitas, errores tipados y UI dividida por componentes. Ver `docs/arquitectura.md`.
 - Idioma, historial, bloqueos, estado maximizado, formato de salida, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. Las opciones de Preprocesado y Avanzado no se guardan y vuelven a sus valores por defecto al reiniciar.
@@ -40,7 +40,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **60 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **62 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; **1.1.0** pendiente de revisar resize/UI, completar el resto de features y cerrar `t-43`. No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
@@ -85,7 +85,7 @@ Builds portables:
 - **Arquitectura:** `domain` no conoce egui ni ficheros; `ui` devuelve `AppAction` para los efectos de aplicación; `app` es el único que toca disco, workers y configuración. No introducir Clean Architecture completa ni un trait por códec.
 - **Errores:** usar enums tipados y `i18n::present_error`; no volver a `Result<_, String>` ni a comparar mensajes en español.
 - **Parámetros:** máximo 3 además de `self`; agrupar en DTOs cuando haga falta.
-- **Cuentagotas:** el clic derecho sobre la imagen lo desactiva. Los botones de copia son iconos y muestran un aviso temporal.
+- **Cuentagotas:** el clic derecho sobre la imagen lo desactiva. Los códigos de color se copian haciendo clic sobre ellos y muestran un aviso temporal.
 - **Marca:** el nombre visible es **HUNK Converter**; el nombre técnico del binario sigue siendo `hunk-converter`.
 - **Salida portable:** diálogo nativo; si existe, se propone `<carpeta del ejecutable>/export/`.
 - **Sobrescritura:** la confirma el diálogo nativo del sistema.

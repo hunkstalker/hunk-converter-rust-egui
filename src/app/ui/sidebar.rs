@@ -11,7 +11,7 @@ use super::super::actions::AppAction;
 use super::super::{ENCODE_DELAY_MS, HunkApp, PREPROCESS_DELAY_MS};
 use super::dimension_fields::{DimensionLabels, dimension_fields};
 use super::format_picker::{FormatSelector, format_grid};
-use super::widgets::small_text_button;
+use super::widgets::secondary_text_button;
 
 pub(super) struct FileCard<'a> {
     pub texture: egui::TextureId,
@@ -58,7 +58,7 @@ impl HunkApp {
                     ui.set_min_height(ui.available_height());
                     ui.set_width(ui.available_width());
 
-                    let footer_height = 100.0;
+                    let footer_height = 84.0;
                     let scroll_height = (ui.available_height() - footer_height - 8.0).max(200.0);
                     egui::ScrollArea::vertical()
                         .id_salt("sidebar_scroll")
@@ -89,16 +89,7 @@ impl HunkApp {
         card: &FileCard<'_>,
         actions: &mut Vec<AppAction>,
     ) {
-        ui.horizontal(|ui| {
-            ui.label(T::eyebrow(self.t(K::Image)));
-            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                let response = small_text_button(ui, self.t(K::Change))
-                    .on_hover_text(self.t(K::ChangeTooltip));
-                if response.clicked() {
-                    actions.push(AppAction::OpenFileDialog);
-                }
-            });
-        });
+        ui.label(T::section_label(self.t(K::Image)));
         ui.add_space(5.0);
         ui.horizontal(|ui| {
             ui.add(
@@ -106,27 +97,42 @@ impl HunkApp {
                     .corner_radius(CornerRadius::same(9)),
             );
             ui.add_space(4.0);
-            ui.vertical(|ui| {
-                ui.add_space(3.0);
-                ui.label(RichText::new(card.name).size(12.5).color(T::TEXT).strong());
-                ui.label(
-                    RichText::new(format!(
-                        "{} · {} × {} px · {}",
-                        card.format,
-                        card.dimensions.0,
-                        card.dimensions.1,
-                        i18n::localized_bytes(self.language, card.file_bytes)
-                    ))
-                    .size(9.5)
-                    .color(T::TEXT_MUTED),
-                );
-            });
+            let text_width = ui.available_width().max(40.0);
+            let display_name = fitted_filename(ui, card.name, text_width);
+            let response = ui.add_sized(
+                [text_width, 48.0],
+                egui::Label::new(
+                    RichText::new(display_name)
+                        .size(T::SMALL_TEXT_SIZE)
+                        .color(T::TEXT)
+                        .strong(),
+                )
+                .wrap(),
+            );
+            response.on_hover_text(card.name);
         });
-
-        ui.add_space(6.0);
+        ui.add_space(4.0);
+        ui.label(
+            RichText::new(format!(
+                "{} · {} × {} px · {}",
+                card.format,
+                card.dimensions.0,
+                card.dimensions.1,
+                i18n::localized_bytes(self.language, card.file_bytes)
+            ))
+            .size(T::SMALL_TEXT_SIZE)
+            .color(T::TEXT_MUTED),
+        );
+        ui.add_space(10.0);
+        let response =
+            secondary_text_button(ui, self.t(K::Change)).on_hover_text(self.t(K::ChangeTooltip));
+        if response.clicked() {
+            actions.push(AppAction::OpenFileDialog);
+        }
+        ui.add_space(10.0);
         super::widgets::hline(ui);
         ui.add_space(6.0);
-        ui.label(T::eyebrow(self.t(K::OutputFormat)));
+        ui.label(T::section_label(self.t(K::OutputFormat)));
         ui.add_space(6.0);
 
         if let Some(selection) = format_grid(
@@ -449,25 +455,26 @@ impl HunkApp {
             .map(|result| result.size);
 
         ui.horizontal(|ui| {
-            ui.label(T::eyebrow(self.t(K::Original)));
+            ui.spacing_mut().item_spacing.x = 5.0;
+            ui.label(T::section_label(self.t(K::Original)));
             ui.label(
                 RichText::new(
                     source_size
                         .map(|bytes| i18n::localized_bytes(self.language, bytes))
                         .unwrap_or_else(|| "—".to_owned()),
                 )
-                .size(10.5)
+                .size(T::SMALL_TEXT_SIZE)
                 .color(T::TEXT),
             );
             T::bullet_separator(ui);
-            ui.label(T::eyebrow(self.t(K::Result)));
+            ui.label(T::section_label(self.t(K::Result)));
             ui.label(
                 RichText::new(
                     output_size
                         .map(|bytes| i18n::localized_bytes(self.language, bytes))
                         .unwrap_or_else(|| "—".to_owned()),
                 )
-                .size(10.5)
+                .size(T::SMALL_TEXT_SIZE)
                 .color(T::ACCENT),
             );
             if let (Some(original), Some(output)) = (source_size, output_size)
@@ -481,15 +488,18 @@ impl HunkApp {
                 } else {
                     (self.t(K::EqualWeight).to_owned(), T::TEXT_MUTED)
                 };
-                ui.add_space(4.0);
-                ui.label(RichText::new(text).size(9.0).color(color));
+                ui.add_space(2.0);
+                ui.label(RichText::new(text).size(T::SMALL_TEXT_SIZE).color(color));
             }
         });
     }
 
     pub(crate) fn show_export(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {
         let enabled = self.can_export();
-        let label = i18n::export_label(self.language, self.format.extension());
+        let label = format!(
+            "{}   Ctrl+E",
+            i18n::export_label(self.language, self.format.extension())
+        );
         let button = egui::Button::new(
             RichText::new(&label)
                 .size(13.0)
@@ -514,19 +524,85 @@ impl HunkApp {
         if response.clicked() && enabled {
             actions.push(AppAction::Export);
         }
-        ui.add_space(4.0);
-        let hint = if self.busy() {
-            self.t(K::Calculating)
-        } else {
-            self.t(K::ExportHint)
-        };
-        ui.label(RichText::new(hint).size(9.0).color(T::TEXT_FAINT));
         ui.add_space(6.0);
     }
 }
 
 fn section_heading(id: &str, title: &str) -> egui::CollapsingHeader {
     egui::CollapsingHeader::new(RichText::new(title).size(11.0).color(T::TEXT).strong()).id_salt(id)
+}
+
+fn fitted_filename(ui: &egui::Ui, name: &str, width: f32) -> String {
+    let limit = (width - 6.0).max(20.0);
+    let font = egui::FontId::proportional(T::SMALL_TEXT_SIZE);
+    let measure = |text: &str| {
+        ui.painter()
+            .layout_no_wrap(text.to_owned(), font.clone(), T::TEXT)
+            .size()
+            .x
+    };
+
+    if measure(name) <= limit {
+        return name.to_owned();
+    }
+
+    let mut split = None;
+    for (index, _) in name.char_indices().skip(1) {
+        if measure(&name[..index]) > limit {
+            break;
+        }
+        if measure(&name[index..]) <= limit {
+            split = Some(index);
+        }
+    }
+    if let Some(index) = split {
+        let mut chosen = index;
+        for (part_index, character) in name[..index].char_indices().rev() {
+            if matches!(character, ' ' | '_' | '-') && part_index > index / 3 {
+                chosen = part_index + character.len_utf8();
+                break;
+            }
+        }
+        if chosen != index && measure(&name[..chosen]) <= limit && measure(&name[chosen..]) <= limit
+        {
+            return format!("{}\n{}", &name[..chosen], &name[chosen..]);
+        }
+        return format!("{}\n{}", &name[..index], &name[index..]);
+    }
+
+    let (stem, extension) = name
+        .rfind('.')
+        .filter(|index| *index > 0)
+        .map_or((name, ""), |index| (&name[..index], &name[index..]));
+    let stem_chars: Vec<char> = stem.chars().collect();
+    let ellipsis = "…";
+
+    let mut head_count = 0;
+    for count in 1..=stem_chars.len() {
+        let candidate: String = stem_chars[..count].iter().collect();
+        if measure(&candidate) + measure(ellipsis) <= limit {
+            head_count = count;
+        } else {
+            break;
+        }
+    }
+
+    let mut tail_count = 0;
+    for count in 1..=stem_chars.len() {
+        let candidate: String = stem_chars[stem_chars.len() - count..].iter().collect();
+        if measure(&candidate) + measure(ellipsis) + measure(extension) <= limit {
+            tail_count = count;
+        } else {
+            break;
+        }
+    }
+
+    if head_count + tail_count > stem_chars.len() {
+        tail_count = stem_chars.len().saturating_sub(head_count);
+    }
+    let head: String = stem_chars[..head_count].iter().collect();
+    let tail: String = stem_chars[stem_chars.len() - tail_count..].iter().collect();
+    format!("{head}{ellipsis}\n{ellipsis}{tail}{extension}")
 }
 
 fn choice_text(label: &str, selected: bool) -> RichText {
