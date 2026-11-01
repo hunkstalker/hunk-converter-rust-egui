@@ -23,14 +23,14 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Objetivo 1.1: salida web JPEG/PNG/WebP/AVIF + ICO; entrada amplia JPEG/PNG/WebP/AVIF/SVG/BMP/TGA/TIFF; preprocesado de redimensionado, rotación y reducción de paleta. TIFF de entrada forma parte de 1.1. Ver `docs/objetivo-1.1-web.md`.
 - Camino único de 1.1.0: **bloque 1** entrada TIFF/AVIF + benchmark; **bloque 2** paridad con Squoosh (MozJPEG, OxiPNG, WebP/AVIF avanzados, preprocesado y UI). Sin release intermedia.
 - Benchmark HUNK vs Squoosh: WebP empata, JPEG queda en paridad práctica (2,5× más rápido), PNG comprime igual o mejor (3,2× más rápido) y AVIF queda en paridad práctica (0,994× mediana a igual SSIM, 1,82× más rápido en UI). Ver `docs/benchmark-squoosh-2026-10-31.md`.
-- Preprocesado: resize Lanczos3 con proporción, rotación 90/180/270 y paleta 2–256 colores con alfa.
-- Opciones avanzadas y persistencia implementadas: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado. Queda la revisión incremental y `t-45` antes de publicar 1.1.
+- Preprocesado: resize Lanczos3 con proporción enlazada, marco del original en el canvas, rotación 90/180/270 y paleta 2–256 colores con alfa. Los campos aceptan arrastre vertical y expresiones como `1600/4`; el cálculo corre en un worker con debounce.
+- Opciones avanzadas implementadas sin persistencia: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado. Se reinician en cada sesión. Queda revisar resize/UI y el resto de features antes de publicar 1.1.
 - Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG; AVIF usa libavif/AOM.
-- Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %.
+- Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %, salvo con resize activo, que encuadra el original para mostrar el marco.
 - Cuentagotas con muestra del píxel original, coordenadas, códigos HEX/RGB/RGBA/HSL, botones de copia y aviso de confirmación. La tarjeta reserva el espacio de coordenadas y códigos para no cambiar de altura.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
 - Arquitectura modular: dominio puro, acciones explícitas, errores tipados y UI dividida por componentes. Ver `docs/arquitectura.md`.
-- Idioma, historial, bloqueos, estado maximizado, formato de salida, opciones avanzadas, preprocesado, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
+- Idioma, historial, bloqueos, estado maximizado, formato de salida, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. Las opciones de Preprocesado y Avanzado no se guardan y vuelven a sus valores por defecto al reiniciar.
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
 - Pie con enlace directo a `github.com/hunkstalker/hunk-converter`, abierto en el navegador.
@@ -40,9 +40,9 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **57 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **59 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
-- Versión **1.0.0** publicada; **1.1.0** pendiente de la revisión de AVIF, `t-45` (resize/UI), revisión del resto de features y `t-43`. No etiquetar todavía.
+- Versión **1.0.0** publicada; **1.1.0** pendiente de revisar resize/UI, completar el resto de features y cerrar `t-43`. No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
 
 ## 3. Comandos
@@ -130,12 +130,12 @@ t-completadas.md            Tareas cerradas
 
 ## 6. Tareas
 
-- Pendientes: `t-45` (correcciones resize/UI) y `t-43` (cierre bloqueado por la revisión incremental).
+- Pendientes: revisión de `t-45` (resize/UI implementado) y `t-43` (cierre bloqueado por la revisión incremental).
 - Cerradas: `t-completadas.md` (t-1 a t-10, t-13, t-14, t-16, t-18, t-19, t-20, t-21, t-22, t-23, t-25, t-26, t-27, t-28, t-29, t-30, t-31, t-32, t-33, t-34, t-35, t-36, t-37, t-39, t-40, t-41, t-42 y t-44).
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso: **revisión de AVIF** por el usuario. Después, **t-45 — resize/UI** y revisión de resize, seguido del resto de features una por una. No etiquetar v1.1.0 hasta completar esas revisiones y el cierre t-43.
+Siguiente paso: **revisión de resize/UI** por el usuario. Después, el resto de features una por una y el cierre `t-43`. No etiquetar v1.1.0 hasta completar esas revisiones.
 
 ## 7. Benchmarks y límites
 

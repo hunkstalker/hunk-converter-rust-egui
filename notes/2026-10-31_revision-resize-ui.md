@@ -1,6 +1,6 @@
 # Revisión de RESIZE y UI — primera pasada
 
-Fecha: 2026-10-31 · Estado: pendiente, se aplicará después de `t-44` (AVIF)
+Fecha: 2026-10-31 · Estado: implementada; pendiente de revisión con el usuario
 
 ## 1. Proporción no sincroniza los dígitos
 
@@ -28,7 +28,7 @@ trabajo actual.
 
 **Propuesta:**
 
-- Dibujar un marco discontinuo o fantasma con la extensión del original.
+- Dibujar un marco fantasma con la extensión del original.
 - Centrarlo respecto al encuadre actual y recortarlo contra el canvas.
 - Sin etiqueta de texto; el marco debe explicarse por sí mismo.
 - Si no hay resize, no dibujar el marco.
@@ -99,9 +99,38 @@ mezcla `·` y resúmenes como `Máxima · —`, que resultan confusos.
 - Reset con el mismo patrón en ambos bloques.
 - Revisar contraste y foco de teclado al unificar.
 
+## Implementación (2026-10-31)
+
+- Ancho y alto se pintan después de procesar la interacción, así que ambos
+  valores enlazados cambian en el mismo frame.
+- El canvas dibuja un marco de referencia sólido y uniforme con el tamaño
+  original; se sustituyó el trazo discontinuo porque la línea inferior quedaba
+  más tenue por el antialiasing. Con resize activo, encuadra el original para
+  que el marco sea visible.
+- Los campos numéricos usan arrastre vertical con delta total y expresiones
+  `1600x2`, `1600/4`, `1600*2`, `1600-200`; `Enter` aplica y `Esc` cancela.
+- El resize completo corre en un worker con debounce de 120 ms; la vista previa
+  no se bloquea.
+- `Preprocesado` y `Avanzado` comparten cabecera, cuerpo, reset y scroll. Se
+  eliminaron los resúmenes con `·`.
+- El panel de historial/cuentagotas vuelve a quedar fijo sobre Exportar; no se
+  desplaza con el scroll de las secciones.
+- El cuerpo de las secciones reserva ancho para el scrollbar y deja margen
+  derecho, evitando que el marco se recorte contra el borde del panel.
+- La fila de rotación compacta sus botones y puede envolver si no cabe: era la
+  que ensanchaba el cuerpo y empujaba el panel entero hasta recortarlo por la
+  derecha.
+- Al abrir una sección se desplaza su cabecera a la vista para que el cuerpo no
+  aparezca cortado. El desplazamiento se mantiene durante la animación de
+  apertura y se retira después, sin bloquear el scroll manual.
+- Los atajos globales (`0`, `1`, `F`, etc.) se ignoran mientras un campo de texto
+  tiene el foco.
+- Suite de **59 pruebas** y validación visual bajo Xvfb: enlace en ambos
+  sentidos, arrastre vertical, expresión, rotación, marco original y secciones.
+
 ## Orden de trabajo
 
 1. `t-44` — cerrada; revisar AVIF con el usuario.
-2. `t-45` — aplicar estas correcciones y revisar resize.
+2. `t-45` — revisar las correcciones implementadas de resize/UI.
 3. Revisar el resto de features una por una.
 4. `t-43` — benchmark final, capturas y release.

@@ -256,8 +256,8 @@ catalogue! {
         "Could not save the image:"
     ),
     ImagesFilter => ("Imágenes", "Imatges", "Images"),
-    Preprocess => ("PREPROCESADO", "PREPROCÉS", "PREPROCESS"),
-    Advanced => ("AVANZADO", "AVANÇAT", "ADVANCED"),
+    Preprocess => ("Preprocesado", "Preprocés", "Preprocess"),
+    Advanced => ("Avanzado", "Avançat", "Advanced"),
     Progressive => ("Progresivo", "Progressiu", "Progressive"),
     Subsampling => ("Submuestreo", "Submostreig", "Subsampling"),
     SubsamplingAuto => ("Automático", "Automàtic", "Automatic"),
@@ -275,6 +275,11 @@ catalogue! {
     Width => ("Ancho", "Amplada", "Width"),
     Height => ("Alto", "Alçada", "Height"),
     KeepAspect => ("Mantener proporción", "Mantén la proporció", "Keep aspect ratio"),
+    DimensionFieldHint => (
+        "Arrastra arriba o abajo para ajustar; clic para escribir una expresión como 1600/4.",
+        "Arrossega amunt o avall per ajustar; clic per escriure una expressió com 1600/4.",
+        "Drag up or down to adjust; click to type an expression such as 1600/4."
+    ),
     Rotate => ("Rotación", "Rotació", "Rotation"),
     Palette => ("Reducir paleta", "Redueix la paleta", "Reduce palette"),
     Colors => ("Colores", "Colors", "Colors"),

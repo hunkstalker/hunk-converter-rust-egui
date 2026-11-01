@@ -1,6 +1,6 @@
 # Pruebas y automatización
 
-> Estado: 2026-10-31 · 1.1.0 pendiente de revisión incremental y `t-45`
+> Estado: 2026-10-31 · `t-45` implementada, pendiente de revisión con el usuario
 
 ## 1. Capas
 
@@ -20,7 +20,9 @@
 - alfa en PNG, WebP y TIFF;
 - codificación AVIF con AOM, cuantizador directo y alfa;
 - preprocesado: rotación, resize con proporción y paleta con alfa;
-- opciones avanzadas y persistencia `[advanced]` de `config.ini`;
+- expresiones de tamaño `1600x2`, `1600/4`, `1600*2`, `1600-200`, límites y errores;
+- proporción enlazada y dimensiones rotadas;
+- opciones avanzadas y preprocesado sin persistencia; `config.ini` solo guarda idioma, historial, formato y ventana;
 - rechazo de imágenes de más de 16 384 px por lado;
 - rechazo de archivos de más de 200 MB antes de leerlos;
 - error controlado con archivos corruptos.
@@ -52,6 +54,10 @@ añadir binarios de prueba al repositorio.
 La regla es que **ninguna funcionalidad de carga, codificación, configuración o
 exportación** dependa de una validación manual. Lo manual queda para lo visual y
 lo específico de plataforma.
+
+Estado actual: **59 pruebas**, incluidas las expresiones de tamaño y la
+proporción enlazada. La interacción de arrastre y el marco del canvas se validan
+visualmente.
 
 ## 5. Comandos
 

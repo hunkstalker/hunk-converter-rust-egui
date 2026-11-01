@@ -3,6 +3,7 @@ use std::time::Duration;
 #[derive(Debug)]
 pub(crate) enum AppAction {
     RequestEncode(Option<Duration>),
+    RequestPreprocess(Option<Duration>),
     PersistSettings,
     Export,
     OpenFileDialog,

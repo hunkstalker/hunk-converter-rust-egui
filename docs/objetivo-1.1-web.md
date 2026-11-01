@@ -128,7 +128,7 @@ directo. A igual SSIMULACRA2, el tamaño mediano es **0,994×** frente a Squoosh
 (0,704–1,069), la UI queda entre **0,705× y 0,960×** y la velocidad es **1,82×**
 en UI y **4,58×** de mediana. La puerta de AVIF se cumple.
 
-**1.1.0 sigue sin publicarse** hasta aplicar `t-45` (resize/UI), revisar cada
+**1.1.0 sigue sin publicarse** hasta revisar `t-45` (resize/UI), revisar cada
 feature con el usuario y cerrar `t-43`. El bloqueo ya no es AVIF.
 
 ## 4. Encoders de referencia
@@ -161,9 +161,9 @@ Todo pertenece a la misma release. No hay una 1.2 ni un bloque sin numerar.
 - Preprocesado: redimensionar, rotar y reducir paleta (`t-41`, completada).
 - UI, selector web+ICO y persistencia (`t-42`, completada).
 - Cerrar la brecha AVIF (`t-44`, completada).
-- Correcciones de resize y UI (`t-45`).
+- Correcciones de resize y UI (`t-45`, implementada; pendiente de revisión).
 - Cierre, benchmark final y release (`t-43`, bloqueada por la revisión
-  incremental y `t-45`).
+  incremental de resize y del resto de features).
 
 El bloque 2 no se publica aparte: es la segunda mitad de 1.1.0.
 

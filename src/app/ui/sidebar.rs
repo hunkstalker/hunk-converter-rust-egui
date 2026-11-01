@@ -1,11 +1,15 @@
+use std::time::Duration;
+
 use eframe::egui::{self, Align, CornerRadius, Frame, Layout, Margin, RichText, Stroke, vec2};
 
 use crate::codec::OutputFormat;
+use crate::domain::{linked_height, rotated_size};
 use crate::i18n::{self, K};
 use crate::theme as T;
 
-use super::super::HunkApp;
 use super::super::actions::AppAction;
+use super::super::{ENCODE_DELAY_MS, HunkApp, PREPROCESS_DELAY_MS};
+use super::dimension_fields::{DimensionLabels, dimension_fields};
 use super::format_picker::{FormatSelector, format_selector};
 use super::widgets::small_text_button;
 
@@ -15,6 +19,7 @@ pub(super) struct FileCard<'a> {
     pub format: &'a str,
     pub file_bytes: u64,
     pub dimensions: (u32, u32),
+    pub original_dimensions: (u32, u32),
 }
 
 impl HunkApp {
@@ -28,12 +33,14 @@ impl HunkApp {
         let format = source.format.clone();
         let file_bytes = source.file_bytes;
         let dimensions = (source.width, source.height);
+        let original_dimensions = source.original.dimensions();
         let card = FileCard {
             texture,
             name: &name,
             format: &format,
             file_bytes,
             dimensions,
+            original_dimensions,
         };
 
         egui::Panel::left("settings_panel")
@@ -55,19 +62,17 @@ impl HunkApp {
                     let scroll_height =
                         (ui.available_height() - self.color_panel_height - export_height - 8.0)
                             .max(160.0);
-                    let mut settings_scroll = egui::ScrollArea::vertical()
+                    egui::ScrollArea::vertical()
                         .id_salt("sidebar_scroll")
                         .auto_shrink([false, false])
-                        .max_height(scroll_height);
-                    if scroll_height < 300.0 {
-                        settings_scroll = settings_scroll.scroll_bar_visibility(
+                        .max_height(scroll_height)
+                        .scroll_bar_visibility(
                             egui::scroll_area::ScrollBarVisibility::AlwaysVisible,
-                        );
-                    }
-                    settings_scroll.show(ui, |ui| {
-                        ui.set_width(ui.available_width());
-                        self.show_sidebar_top(ui, &card, &mut actions);
-                    });
+                        )
+                        .show(ui, |ui| {
+                            ui.set_width((ui.available_width() - 6.0).max(0.0));
+                            self.show_sidebar_top(ui, &card, &mut actions);
+                        });
 
                     ui.add_space(4.0);
                     let mut color_actions = Vec::new();
@@ -153,18 +158,18 @@ impl HunkApp {
             self.show_quality(ui, actions);
         }
 
-        self.show_preprocess(ui, card.dimensions, actions);
+        self.show_preprocess(ui, card.original_dimensions, actions);
         self.show_advanced(ui, actions);
     }
 
     fn show_preprocess(
         &mut self,
         ui: &mut egui::Ui,
-        source_dimensions: (u32, u32),
+        original_dimensions: (u32, u32),
         actions: &mut Vec<AppAction>,
     ) {
         let before = self.advanced.preprocess.clone();
-        let title = T::eyebrow(self.t(K::Preprocess));
+        let title = self.t(K::Preprocess);
         let resize_label = self.t(K::Resize);
         let width_label = self.t(K::Width);
         let height_label = self.t(K::Height);
@@ -172,43 +177,83 @@ impl HunkApp {
         let rotate_label = self.t(K::Rotate);
         let palette_label = self.t(K::Palette);
         let colors_label = self.t(K::Colors);
-        ui.add_space(10.0);
-        egui::CollapsingHeader::new(title)
-            .default_open(false)
-            .show(ui, |ui| {
+        let reset_label = self.t(K::ResetOptions);
+        let dimension_hint = self.t(K::DimensionFieldHint);
+        let mut dimension_response = None;
+        let mut reset = false;
+
+        ui.add_space(8.0);
+        let preprocess_section = section_heading("preprocess_section", title).show(ui, |ui| {
+            let body_width = ui.available_width();
+            T::soft_frame().show(ui, |ui| {
+                let inner_width = (body_width - 30.0).max(0.0);
+                ui.set_width(inner_width);
+                ui.set_max_width(inner_width);
+                ui.spacing_mut().item_spacing.y = 7.0;
+
                 ui.checkbox(&mut self.advanced.preprocess.resize_enabled, resize_label);
-                if self.advanced.preprocess.resize_enabled {
-                    if self.advanced.preprocess.width == 0 {
-                        self.advanced.preprocess.width = source_dimensions.0;
-                    }
-                    if self.advanced.preprocess.height == 0 {
-                        self.advanced.preprocess.height = source_dimensions.1;
-                    }
-                    ui.horizontal(|ui| {
-                        ui.label(width_label);
-                        ui.add(
-                            egui::DragValue::new(&mut self.advanced.preprocess.width)
-                                .range(1..=16_384)
-                                .speed(1),
-                        );
-                        ui.label(height_label);
-                        ui.add(
-                            egui::DragValue::new(&mut self.advanced.preprocess.height)
-                                .range(1..=16_384)
-                                .speed(1),
-                        );
+
+                let rotation_before = self.advanced.preprocess.rotation;
+                ui.scope(|ui| {
+                    ui.spacing_mut().item_spacing.x = 4.0;
+                    ui.spacing_mut().button_padding.x = 5.0;
+                    ui.horizontal_wrapped(|ui| {
+                        ui.label(rotate_label);
+                        for (degrees, label) in
+                            [(0u16, "0°"), (90, "90°"), (180, "180°"), (270, "270°")]
+                        {
+                            ui.selectable_value(
+                                &mut self.advanced.preprocess.rotation,
+                                degrees,
+                                label,
+                            );
+                        }
                     });
-                    ui.checkbox(&mut self.advanced.preprocess.keep_aspect, keep_aspect_label);
+                });
+                if self.advanced.preprocess.rotation != rotation_before {
+                    let delta = (self.advanced.preprocess.rotation + 360 - rotation_before) % 360;
+                    if matches!(delta, 90 | 270) {
+                        std::mem::swap(
+                            &mut self.advanced.preprocess.width,
+                            &mut self.advanced.preprocess.height,
+                        );
+                    }
                 }
 
-                ui.horizontal(|ui| {
-                    ui.label(rotate_label);
-                    for (degrees, label) in
-                        [(0u16, "0°"), (90, "90°"), (180, "180°"), (270, "270°")]
-                    {
-                        ui.selectable_value(&mut self.advanced.preprocess.rotation, degrees, label);
+                if self.advanced.preprocess.resize_enabled {
+                    let (rotated_width, rotated_height) = rotated_size(
+                        original_dimensions.0,
+                        original_dimensions.1,
+                        self.advanced.preprocess.rotation,
+                    );
+                    if self.advanced.preprocess.width == 0 {
+                        self.advanced.preprocess.width = rotated_width;
                     }
-                });
+                    if self.advanced.preprocess.height == 0 {
+                        self.advanced.preprocess.height = rotated_height;
+                    }
+                    let aspect = rotated_width as f32 / rotated_height.max(1) as f32;
+                    if ui
+                        .checkbox(&mut self.advanced.preprocess.keep_aspect, keep_aspect_label)
+                        .changed()
+                        && self.advanced.preprocess.keep_aspect
+                    {
+                        self.advanced.preprocess.height =
+                            linked_height(self.advanced.preprocess.width, aspect, 16_384);
+                    }
+                    dimension_response = Some(dimension_fields(
+                        ui,
+                        &mut self.advanced.preprocess.width,
+                        &mut self.advanced.preprocess.height,
+                        aspect,
+                        self.advanced.preprocess.keep_aspect,
+                        DimensionLabels {
+                            width: width_label,
+                            height: height_label,
+                            hint: dimension_hint,
+                        },
+                    ));
+                }
 
                 let mut palette_enabled = self.advanced.preprocess.palette_colors.is_some();
                 if ui.checkbox(&mut palette_enabled, palette_label).changed() {
@@ -220,22 +265,62 @@ impl HunkApp {
                         ui.add(egui::DragValue::new(colors).range(2..=256).speed(1));
                     });
                 }
-            });
 
+                ui.horizontal(|ui| {
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        if ui.small_button(reset_label).clicked() {
+                            reset = true;
+                        }
+                    });
+                });
+            });
+        });
+        if preprocess_section.header_response.clicked() {
+            request_section_scroll(ui, "preprocess", preprocess_section.header_response.rect);
+        }
+        apply_pending_section_scroll(ui, "preprocess", &preprocess_section);
+        if reset {
+            let mut options = crate::domain::PreprocessOptions::default();
+            options.reset_for_source(original_dimensions.0, original_dimensions.1);
+            self.advanced.preprocess = options;
+        }
+
+        let dragging = dimension_response.is_some_and(|response| response.dragging);
+        let drag_stopped = dimension_response.is_some_and(|response| response.drag_stopped);
         if self.advanced.preprocess == before {
+            if drag_stopped {
+                actions.push(AppAction::PersistSettings);
+            }
             return;
         }
-        let geometry_changed = self.advanced.preprocess.resize_enabled != before.resize_enabled
+        let rotation_changed = self.advanced.preprocess.rotation != before.rotation;
+        let resize_toggled = self.advanced.preprocess.resize_enabled != before.resize_enabled;
+        let keep_aspect_toggled = self.advanced.preprocess.keep_aspect != before.keep_aspect;
+        let geometry_changed = resize_toggled
             || self.advanced.preprocess.width != before.width
             || self.advanced.preprocess.height != before.height
-            || self.advanced.preprocess.keep_aspect != before.keep_aspect
-            || self.advanced.preprocess.rotation != before.rotation;
+            || keep_aspect_toggled
+            || rotation_changed;
         if geometry_changed {
-            self.refresh_preprocessed_source(ui.ctx());
+            let immediate = reset || resize_toggled || keep_aspect_toggled || rotation_changed;
+            let delayed = dimension_response.is_some_and(|response| {
+                response.dragging
+                    || (!response.committed && (response.width_changed || response.height_changed))
+            });
+            let delay = if immediate || !delayed {
+                None
+            } else {
+                Some(Duration::from_millis(PREPROCESS_DELAY_MS))
+            };
+            actions.push(AppAction::RequestPreprocess(delay));
         } else if self.advanced.preprocess.palette_colors != before.palette_colors {
-            actions.push(AppAction::RequestEncode(None));
+            actions.push(AppAction::RequestEncode(Some(Duration::from_millis(
+                ENCODE_DELAY_MS,
+            ))));
         }
-        actions.push(AppAction::PersistSettings);
+        if !dragging || drag_stopped {
+            actions.push(AppAction::PersistSettings);
+        }
     }
 
     fn show_advanced(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {
@@ -243,7 +328,7 @@ impl HunkApp {
             return;
         }
         let before = self.advanced.clone();
-        let advanced_label = self.t(K::Advanced).to_uppercase();
+        let title = self.t(K::Advanced);
         let progressive_label = self.t(K::Progressive);
         let subsampling_label = self.t(K::Subsampling);
         let auto_label = self.t(K::SubsamplingAuto);
@@ -258,52 +343,14 @@ impl HunkApp {
         let speed_label = self.t(K::AvifSpeed);
         let reset_label = self.t(K::ResetOptions);
 
-        let summary = match self.format {
-            OutputFormat::Jpg => format!(
-                "{} · {}",
-                if self.advanced.jpg_progressive {
-                    progressive_label
-                } else {
-                    "Baseline"
-                },
-                match self.advanced.jpg_subsampling {
-                    1 => "4:2:0",
-                    2 => "4:2:2",
-                    3 => "4:4:4",
-                    _ => auto_label,
-                }
-            ),
-            OutputFormat::Png => format!(
-                "{} · {}",
-                match self.advanced.png_level {
-                    0 | 1 => fast_label,
-                    6 => maximum_label,
-                    _ => balanced_label,
-                },
-                if self.advanced.png_interlace {
-                    interlaced_label
-                } else {
-                    "—"
-                }
-            ),
-            OutputFormat::Webp => {
-                if self.advanced.webp_lossless {
-                    format!(
-                        "{lossless_label} · {} {}",
-                        method_label, self.advanced.webp_method
-                    )
-                } else {
-                    format!("{} {}", method_label, self.advanced.webp_method)
-                }
-            }
-            OutputFormat::Avif => format!("{} {}", speed_label, self.advanced.avif_speed),
-            OutputFormat::Ico | OutputFormat::Jxl => String::new(),
-        };
-
-        ui.add_space(6.0);
-        egui::CollapsingHeader::new(format!("{advanced_label} · {summary}"))
-            .default_open(false)
-            .show(ui, |ui| {
+        ui.add_space(8.0);
+        let advanced_section = section_heading("advanced_section", title).show(ui, |ui| {
+            let body_width = ui.available_width();
+            T::soft_frame().show(ui, |ui| {
+                let inner_width = (body_width - 30.0).max(0.0);
+                ui.set_width(inner_width);
+                ui.set_max_width(inner_width);
+                ui.spacing_mut().item_spacing.y = 7.0;
                 match self.format {
                     OutputFormat::Jpg => {
                         ui.checkbox(&mut self.advanced.jpg_progressive, progressive_label);
@@ -317,6 +364,7 @@ impl HunkApp {
                             };
                             egui::ComboBox::from_id_salt("jpg_subsampling")
                                 .selected_text(selected)
+                                .width(ui.available_width())
                                 .show_ui(ui, |ui| {
                                     ui.selectable_value(
                                         &mut self.advanced.jpg_subsampling,
@@ -350,6 +398,7 @@ impl HunkApp {
                                     6 => maximum_label,
                                     _ => balanced_label,
                                 })
+                                .width(ui.available_width())
                                 .show_ui(ui, |ui| {
                                     ui.selectable_value(
                                         &mut self.advanced.png_level,
@@ -411,16 +460,26 @@ impl HunkApp {
                     }
                     OutputFormat::Ico | OutputFormat::Jxl => {}
                 }
-                if ui.small_button(reset_label).clicked() {
-                    let preprocess = self.advanced.preprocess.clone();
-                    self.advanced = crate::settings::AdvancedSettings::default();
-                    self.advanced.preprocess = preprocess;
-                }
+                ui.horizontal(|ui| {
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        if ui.small_button(reset_label).clicked() {
+                            let preprocess = self.advanced.preprocess.clone();
+                            self.advanced = crate::settings::AdvancedSettings::default();
+                            self.advanced.preprocess = preprocess;
+                        }
+                    });
+                });
             });
-
+        });
+        if advanced_section.header_response.clicked() {
+            request_section_scroll(ui, "advanced", advanced_section.header_response.rect);
+        }
+        apply_pending_section_scroll(ui, "advanced", &advanced_section);
         if self.advanced != before {
             actions.push(AppAction::PersistSettings);
-            actions.push(AppAction::RequestEncode(None));
+            actions.push(AppAction::RequestEncode(Some(Duration::from_millis(
+                ENCODE_DELAY_MS,
+            ))));
         }
     }
 
@@ -458,5 +517,46 @@ impl HunkApp {
             self.t(K::ExportHint)
         };
         ui.label(RichText::new(hint).size(9.0).color(T::TEXT_FAINT));
+    }
+}
+
+fn section_heading(id: &str, title: &str) -> egui::CollapsingHeader {
+    egui::CollapsingHeader::new(RichText::new(title).size(11.0).color(T::TEXT).strong()).id_salt(id)
+}
+
+const SECTION_SCROLL_FRAMES: u64 = 24;
+
+fn section_scroll_id(section: &'static str) -> egui::Id {
+    egui::Id::unique(("sidebar_section_scroll", section))
+}
+
+fn request_section_scroll(ui: &egui::Ui, section: &'static str, rect: egui::Rect) {
+    let deadline = ui.ctx().cumulative_frame_nr() + SECTION_SCROLL_FRAMES;
+    ui.data_mut(|data| data.insert_temp(section_scroll_id(section), (rect, deadline)));
+}
+
+fn apply_pending_section_scroll<T>(
+    ui: &egui::Ui,
+    section_name: &'static str,
+    section: &egui::CollapsingResponse<T>,
+) {
+    let id = section_scroll_id(section_name);
+    let Some((rect, deadline)) = ui.data_mut(|data| data.get_temp::<(egui::Rect, u64)>(id)) else {
+        return;
+    };
+    let frame = ui.ctx().cumulative_frame_nr();
+    if section.fully_closed() || frame > deadline {
+        ui.data_mut(|data| data.remove::<(egui::Rect, u64)>(id));
+        return;
+    }
+    ui.scroll_to_rect_animation(
+        rect.translate(vec2(0.0, -6.0)),
+        Some(Align::TOP),
+        egui::style::ScrollAnimation::none(),
+    );
+    if frame == deadline {
+        ui.data_mut(|data| data.remove::<(egui::Rect, u64)>(id));
+    } else {
+        ui.ctx().request_repaint();
     }
 }

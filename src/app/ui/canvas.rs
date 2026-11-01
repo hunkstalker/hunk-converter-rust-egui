@@ -1,8 +1,12 @@
 use std::sync::Arc;
 
-use eframe::egui::{self, Align2, Color32, CursorIcon, FontId, Rect, Stroke, Vec2, pos2, vec2};
+use eframe::egui::{
+    self, Align2, Color32, CornerRadius, CursorIcon, FontId, Rect, Stroke, StrokeKind, Vec2, pos2,
+    vec2,
+};
 
 use crate::codec::OutputFormat;
+use crate::domain::rotated_size;
 use crate::i18n::{self, K};
 use crate::theme as T;
 
@@ -132,6 +136,14 @@ impl HunkApp {
         let source_width = source.width;
         let source_height = source.height;
         let source_pixels = Arc::clone(&source.pixels);
+        let original_size = source.original.dimensions();
+        let (original_width, original_height) = rotated_size(
+            original_size.0,
+            original_size.1,
+            self.advanced.preprocess.rotation,
+        );
+        let reference_frame = self.advanced.preprocess.resize_enabled
+            && (original_width, original_height) != (source_width, source_height);
         let source_size = vec2(source_width as f32, source_height as f32);
         let icon_mode = self.format == OutputFormat::Ico;
 
@@ -185,20 +197,27 @@ impl HunkApp {
             return actions;
         }
 
-        let fit_rect = fit_rect(source_size, area);
-        self.fit_scale = (fit_rect.width() / source_size.x).max(f32::EPSILON);
-        self.clamp_pan(self.image_size(source_size, fit_rect), area);
-        let mut image_rect = self.view_rect(source_size, fit_rect, area);
+        let reference_size = if reference_frame {
+            vec2(original_width as f32, original_height as f32)
+        } else {
+            source_size
+        };
+        let reference_fit_rect = fit_rect(reference_size, area);
+        let reference_scale = (reference_fit_rect.width() / reference_size.x).max(f32::EPSILON);
+        let view_fit_rect = Rect::from_center_size(area.center(), source_size * reference_scale);
+        self.fit_scale = reference_scale;
+        self.clamp_pan(self.image_size(source_size, view_fit_rect), area);
+        let mut image_rect = self.view_rect(source_size, view_fit_rect, area);
 
         if let Some(factor) = self.pending_zoom.take() {
             self.zoom_by(ZoomInput {
                 factor,
                 pointer: area.center(),
                 source_size,
-                fit_rect,
+                fit_rect: view_fit_rect,
                 area,
             });
-            image_rect = self.view_rect(source_size, fit_rect, area);
+            image_rect = self.view_rect(source_size, view_fit_rect, area);
         }
 
         let actual_percent = if self.actual_size {
@@ -342,8 +361,8 @@ impl HunkApp {
                     }
                     if delta != Vec2::ZERO {
                         self.pan += delta;
-                        self.clamp_pan(self.image_size(source_size, fit_rect), area);
-                        image_rect = self.view_rect(source_size, fit_rect, area);
+                        self.clamp_pan(self.image_size(source_size, view_fit_rect), area);
+                        image_rect = self.view_rect(source_size, view_fit_rect, area);
                     }
                 }
             }
@@ -373,10 +392,10 @@ impl HunkApp {
                     factor,
                     pointer: position,
                     source_size,
-                    fit_rect,
+                    fit_rect: view_fit_rect,
                     area,
                 });
-                image_rect = self.view_rect(source_size, fit_rect, area);
+                image_rect = self.view_rect(source_size, view_fit_rect, area);
             }
         }
         if !deactivated_eyedropper
@@ -385,8 +404,8 @@ impl HunkApp {
         {
             let delta = ctx.input(|input| input.pointer.delta());
             self.pan += delta;
-            self.clamp_pan(self.image_size(source_size, fit_rect), area);
-            image_rect = self.view_rect(source_size, fit_rect, area);
+            self.clamp_pan(self.image_size(source_size, view_fit_rect), area);
+            image_rect = self.view_rect(source_size, view_fit_rect, area);
         }
 
         let view_rect = image_rect.intersect(area);
@@ -520,6 +539,25 @@ impl HunkApp {
                 FontId::proportional(13.0),
                 T::TEXT_FAINT,
             );
+        }
+
+        if reference_frame && source_width > 0 {
+            let scale = image_rect.width() / source_width as f32;
+            let original_rect = Rect::from_center_size(
+                image_rect.center(),
+                vec2(
+                    original_width as f32 * scale,
+                    original_height as f32 * scale,
+                ),
+            );
+            if original_rect.intersects(area) {
+                canvas.rect_stroke(
+                    original_rect,
+                    CornerRadius::same(2),
+                    Stroke::new(1.0, Color32::from_rgba_unmultiplied(200, 244, 109, 150)),
+                    StrokeKind::Inside,
+                );
+            }
         }
 
         if self.eyedropper_active

@@ -42,6 +42,12 @@ pub(super) struct EncodeJobResult {
     pub elapsed: Duration,
 }
 
+pub(super) struct PreprocessJobResult {
+    pub revision: u64,
+    pub pixels: RgbaImage,
+    pub preview: RgbaImage,
+}
+
 pub(super) struct EncodeCompletion {
     pub output: EncodedOutput,
     pub elapsed: Duration,

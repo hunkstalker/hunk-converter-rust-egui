@@ -21,7 +21,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Salida:** WebP, AVIF, JPG, PNG e ICO, con selector desplegable y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
 - **AVIF de referencia:** libavif/AOM con YUV420 y alfa; paridad práctica con Squoosh y más velocidad.
-- **Preprocesado:** redimensionar con proporción, rotar en pasos de 90° y reducir la paleta a 2–256 colores conservando alfa.
+- **Preprocesado:** resize enlazado con proporción, marco del tamaño original en el canvas, rotación en pasos de 90° y paleta de 2–256 colores. Los campos numéricos aceptan arrastre vertical y expresiones como `1600/4`.
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
 - **Zoom y paneo:** rueda del ratón sobre la imagen y clic derecho para desplazarte.
 - **Vista previa fiel al archivo final**: se decodifica el resultado codificado real.
@@ -214,7 +214,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 57 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas persistentes, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 59 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 

@@ -20,6 +20,9 @@ impl HunkApp {
                 OutputFormat::from_input_label(&input.format).unwrap_or(OutputFormat::Webp)
             }
         };
+        self.preprocess_revision = self.preprocess_revision.wrapping_add(1);
+        self.preprocess_pending_since = None;
+        self.preprocess_worker = None;
         let (input_width, input_height) = input.pixels.dimensions();
         self.advanced
             .preprocess
@@ -28,7 +31,11 @@ impl HunkApp {
         let processed = apply_geometry(&original, &self.advanced.preprocess);
         let (width, height) = processed.dimensions();
         let preview = resized_for_ui(&processed, UI_PREVIEW_MAX);
-        let texture = upload_texture(ctx, &format!("source-{}", self.revision), &preview);
+        let texture = upload_texture(
+            ctx,
+            &format!("source-{}", self.preprocess_revision),
+            &preview,
+        );
         self.source = Some(SourceImage {
             name: input.name,
             stem: input.stem,
@@ -49,43 +56,20 @@ impl HunkApp {
         self.split = 0.5;
         self.zoom = FIT_ZOOM;
         self.pan = egui::Vec2::ZERO;
-        self.actual_size = true;
+        let (rotated_width, rotated_height) = crate::domain::rotated_size(
+            input_width,
+            input_height,
+            self.advanced.preprocess.rotation,
+        );
+        self.actual_size = !(self.advanced.preprocess.resize_enabled
+            && (
+                self.advanced.preprocess.width,
+                self.advanced.preprocess.height,
+            ) != (rotated_width, rotated_height));
         self.pending_zoom = None;
         self.fit_scale = 1.0;
         self.screenshot_at = None;
         self.screenshot_requested = false;
-        self.request_encode(ctx, None);
-    }
-
-    pub(crate) fn refresh_preprocessed_source(&mut self, ctx: &egui::Context) {
-        let Some(original) = self
-            .source
-            .as_ref()
-            .map(|source| std::sync::Arc::clone(&source.original))
-        else {
-            return;
-        };
-        let processed = apply_geometry(&original, &self.advanced.preprocess);
-        let (width, height) = processed.dimensions();
-        let preview = resized_for_ui(&processed, UI_PREVIEW_MAX);
-        let texture = upload_texture(ctx, &format!("source-{}", self.revision), &preview);
-        if let Some(source) = self.source.as_mut() {
-            source.width = width;
-            source.height = height;
-            source.pixels = std::sync::Arc::new(processed);
-            source.texture = texture;
-        }
-        self.result = None;
-        self.eyedropper_active = false;
-        self.sampled_color = None;
-        self.sampled_position = None;
-        self.sample_pending_history = false;
-        self.split = 0.5;
-        self.zoom = FIT_ZOOM;
-        self.pan = egui::Vec2::ZERO;
-        self.actual_size = true;
-        self.pending_zoom = None;
-        self.fit_scale = 1.0;
         self.request_encode(ctx, None);
     }
 
@@ -214,6 +198,9 @@ impl HunkApp {
     pub(crate) fn reset(&mut self, ctx: &egui::Context) {
         self.source = None;
         self.result = None;
+        self.preprocess_pending_since = None;
+        self.preprocess_worker = None;
+        self.preprocess_revision = self.preprocess_revision.wrapping_add(1);
         self.format = OutputFormat::Webp;
         self.format_selection = FormatSelection::Auto;
         self.advanced = crate::settings::AdvancedSettings::default();

@@ -1,5 +1,6 @@
 mod canvas;
 mod color_card;
+mod dimension_fields;
 mod empty;
 mod footer;
 mod format_picker;

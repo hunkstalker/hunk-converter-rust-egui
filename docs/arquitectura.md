@@ -25,12 +25,14 @@ main.rs
         ├── actions.rs      efectos explícitos que devuelve la UI
         ├── encoding.rs     worker de codificación y revisiones
         ├── export.rs       escritura portable y nombres únicos
+        ├── preprocess.rs   worker de resize/rotación
         ├── session.rs      carga, pegado, reinicio y formato
         ├── state.rs        DTOs de estado de la aplicación
         └── ui/             componentes egui
               ├── header.rs
               ├── footer.rs
               ├── sidebar.rs
+              ├── dimension_fields.rs
               ├── format_picker.rs
               ├── quality.rs
               ├── ico_sizes.rs
@@ -48,7 +50,8 @@ domain/                     lógica pura y tipos del negocio
   ├── error.rs
   ├── export_name.rs
   ├── format.rs
-  └── history.rs
+  ├── history.rs
+  └── preprocess.rs
 
 codec/                      implementaciones concretas de códecs
   ├── mod.rs
@@ -229,6 +232,9 @@ Decisiones:
 - `maximized` sustituye al antiguo `fullscreen`; el valor antiguo se acepta
   para no romper configuraciones existentes.
 - `[output]` guarda `auto` o el formato fijo elegido en el selector de salida.
+- `[advanced]` no se escribe. Las claves antiguas de opciones avanzadas o
+  preprocesado se ignoran al cargar y esos bloques vuelven a sus valores por
+  defecto en cada sesión.
 - `[window]` guarda posición y tamaño de la ventana cuando no está maximizada.
   Al restaurar se usa la posición guardada; el sistema operativo la corrige si
   el monitor ya no existe.
@@ -249,8 +255,10 @@ La suite cubre:
 - códecs WebP/JPG/PNG/AVIF/JPEG XL;
 - JPG progresivo y submuestreo automático; PNG OxiPNG sin pérdida exacta;
 - WebP lossless/method/alfa y AVIF con AOM (YUV420, cuantizador y alfa);
-- preprocesado de rotación, resize con proporción y paleta con alfa;
-- opciones avanzadas y persistencia `[advanced]` de `config.ini`;
+- preprocesado de rotación, resize con proporción enlazada, marco del original en el canvas y paleta con alfa;
+- campos numéricos con arrastre vertical y expresiones `1600/4`;
+- worker de preprocesado con debounce y encuadre de referencia;
+- opciones avanzadas y preprocesado sin persistencia en `config.ini`;
 - entrada TIFF de una página, compresiones LZW/Deflate/PackBits y rechazo de 16 bits;
 - entrada AVIF con alfa y conversión a RGBA8;
 - orientación EXIF y TIFF;
@@ -260,7 +268,7 @@ La suite cubre:
 - códigos de color;
 - contraste WCAG y navegación por teclado.
 
-Estado actual: **57 pruebas**, `cargo fmt --check` y
+Estado actual: **59 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

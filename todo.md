@@ -8,11 +8,13 @@
 
 **Descripción:** Repetir el benchmark final, regenerar capturas, actualizar documentación, validar builds y preparar la release 1.1.
 
-**Estado:** AVIF superado. Bloqueada por la revisión incremental de features y por `t-45`. No etiquetar `v1.1.0` hasta revisar AVIF, aplicar `t-45`, revisar resize y el resto de features con el usuario; después se repetirá el benchmark final.
+**Estado:** AVIF validado. Bloqueada por la revisión de `t-45` (resize/UI) y del resto de features. No etiquetar `v1.1.0` hasta completar esas revisiones y repetir el benchmark final.
 
 ## t-45 — Correcciones de resize y UI
 
 **Descripción:** Aplicar la primera pasada de revisión de la UI de preprocesado/avanzado: sincronizar ancho y alto con la proporción, sustituir la referencia textual por un marco del tamaño original en el canvas, usar cajas numéricas con arrastre vertical y expresiones estilo Blender, y unificar el diseño de los desplegables. Debe hacerse después de la revisión de AVIF.
+
+**Estado:** implementada el 2026-10-31; pendiente de revisión visual e interacción con el usuario.
 
 **Aceptación:**
 

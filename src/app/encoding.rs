@@ -13,7 +13,10 @@ use super::state::{EncodeCompletion, EncodeJobResult, RenderedResult};
 
 impl HunkApp {
     pub(crate) fn busy(&self) -> bool {
-        self.worker.is_some() || self.pending_since.is_some()
+        self.worker.is_some()
+            || self.pending_since.is_some()
+            || self.preprocess_worker.is_some()
+            || self.preprocess_pending_since.is_some()
     }
 
     pub(crate) fn request_encode(&mut self, ctx: &egui::Context, delay: Option<Duration>) {
@@ -25,7 +28,11 @@ impl HunkApp {
     }
 
     pub(crate) fn maybe_start_worker(&mut self, ctx: &egui::Context) {
-        if self.worker.is_some() || self.source.is_none() {
+        if self.worker.is_some()
+            || self.source.is_none()
+            || self.preprocess_worker.is_some()
+            || self.preprocess_pending_since.is_some()
+        {
             return;
         }
         let Some(due) = self.pending_since else {

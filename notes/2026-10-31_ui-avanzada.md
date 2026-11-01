@@ -12,7 +12,8 @@ Fecha: 2026-10-31 · Tarea: `t-42`
   - AVIF: speed y alpha quality.
 - El selector de salida queda en JPEG/PNG/WebP/AVIF/ICO; JPEG XL sale de
   `OutputFormat::ALL`.
-- `[advanced]` en `config.ini` persiste las opciones y el preprocesado.
+- `[advanced]` en `config.ini` persiste las opciones y el preprocesado
+  (histórico; ver actualización del 2026-11-01).
 - Configuraciones antiguas siguen funcionando y `format=jxl` cae a `Auto` con
   advertencia.
 
@@ -24,6 +25,14 @@ Fecha: 2026-10-31 · Tarea: `t-42`
 - Prueba de ida y vuelta de `[advanced]` y de configuraciones antiguas.
 - Prueba visual bajo Xvfb: bloque `Avanzado · Progresivo · Automático`
   colapsado y expandido.
+
+## Actualización 2026-11-01
+
+- Se retira la persistencia de `Preprocesado` y `Avanzado`: `config.ini` ya no
+  escribe `[advanced]`. Las claves antiguas se ignoran al cargar y ambos bloques
+  vuelven a sus valores por defecto en cada sesión.
+- La prueba de ida y vuelta se sustituye por una prueba que verifica que esas
+  opciones no se guardan.
 
 ## Pendiente
 

@@ -49,7 +49,7 @@
 | JPEG XL | `.jxl` | Sin pérdida | Sin opciones |
 | ICO | `.ico` | Sin pérdida | Tamaños 16–256 px |
 
-JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. WebP usa libwebp avanzado. AVIF usa libavif/AOM con YUV420, BT.601, cuantizador directo, speed y alpha quality. Los controles están expuestos en el bloque `Avanzado` y se persisten en `config.ini`.
+JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. WebP usa libwebp avanzado. AVIF usa libavif/AOM con YUV420, BT.601, cuantizador directo, speed y alpha quality. Los controles están expuestos en el bloque `Avanzado` y no se persisten.
 
 La salida se elige en un desplegable con modo `Automático`: conserva el formato de entrada cuando existe salida equivalente y usa WebP como fallback.
 
@@ -267,20 +267,22 @@ sin alterar los píxeles; en JPG, WebP y AVIF la pérdida se controla con
 
 - **Contextuales:** solo aparecen las opciones del formato actual.
 - **Colapsadas por defecto:** el flujo básico sigue siendo formato + calidad.
-- **Con resumen:** al cerrar el bloque se ve la configuración activa.
-- **Con reset:** restablecer solo el formato actual.
-- **Persistentes:** las opciones por formato se guardan en `config.ini`.
+- **Con título simple:** `Preprocesado` y `Avanzado` comparten estilo; no se encadenan resúmenes con `·`.
+- **Con reset:** restablecer solo el bloque actual.
+- **No persistentes:** las opciones por formato y el preprocesado vuelven a sus valores por defecto al reiniciar; `config.ini` no guarda `[advanced]`.
 - **Accesibles:** controles con nombre, estado y foco visible.
 
 ### 7.2 Controles previstos
 
 JPG y PNG usan MozJPEG/OxiPNG. WebP acepta lossless, method y alpha quality, y
 AVIF acepta speed y alpha quality con YUV420 fijo. Los controles están expuestos
-en el bloque `Avanzado` y se persisten en `config.ini`.
+en el bloque `Avanzado` y no se persisten en `config.ini`.
 
-Preprocesado actual: resize Lanczos3 con proporción opcional, rotación en pasos
-de 90° y paleta de 2–256 colores con alfa conservado. Rotación y resize actualizan
-la vista previa de entrada; la paleta se aplica al resultado codificado.
+Preprocesado actual: resize Lanczos3 con proporción enlazada, marco del tamaño
+original en el canvas, rotación en pasos de 90° y paleta de 2–256 colores con
+alfa conservado. Los campos numéricos permiten arrastre vertical y expresiones
+como `1600/4`; `Enter` aplica y `Esc` cancela. La geometría completa se calcula
+en un worker con debounce; la paleta se aplica al resultado codificado.
 
 | Formato | Básico | Avanzado |
 | --- | --- | --- |
@@ -398,11 +400,8 @@ progressive=0
 │ CALIDAD                              82 %   │
 │ [──────────●──────────────]                 │
 │                                             │
-│ ▸ Avanzado          PNG · Equilibrada       │
-│   ┌───────────────────────────────────────┐ │
-│   │ Compresión  [Rápida][Equilibrada][Máxima] │
-│   │ Filtro      [Auto][Sub][Up][Paeth]    │
-│   └───────────────────────────────────────┘ │
+│ ▸ Preprocesado                              │
+│ ▸ Avanzado                                  │
 │                                             │
 │ HISTORIAL                                   │
 │ CUENTAGOTAS                                 │
@@ -462,7 +461,7 @@ progressive=0
 - HEIC/HEIF, PSD, RAW y formatos de cámara.
 - CMYK, ICC, 16 bits y Display P3.
 - Salida SVG, BMP o ICO desde entrada ICO.
-- Procesamiento por lotes o redimensionado.
+- Procesamiento por lotes.
 
 Estas decisiones se pueden revisar más adelante, pero no forman parte de la
 primera ampliación de formatos.

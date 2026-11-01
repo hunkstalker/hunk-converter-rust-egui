@@ -34,6 +34,66 @@ impl PreprocessOptions {
     }
 }
 
+pub fn rotated_size(width: u32, height: u32, rotation: u16) -> (u32, u32) {
+    match rotation % 360 {
+        90 | 270 => (height, width),
+        _ => (width, height),
+    }
+}
+
+pub fn linked_height(width: u32, aspect: f32, max_side: u32) -> u32 {
+    if !aspect.is_finite() || aspect <= 0.0 {
+        return width.clamp(1, max_side);
+    }
+    ((width as f32 / aspect).round() as u32).clamp(1, max_side)
+}
+
+pub fn linked_width(height: u32, aspect: f32, max_side: u32) -> u32 {
+    if !aspect.is_finite() || aspect <= 0.0 {
+        return height.clamp(1, max_side);
+    }
+    ((height as f32 * aspect).round() as u32).clamp(1, max_side)
+}
+
+pub fn parse_dimension_expression(input: &str) -> Option<u32> {
+    let normalized: String = input
+        .chars()
+        .filter(|character| !character.is_whitespace())
+        .collect();
+    if normalized.is_empty() {
+        return None;
+    }
+    if let Ok(value) = normalized.parse::<u32>() {
+        return Some(value);
+    }
+
+    let mut operator = None;
+    for (index, character) in normalized.char_indices().skip(1) {
+        if matches!(character, 'x' | 'X' | '*' | '/' | '+' | '-') {
+            operator = Some((index, character));
+            break;
+        }
+    }
+    let (index, operator) = operator?;
+    let left = normalized[..index].parse::<u64>().ok()?;
+    let right = normalized[index + operator.len_utf8()..]
+        .parse::<u64>()
+        .ok()?;
+    let result = match operator {
+        'x' | 'X' | '*' => left.checked_mul(right)?,
+        '/' => {
+            if right == 0 {
+                return None;
+            }
+            (left as f64 / right as f64).round() as u64
+        }
+        '+' => left.checked_add(right)?,
+        '-' => left.checked_sub(right)?,
+        _ => return None,
+    };
+    u32::try_from(result).ok()
+}
+
 pub fn apply_geometry(source: &RgbaImage, options: &PreprocessOptions) -> RgbaImage {
     let rotated = match options.rotation % 360 {
         90 => imageops::rotate90(source),
@@ -147,6 +207,30 @@ mod tests {
             },
         );
         assert_eq!(output.dimensions(), (8, 4));
+    }
+
+    #[test]
+    fn parses_blender_style_dimension_expressions() {
+        assert_eq!(parse_dimension_expression("1600x2"), Some(3200));
+        assert_eq!(parse_dimension_expression("1600 X 2"), Some(3200));
+        assert_eq!(parse_dimension_expression("1600/4"), Some(400));
+        assert_eq!(parse_dimension_expression("1600*2"), Some(3200));
+        assert_eq!(parse_dimension_expression("1600-200"), Some(1400));
+        assert_eq!(parse_dimension_expression("1600+200"), Some(1800));
+        assert_eq!(parse_dimension_expression("4000/3"), Some(1333));
+        assert_eq!(parse_dimension_expression("1600/0"), None);
+        assert_eq!(parse_dimension_expression("1600-2000"), None);
+        assert_eq!(parse_dimension_expression("1600x2x3"), None);
+        assert_eq!(parse_dimension_expression("alto"), None);
+    }
+
+    #[test]
+    fn links_dimensions_with_the_rotated_aspect_ratio() {
+        assert_eq!(rotated_size(1600, 1000, 90), (1000, 1600));
+        assert_eq!(rotated_size(1600, 1000, 180), (1600, 1000));
+        assert_eq!(linked_height(800, 1.6, 16_384), 500);
+        assert_eq!(linked_width(500, 1.6, 16_384), 800);
+        assert_eq!(linked_height(16_384, 1.6, 16_384), 10_240);
     }
 
     #[test]

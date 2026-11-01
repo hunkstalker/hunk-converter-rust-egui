@@ -15,14 +15,16 @@ use crate::theme as T;
 mod actions;
 mod encoding;
 mod export;
+mod preprocess;
 mod session;
 mod state;
 mod ui;
 
 use actions::AppAction;
-use state::{EncodeJobResult, RenderedResult, SourceImage, Toast};
+use state::{EncodeJobResult, PreprocessJobResult, RenderedResult, SourceImage, Toast};
 
 pub const ENCODE_DELAY_MS: u64 = 160;
+pub const PREPROCESS_DELAY_MS: u64 = 120;
 pub const UI_PREVIEW_MAX: u32 = 2048;
 pub const FIT_ZOOM: f32 = 1.0;
 pub const MIN_ZOOM: f32 = 0.05;
@@ -62,6 +64,9 @@ pub struct HunkApp {
     revision: u64,
     pending_since: Option<Instant>,
     worker: Option<Receiver<EncodeJobResult>>,
+    preprocess_revision: u64,
+    preprocess_pending_since: Option<Instant>,
+    preprocess_worker: Option<Receiver<PreprocessJobResult>>,
     toast: Option<Toast>,
     screenshot_path: Option<PathBuf>,
     screenshot_at: Option<Instant>,
@@ -100,7 +105,7 @@ impl HunkApp {
             maximized: settings.maximized,
             native_maximized_seen: false,
             sample_pending_history: false,
-            color_panel_height: 300.0,
+            color_panel_height: 360.0,
             format: match settings.output_format {
                 FormatSelection::Fixed(format) => format,
                 FormatSelection::Auto => OutputFormat::Webp,
@@ -126,6 +131,9 @@ impl HunkApp {
             revision: 0,
             pending_since: None,
             worker: None,
+            preprocess_revision: 0,
+            preprocess_pending_since: None,
+            preprocess_worker: None,
             toast: None,
             screenshot_path,
             screenshot_at: None,
@@ -299,6 +307,7 @@ impl HunkApp {
         for action in actions {
             match action {
                 AppAction::RequestEncode(delay) => self.request_encode(ctx, delay),
+                AppAction::RequestPreprocess(delay) => self.request_preprocess(ctx, delay),
                 AppAction::PersistSettings => self.save_settings(),
                 AppAction::Export => self.export(),
                 AppAction::OpenFileDialog => self.open_file_dialog(ctx),
@@ -360,6 +369,9 @@ impl eframe::App for HunkApp {
         let ctx = ui.ctx().clone();
         self.sync_native_maximized(&ctx);
         self.sync_window_geometry(&ctx);
+        let focused = ctx.memory(|memory| memory.focused());
+        let text_input_active = focused
+            .is_some_and(|id| egui::widgets::text_edit::TextEditState::load(&ctx, id).is_some());
 
         let dropped = ctx.input(|input| {
             input
@@ -372,11 +384,16 @@ impl eframe::App for HunkApp {
             self.load_path(&path, &ctx);
         }
 
-        if ctx.input(|input| input.modifiers.command && input.key_released(egui::Key::V)) {
+        if !text_input_active
+            && ctx.input(|input| input.modifiers.command && input.key_released(egui::Key::V))
+        {
             self.paste_clipboard_image(&ctx);
         }
 
-        if self.eyedropper_active && ctx.input(|input| input.key_pressed(egui::Key::Escape)) {
+        if !text_input_active
+            && self.eyedropper_active
+            && ctx.input(|input| input.key_pressed(egui::Key::Escape))
+        {
             self.eyedropper_active = false;
             ctx.request_repaint();
         }
@@ -389,17 +406,17 @@ impl eframe::App for HunkApp {
                 command && input.key_pressed(egui::Key::O),
             )
         });
-        if reset_shortcut {
+        if !text_input_active && reset_shortcut {
             self.reset(&ctx);
         }
-        if export_shortcut {
+        if !text_input_active && export_shortcut {
             self.export();
         }
-        if open_shortcut {
+        if !text_input_active && open_shortcut {
             self.open_file_dialog(&ctx);
         }
 
-        if self.source.is_some() && self.format != OutputFormat::Ico {
+        if !text_input_active && self.source.is_some() && self.format != OutputFormat::Ico {
             let (fit, actual, zoom_in, zoom_out) = ctx.input(|input| {
                 let navigation = !input.modifiers.command && !input.modifiers.alt;
                 let plain = navigation && !input.modifiers.shift;
@@ -428,6 +445,8 @@ impl eframe::App for HunkApp {
             }
         }
 
+        self.poll_preprocess(&ctx);
+        self.maybe_start_preprocess(&ctx);
         self.poll_worker(&ctx);
         self.maybe_start_worker(&ctx);
 

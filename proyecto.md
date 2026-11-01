@@ -73,13 +73,21 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - La imagen resultante se obtiene decodificando el archivo codificado real.
 - Damero para transparencia.
 - Modo ICO: se oculta el divisor y se muestra el icono generado, con recuento de tamaños.
-- La imagen se abre al 100 %; `0`/`F` la ajusta a la ventana conservando la proporción.
+- La imagen se abre al 100 %; con resize activo se encuadra el original para mostrar su marco. `0`/`F` ajusta a la ventana conservando la proporción.
 - **Zoom continuo** con rueda o pinza, anclado al cursor, y atajos de teclado.
 - **Modo 1:1** con `1` para ver la imagen a escala real; `0`/`F` vuelve al encuadre completo.
 - **Paneo con clic derecho** cuando la imagen está ampliada, con límites para no perderla de vista.
 - El porcentaje de zoom refleja la escala real. No hay botones de zoom en la cabecera: se controla con teclado, rueda o pinza.
 - El divisor, su círculo y el cuentagotas se adaptan al zoom y al desplazamiento.
 - La vista previa se limita a 2048 px de lado; la exportación conserva la resolución completa.
+
+### 3.3.1 Preprocesado y resize
+
+- Ancho y alto se sincronizan en el mismo frame cuando `Mantener proporción` está activo.
+- La referencia del tamaño original es un marco tenue en el canvas; no añade texto a la barra lateral.
+- Los campos numéricos se ajustan con arrastre vertical y aceptan expresiones `1600x2`, `1600/4`, `1600*2` o `1600-200`; `Enter` aplica y `Esc` cancela.
+- El resize completo se calcula en un worker con debounce, sin bloquear la UI.
+- `Preprocesado` y `Avanzado` comparten el mismo componente de sección y reset.
 
 ### 3.4 Cuentagotas
 
@@ -362,7 +370,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **57 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas persistentes, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **59 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.
