@@ -16,6 +16,11 @@ impl HunkApp {
                     .inner_margin(Margin::symmetric(30, 18)),
             )
             .show(root, |ui| {
+                ui.horizontal(|ui| {
+                    ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                        self.show_top_controls(ui, &mut actions);
+                    });
+                });
                 let available = ui.available_size();
                 let card_width = 680.0_f32.min(available.x - 20.0);
                 let card_height = 500.0_f32.min(available.y - 20.0);

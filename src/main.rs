@@ -22,7 +22,7 @@ fn main() -> eframe::Result {
     settings.maximized = maximized;
 
     let mut viewport = egui::ViewportBuilder::default()
-        .with_title("HUNK Converter · Image Toolbox")
+        .with_title("HUNK Converter - Image Toolbox")
         .with_inner_size(inner_size)
         .with_min_inner_size([1024.0, 800.0])
         .with_maximized(maximized)

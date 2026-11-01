@@ -141,13 +141,19 @@ pub fn sidebar_frame() -> Frame {
     Frame::new()
         .fill(SURFACE)
         .stroke(Stroke::new(1.0, BORDER))
-        .corner_radius(CornerRadius {
-            nw: 18,
-            ne: 18,
-            sw: 0,
-            se: 0,
-        })
+        .corner_radius(CornerRadius::same(18))
         .inner_margin(Margin::symmetric(20, 14))
+}
+
+pub fn floating_frame() -> Frame {
+    soft_frame()
+        .corner_radius(CornerRadius::same(16))
+        .shadow(Shadow {
+            offset: [0, 10],
+            blur: 28,
+            spread: 0,
+            color: Color32::from_black_alpha(120),
+        })
 }
 
 pub fn card_frame() -> Frame {

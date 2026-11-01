@@ -41,7 +41,6 @@ pub struct HunkApp {
     maximized: bool,
     native_maximized_seen: bool,
     sample_pending_history: bool,
-    color_panel_height: f32,
     format: OutputFormat,
     format_selection: FormatSelection,
     advanced: settings::AdvancedSettings,
@@ -105,7 +104,6 @@ impl HunkApp {
             maximized: settings.maximized,
             native_maximized_seen: false,
             sample_pending_history: false,
-            color_panel_height: 360.0,
             format: match settings.output_format {
                 FormatSelection::Fixed(format) => format,
                 FormatSelection::Auto => OutputFormat::Webp,
@@ -312,6 +310,8 @@ impl HunkApp {
                 AppAction::Export => self.export(),
                 AppAction::OpenFileDialog => self.open_file_dialog(ctx),
                 AppAction::Reset => self.reset(ctx),
+                AppAction::RotateQuick => self.rotate_quick(ctx),
+                AppAction::ToggleInvert => self.toggle_invert(ctx),
                 AppAction::RememberColor(rgba) => {
                     self.remember_color(rgba);
                 }
@@ -451,7 +451,6 @@ impl eframe::App for HunkApp {
         self.maybe_start_worker(&ctx);
 
         let mut actions = Vec::new();
-        actions.extend(self.show_header(ui));
         self.show_footer(ui);
         if self.source.is_some() {
             actions.extend(self.show_sidebar(ui));

@@ -13,7 +13,7 @@ use crate::theme as T;
 use super::super::HunkApp;
 use super::super::actions::AppAction;
 use super::super::{FIT_ZOOM, MAX_ZOOM, MIN_ZOOM};
-use super::widgets::{Badge, fit_rect, paint_badge, paint_checker, paint_focus_ring};
+use super::widgets::{Badge, fit_rect, paint_badge, paint_checker};
 
 pub(crate) const CANVAS_ID: &str = "hunk_preview_canvas";
 const MIN_SPLIT: f32 = 0.015;
@@ -378,7 +378,6 @@ impl HunkApp {
         }
         if response.hovered()
             && let Some(position) = pointer
-            && image_rect.contains(position)
         {
             let (scroll, pinch) =
                 ctx.input(|input| (input.smooth_scroll_delta.y, input.zoom_delta()));
@@ -601,9 +600,6 @@ impl HunkApp {
                 foreground: T::TEXT,
             },
         );
-        if response.has_focus() {
-            paint_focus_ring(painter, rect.shrink(2.0), 18);
-        }
         actions
     }
 }

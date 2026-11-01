@@ -176,10 +176,11 @@ catalogue! {
     Copied => ("Copiado", "Copiat", "Copied"),
     Export => ("Exportar", "Exporta", "Export"),
     ExportHint => (
-        "Se guarda en export/, junto a la app.  Ctrl+E",
-        "Es desa a export/, al costat de l'app.  Ctrl+E",
-        "Saved to export/, next to the app.  Ctrl+E"
+        "Elige la ruta al exportar.  Ctrl+E",
+        "Tria la ruta en exportar.  Ctrl+E",
+        "Choose the path when exporting.  Ctrl+E"
     ),
+    SaveImageAs => ("Guardar imagen como", "Desa la imatge com", "Save image as"),
     Calculating => ("Calculando el resultado…", "Calculant el resultat…", "Calculating result…"),
     Preview => ("Vista previa", "Vista prèvia", "Preview"),
     ComparatorDivider => (
@@ -249,7 +250,7 @@ catalogue! {
         "No s'ha pogut crear export/:",
         "Could not create export/:"
     ),
-    ExportSaved => ("Imagen guardada en export/", "Imatge desada a export/", "Image saved to export/"),
+    ExportSaved => ("Imagen guardada como ", "Imatge desada com a ", "Image saved as "),
     ExportWriteError => (
         "No se pudo guardar la imagen:",
         "No s'ha pogut desar la imatge:",
@@ -281,9 +282,13 @@ catalogue! {
         "Drag up or down to adjust; click to type an expression such as 1600/4."
     ),
     Rotate => ("Rotación", "Rotació", "Rotation"),
+    RotateQuick => ("Girar 90°", "Gira 90°", "Rotate 90°"),
+    InvertColors => ("Invertir colores", "Inverteix els colors", "Invert colors"),
     Palette => ("Reducir paleta", "Redueix la paleta", "Reduce palette"),
     Colors => ("Colores", "Colors", "Colors"),
     FormatAuto => ("Automático", "Automàtic", "Automatic"),
+    FormatAutoShort => ("Auto", "Auto", "Auto"),
+    FormatAutoCardHint => ("Según entrada", "Segons entrada", "From input"),
     FormatAutoHint => (
         "Mismo formato que la entrada cuando sea posible; si no, WebP.",
         "Mateix format que l'entrada quan sigui possible; si no, WebP.",

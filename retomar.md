@@ -7,7 +7,7 @@
 
 **HUNK Converter** es una aplicación de escritorio local-first para convertir, comprimir, comparar y exportar imágenes. Está hecha en **Rust + egui**, usa el renderizador **glow** y no requiere instalador.
 
-Puede exportar WebP, AVIF, JPG, PNG e ICO. La vista previa compara el original con el archivo codificado real. Incluye un cuentagotas que obtiene colores de la imagen y muestra sus códigos HEX/RGB/RGBA/HSL. Los resultados se guardan en `export/`, junto al ejecutable.
+Puede exportar WebP, AVIF, JPG, PNG e ICO. La vista previa compara el original con el archivo codificado real. Incluye un cuentagotas que obtiene colores de la imagen y muestra sus códigos HEX/RGB/RGBA/HSL. Al exportar se abre el explorador nativo para elegir la ruta.
 
 Ruta principal: la raíz de este repositorio.
 
@@ -19,7 +19,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Carga por arrastre, selector nativo, argumento de línea de comandos o `Ctrl+V` desde el portapapeles.
 - Entrada: PNG, JPG, WebP, AVIF, BMP, TGA, TIFF y SVG. La orientación EXIF de JPG/WebP y la orientación TIFF se aplican al cargar. TIFF se limita a la primera página y a 8 bits RGB/RGBA/gris.
 - Salida de 1.1: WebP, AVIF, JPG, PNG e ICO. JPEG XL sale del selector.
-- Selector de salida desplegable con modo Automático implementado y validado (t-35).
+- Selector de salida en cuadrícula de tarjetas con modo Automático implementado y validado.
 - Objetivo 1.1: salida web JPEG/PNG/WebP/AVIF + ICO; entrada amplia JPEG/PNG/WebP/AVIF/SVG/BMP/TGA/TIFF; preprocesado de redimensionado, rotación y reducción de paleta. TIFF de entrada forma parte de 1.1. Ver `docs/objetivo-1.1-web.md`.
 - Camino único de 1.1.0: **bloque 1** entrada TIFF/AVIF + benchmark; **bloque 2** paridad con Squoosh (MozJPEG, OxiPNG, WebP/AVIF avanzados, preprocesado y UI). Sin release intermedia.
 - Benchmark HUNK vs Squoosh: WebP empata, JPEG queda en paridad práctica (2,5× más rápido), PNG comprime igual o mejor (3,2× más rápido) y AVIF queda en paridad práctica (0,994× mediana a igual SSIM, 1,82× más rápido en UI). Ver `docs/benchmark-squoosh-2026-10-31.md`.
@@ -34,13 +34,13 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
 - Pie con enlace directo a `github.com/hunkstalker/hunk-converter`, abierto en el navegador.
-- Exportación directa a `export/`, sin sobrescribir, con nombres saneados y creación atómica.
+- Exportación mediante diálogo nativo, con nombre saneado y confirmación de sobrescritura del sistema.
 - Procesamiento en hilo aparte con debounce y descarte de resultados obsoletos.
 - Reinicio, atajos y avisos de error.
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **59 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **60 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; **1.1.0** pendiente de revisar resize/UI, completar el resto de features y cerrar `t-43`. No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
@@ -87,8 +87,8 @@ Builds portables:
 - **Parámetros:** máximo 3 además de `self`; agrupar en DTOs cuando haga falta.
 - **Cuentagotas:** el clic derecho sobre la imagen lo desactiva. Los botones de copia son iconos y muestran un aviso temporal.
 - **Marca:** el nombre visible es **HUNK Converter**; el nombre técnico del binario sigue siendo `hunk-converter`.
-- **Salida portable:** en una build, `<carpeta del ejecutable>/export/`; en desarrollo, `target/release/export/`.
-- **No sobrescribir:** `foto.webp`, `foto-2.webp`, etc.
+- **Salida portable:** diálogo nativo; si existe, se propone `<carpeta del ejecutable>/export/`.
+- **Sobrescritura:** la confirma el diálogo nativo del sistema.
 - **Vista previa fiel:** decodificar el buffer final, no estimar.
 - **Cuentagotas:** icono de pipeta; un clic activa o desactiva el modo y también se puede arrastrar desde el icono hasta la imagen; muestrea el píxel original; no mueve el divisor; la marca solo se ve mientras está activo; se cancela con `Esc`; se desactiva en ICO; limpia la muestra al cambiar de imagen o reiniciar.
 - **Comparador:** el cursor de redimensionado solo aparece sobre la línea o el círculo del divisor. La rueda hace zoom (100–800 %) y el clic derecho desplaza la imagen cuando está ampliada.
@@ -96,7 +96,7 @@ Builds portables:
 - **JPG:** transparencia compuesta sobre blanco.
 - **ICO:** frames PNG, contenedor manual, ajuste centrado sin recorte, al menos un tamaño.
 - **Calidad inicial:** 82 %.
-- **PNG:** sin pérdida y sin deslizador de calidad.
+- **PNG:** sin pérdida y con el deslizador de calidad deshabilitado.
 - **AVIF:** salida con pérdida mediante libavif/AOM, cuantizador directo y control de calidad; vista previa decodificada con `avif-decode`.
 - **Badges del comparador:** el formato de salida va a la izquierda y `ORIGINAL` a la derecha, igual que las mitades visibles.
 - **Reinicio:** restablece formato, calidad, tamaños y muestra de color.
@@ -109,7 +109,7 @@ Builds portables:
 ```text
 src/main.rs                  eframe, ventana e icono
 src/app/                     Shell, acciones, estado y componentes egui
-src/app/ui/                  Cabecera, sidebar, color, canvas, avisos
+src/app/ui/                  Panel derecho, color flotante, canvas, avisos
 src/domain/                  Formatos, color, historial, exportación y errores
 src/codec/                   WebP, JPG, PNG, AVIF, JPEG XL, ICO, SVG y TIFF
 src/settings/                config.ini, idioma, historial, formato y maximizado

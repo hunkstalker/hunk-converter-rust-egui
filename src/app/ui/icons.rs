@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use eframe::egui::{
     self, Color32, CornerRadius, CursorIcon, Rect, Sense, Stroke, StrokeKind, pos2, vec2,
 };
@@ -100,6 +102,92 @@ pub(crate) fn paint_eyedropper(painter: &egui::Painter, rect: Rect, color: Color
         color,
         Stroke::NONE,
     ));
+}
+
+#[derive(Clone, Copy)]
+pub(crate) enum QuickTool {
+    Invert,
+    Rotate,
+}
+
+pub(crate) fn quick_tool_button(
+    ui: &mut egui::Ui,
+    tool: QuickTool,
+    active: bool,
+    label: &str,
+) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(vec2(38.0, 38.0), Sense::click());
+    let hovered = response.hovered();
+    let fill = if active {
+        T::ACCENT
+    } else if hovered {
+        T::SURFACE_3
+    } else {
+        T::SURFACE_2
+    };
+    let border = if active {
+        T::ACCENT
+    } else if hovered {
+        T::BORDER_STRONG
+    } else {
+        T::BORDER
+    };
+    let icon = if active { T::ACCENT_INK } else { T::TEXT_MUTED };
+    ui.painter().rect(
+        rect,
+        CornerRadius::same(12),
+        fill,
+        Stroke::new(1.0, border),
+        StrokeKind::Inside,
+    );
+    match tool {
+        QuickTool::Invert => paint_invert_icon(ui.painter(), rect, icon),
+        QuickTool::Rotate => paint_rotate_icon(ui.painter(), rect, icon),
+    }
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label.to_owned()));
+    if response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), rect, 12);
+    }
+    response
+        .on_hover_cursor(CursorIcon::PointingHand)
+        .on_hover_text(label)
+}
+
+fn paint_invert_icon(painter: &egui::Painter, rect: Rect, color: Color32) {
+    let center = rect.center();
+    let radius = 8.0;
+    painter.circle_stroke(center, radius, Stroke::new(1.4, color));
+    let mut half = Vec::with_capacity(17);
+    half.push(center);
+    for step in 0..=16 {
+        let angle = -PI / 2.0 + step as f32 / 16.0 * PI;
+        half.push(center + vec2(angle.cos(), angle.sin()) * radius);
+    }
+    painter.add(egui::Shape::convex_polygon(half, color, Stroke::NONE));
+}
+
+fn paint_rotate_icon(painter: &egui::Painter, rect: Rect, color: Color32) {
+    let center = rect.center();
+    let radius = 8.0;
+    let mut arc = Vec::with_capacity(24);
+    for step in 0..=20 {
+        let angle = -0.75 * PI + step as f32 / 20.0 * 1.65 * PI;
+        arc.push(center + vec2(angle.cos(), angle.sin()) * radius);
+    }
+    painter.add(egui::Shape::line(arc.clone(), Stroke::new(1.4, color)));
+    if let (Some(end), Some(previous)) = (arc.last(), arc.get(arc.len().saturating_sub(2))) {
+        let direction = (*end - *previous).normalized();
+        let normal = vec2(-direction.y, direction.x);
+        painter.add(egui::Shape::convex_polygon(
+            vec![
+                *end + direction * 3.0,
+                *end - normal * 3.0 - direction * 1.5,
+                *end + normal * 3.0 - direction * 1.5,
+            ],
+            color,
+            Stroke::NONE,
+        ));
+    }
 }
 
 #[derive(Clone, Copy)]

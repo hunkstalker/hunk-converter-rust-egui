@@ -18,10 +18,10 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Pegar desde el portapapeles** con `Ctrl+V`, haya o no una imagen cargada.
 - **Entrada:** PNG, JPG/JPEG, WebP, AVIF, BMP, TGA, TIFF y SVG.
 - **Orientación EXIF/TIFF:** las fotos de móvil y los TIFF se muestran, comparan, muestrean y exportan ya orientados.
-- **Salida:** WebP, AVIF, JPG, PNG e ICO, con selector desplegable y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
+- **Salida:** WebP, AVIF, JPG, PNG e ICO, con cuadrícula de tarjetas y modo **Automático** que conserva el formato de entrada cuando existe salida equivalente.
 - **Calidad ajustable** de 1 a 100 para WebP, JPG y AVIF (82 % por defecto).
 - **AVIF de referencia:** libavif/AOM con YUV420 y alfa; paridad práctica con Squoosh y más velocidad.
-- **Preprocesado:** resize enlazado con proporción, marco del tamaño original en el canvas, rotación en pasos de 90° y paleta de 2–256 colores. Los campos numéricos aceptan arrastre vertical y expresiones como `1600/4`.
+- **Preprocesado:** resize enlazado con proporción, marco del tamaño original en el canvas, rotación con el botón rápido de 90° y paleta de 2–256 colores. Los campos numéricos aceptan arrastre vertical y expresiones como `1600/4`.
 - **Comparador visual** antes/después con divisor arrastrable y soporte de teclado.
 - **Zoom y paneo:** rueda del ratón sobre la imagen y clic derecho para desplazarte.
 - **Vista previa fiel al archivo final**: se decodifica el resultado codificado real.
@@ -34,17 +34,24 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Icono nativo:** ventana, `.exe` de Windows, `.app` de macOS y lanzador `.desktop` de Linux.
 - **PNG sin pérdida**, con transparencia conservada en WebP/AVIF/PNG/ICO.
 - **JPG sobre fondo blanco** cuando la imagen tiene transparencia.
-- **Guardado directo** en `export/`, junto al ejecutable, sin sobrescribir archivos.
+- **Guardado con diálogo nativo:** eliges carpeta y nombre de archivo.
 - **Reinicio completo** con `Ctrl+R`.
 - **Portable:** builds de Linux, Windows 10/11 y macOS universal, sin instalador.
 - **Local y privado:** cero llamadas de red.
 - **Render bajo demanda:** sin CPU de UI en reposo.
 - **Enlace al repositorio:** el pie abre `github.com/hunkstalker/hunk-converter` en el navegador.
 
+## Interfaz
+
+- Vista previa a pantalla completa con el **panel de ajustes a la derecha**.
+- Formato de salida en una cuadrícula de tarjetas: WebP, JPG, PNG, AVIF, Auto e ICO.
+- Historial y cuentagotas flotantes en la esquina inferior izquierda del lienzo.
+- Botones rápidos **Invertir colores** y **Girar 90°** junto a la tarjeta de color.
+
 ## Cuentagotas
 
 1. Carga una imagen.
-2. Pulsa el **icono de cuentagotas** en la tarjeta inferior.
+2. Pulsa el **icono de cuentagotas** en la tarjeta flotante inferior izquierda.
 3. Haz clic sobre la imagen o arrastra desde el icono hasta el píxel que quieras.
 4. Copia cualquiera de sus códigos con el icono de portapapeles.
 
@@ -66,7 +73,7 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 
 ## Idiomas y configuración
 
-- Selector **ES / CA / EN** en la cabecera.
+- Selector **ES / CA / EN** arriba a la derecha, sobre el lienzo.
 - En el primer arranque se detecta el idioma del sistema.
 - El idioma, el historial, los bloqueos, el estado maximizado, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
 - Si no se puede escribir el archivo, la aplicación sigue funcionando sin persistencia.
@@ -77,7 +84,7 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 - **Rueda o pinza** sobre la imagen: acerca y aleja manteniendo el punto bajo el cursor.
 - **Atajos:** `+`/`-` ajustan el zoom por pasos; `1` activa el tamaño real 1:1 y `0`/`F` vuelve al encuadre completo.
 - **Clic derecho y arrastra**: desplaza la imagen cuando está ampliada.
-- El porcentaje de zoom refleja la escala real de la imagen. La cabecera no tiene botones de zoom: se controla con teclado, rueda o pinza.
+- El porcentaje de zoom refleja la escala real de la imagen y se resalta en lima solo al 100 %. La vista previa no tiene botones de zoom: se controla con teclado, rueda o pinza en cualquier punto del visor.
 - El divisor y el cuentagotas siguen funcionando con cualquier zoom.
 
 ![Zoom y paneo de HUNK Converter](docs/hunk-converter-zoom.png)
@@ -116,7 +123,7 @@ cargo run --release
 5. Activa el cuentagotas si necesitas extraer colores.
 6. Pulsa **Exportar** o `Ctrl+E`.
 
-El archivo aparece en `export/`, junto a la aplicación. Si el nombre existe, se añade `-2`, `-3`, etc. La creación es atómica, sin ventana de carrera entre comprobar y escribir.
+Al exportar se abre el explorador nativo para elegir la carpeta y el nombre. Si no escribes extensión, se añade la del formato actual.
 
 ### Atajos
 
@@ -170,11 +177,11 @@ muestra 1 px y con `Shift` 10 px; `Enter` confirma el color.
 | TIFF | ✓ | — | Sí, 8 bits | Sin pérdida |
 | SVG | ✓ | — | Rasterizado | — |
 
-Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como primera página RGBA8; se admiten RGB, RGBA, gris y gris con alfa de 8 bits. AVIF se abre con `avif-decode` y se convierte a RGBA8. La salida AVIF usa libavif/AOM con YUV420, BT.601 y cuantizador directo; AOM se enlaza estáticamente. PNG no muestra deslizador porque no modifica la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md); el alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
+Los SVG se rasterizan con `resvg` al tamaño declarado. Los TIFF se cargan como primera página RGBA8; se admiten RGB, RGBA, gris y gris con alfa de 8 bits. AVIF se abre con `avif-decode` y se convierte a RGBA8. La salida AVIF usa libavif/AOM con YUV420, BT.601 y cuantizador directo; AOM se enlaza estáticamente. PNG muestra el deslizador de calidad deshabilitado porque no modifica la calidad de la imagen. La ampliación de entrada/salida y las opciones avanzadas están especificadas en [docs/formatos.md](docs/formatos.md); el alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-web.md). El límite de entrada es de 200 MB y 40 megapíxeles (máximo 16 384 px por lado).
 
 ## Builds portables
 
-Cada build es una carpeta autocontenida. La salida queda en `export/`, junto al ejecutable.
+Cada build es una carpeta autocontenida. Al exportar se elige la ruta con el diálogo nativo; si existe, se propone la carpeta `export/` junto al ejecutable.
 
 ```text
 hunk-converter-1.0.0-windows-x86_64/
@@ -204,7 +211,7 @@ Los resultados se generan en `dist/`:
 
 La entrega Linux incluye `hunk-converter.desktop` y `hunk-converter.png`. La entrega macOS incluye `HUNK Converter.app` con `icon.icns`.
 
-La build Windows está validada en Windows 10/11, con el icono embebido mediante `winresource` visible en Explorer y barra de tareas. La build Linux se validó bajo X11, incluyendo la exportación a su carpeta `export/`. La build macOS se empaqueta como `HUNK Converter.app` con `icon.icns`.
+La build Windows está validada en Windows 10/11, con el icono embebido mediante `winresource` visible en Explorer y barra de tareas. La build Linux se validó bajo X11, incluyendo la exportación mediante diálogo nativo. La build macOS se empaqueta como `HUNK Converter.app` con `icon.icns`.
 
 ## Pruebas
 
@@ -214,7 +221,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 59 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 60 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 
@@ -240,7 +247,7 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 │   │   ├── export.rs       Exportación portable sin sobrescritura
 │   │   ├── session.rs      Carga, pegado, reinicio y formato
 │   │   ├── state.rs        SourceImage, RenderedResult, Toast
-│   │   └── ui/             Cabecera, sidebar, color, preview y widgets
+│   │   └── ui/             Panel derecho, color flotante, preview y widgets
 │   ├── codec/              WebP, JPG, PNG, AVIF, JPEG XL, ICO, SVG y TIFF
 │   ├── domain/             Formatos, color, historial y errores tipados
 │   ├── settings/           config.ini, idioma, historial y maximizado

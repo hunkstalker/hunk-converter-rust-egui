@@ -14,7 +14,7 @@
 
 **Descripción:** Aplicar la primera pasada de revisión de la UI de preprocesado/avanzado: sincronizar ancho y alto con la proporción, sustituir la referencia textual por un marco del tamaño original en el canvas, usar cajas numéricas con arrastre vertical y expresiones estilo Blender, y unificar el diseño de los desplegables. Debe hacerse después de la revisión de AVIF.
 
-**Estado:** implementada el 2026-10-31; pendiente de revisión visual e interacción con el usuario.
+**Estado:** implementada el 2026-10-31; pendiente de revisión visual e interacción con el usuario. Rediseño de UI aplicado el 2026-11-01 (panel derecho, cuadrícula de formato, tarjeta flotante y botones rápidos), pendiente de validación y sin commit.
 
 **Aceptación:**
 

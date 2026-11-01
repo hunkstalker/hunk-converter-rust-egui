@@ -8,6 +8,8 @@ pub(crate) enum AppAction {
     Export,
     OpenFileDialog,
     Reset,
+    RotateQuick,
+    ToggleInvert,
     RememberColor([u8; 4]),
     ToggleHistoryLock(usize),
     ClearHistory,

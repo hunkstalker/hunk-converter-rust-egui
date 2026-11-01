@@ -19,7 +19,7 @@
 - dimensiones y etiqueta de formato;
 - alfa en PNG, WebP y TIFF;
 - codificación AVIF con AOM, cuantizador directo y alfa;
-- preprocesado: rotación, resize con proporción y paleta con alfa;
+- preprocesado: rotación, resize con proporción, paleta con alfa e inversión de color;
 - expresiones de tamaño `1600x2`, `1600/4`, `1600*2`, `1600-200`, límites y errores;
 - proporción enlazada y dimensiones rotadas;
 - opciones avanzadas y preprocesado sin persistencia; `config.ini` solo guarda idioma, historial, formato y ventana;
@@ -55,7 +55,7 @@ La regla es que **ninguna funcionalidad de carga, codificación, configuración 
 exportación** dependa de una validación manual. Lo manual queda para lo visual y
 lo específico de plataforma.
 
-Estado actual: **59 pruebas**, incluidas las expresiones de tamaño y la
+Estado actual: **60 pruebas**, incluidas las expresiones de tamaño y la
 proporción enlazada. La interacción de arrastre y el marco del canvas se validan
 visualmente.
 

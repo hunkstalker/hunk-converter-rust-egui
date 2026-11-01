@@ -22,10 +22,10 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 ## 2. Principios de producto
 
 - **Local-first:** todo el procesamiento ocurre en el equipo del usuario. La aplicación no realiza peticiones de red.
-- **Portable:** no requiere instalación. Los resultados se guardan en `export/`, junto al ejecutable.
+- **Portable:** no requiere instalación. Al exportar se elige la ruta con el diálogo nativo; si existe, se propone `export/` junto al ejecutable.
 - **Repintado bajo demanda:** la interfaz solo solicita frames cuando hay actividad. Una ventana estática no consume un bucle de render a 60 FPS.
 - **Transparencia:** la comparación usa la imagen codificada y decodificada, no una estimación.
-- **No sobrescribir:** cada exportación crea un nombre único.
+- **Ruta elegida por el usuario:** la exportación usa el diálogo nativo y el nombre por defecto conserva el stem original.
 - **Código abierto:** licencia MIT, dependencias razonables y pruebas ejecutables sin servicios externos.
 - **Interfaz tranquila:** una tarea principal, jerarquía clara y espacio para la imagen.
 
@@ -57,9 +57,9 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | ICO | `.ico` | PNG por tamaño | Sí | Iconos de Windows |
 
 - Salida objetivo de 1.1: JPEG, PNG, WebP, AVIF e ICO. JPEG XL se retira del selector. La entrada es más amplia: JPEG, PNG, WebP, AVIF, SVG, BMP, TGA y TIFF.
-- Selector de salida desplegable con modo **Automático** (mismo formato que la entrada cuando existe salida equivalente; WebP como fallback).
+- Selector de salida en cuadrícula de tarjetas con modo **Automático** (mismo formato que la entrada cuando existe salida equivalente; WebP como fallback).
 - Calidad inicial: **82 %**.
-- WebP, JPG y AVIF muestran deslizador de calidad; PNG es sin pérdida y no muestra deslizador; ICO usa selección de tamaños.
+- WebP, JPG y AVIF muestran deslizador de calidad; PNG es sin pérdida y muestra el deslizador deshabilitado; ICO usa selección de tamaños.
 - AVIF se añade como formato de salida. JPEG XL queda fuera del selector de 1.1.
 - JPG aplana la transparencia sobre blanco de forma predecible.
 - ICO incluye 16, 32, 48, 64, 128 y 256 px, ajustando la imagen centrada en un lienzo transparente sin recortar.
@@ -77,7 +77,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - **Zoom continuo** con rueda o pinza, anclado al cursor, y atajos de teclado.
 - **Modo 1:1** con `1` para ver la imagen a escala real; `0`/`F` vuelve al encuadre completo.
 - **Paneo con clic derecho** cuando la imagen está ampliada, con límites para no perderla de vista.
-- El porcentaje de zoom refleja la escala real. No hay botones de zoom en la cabecera: se controla con teclado, rueda o pinza.
+- El porcentaje de zoom refleja la escala real. No hay botones de zoom en la vista previa: se controla con teclado, rueda o pinza.
 - El divisor, su círculo y el cuentagotas se adaptan al zoom y al desplazamiento.
 - La vista previa se limita a 2048 px de lado; la exportación conserva la resolución completa.
 
@@ -91,7 +91,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 ### 3.4 Cuentagotas
 
-- Icono de **cuentagotas** en la cabecera de la tarjeta inferior.
+- Icono de **cuentagotas** en la tarjeta flotante inferior izquierda.
 - Un clic activa o desactiva el modo; después basta con hacer clic sobre la imagen.
 - También se puede pulsar el icono y arrastrar hasta el píxel: se muestrea mientras se arrastra y se conserva el último color al soltar.
 - `Esc` o clic derecho sobre la imagen desactivan el modo sin alterar la muestra.
@@ -114,13 +114,11 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 ### 3.6 Exportación
 
 - Botón principal **Exportar .ext** y atajo `Ctrl+E`.
-- Guardado directo en la carpeta **`export/`** situada junto al ejecutable.
-- La carpeta se crea si no existe.
-- El nombre base se conserva; si el destino ya existe se añaden `-2`, `-3`, etc.
-- La creación es atómica: nunca se sobrescribe un archivo, aunque aparezca entre la comprobación y la escritura.
-- El nombre se sanea para Windows.
+- Al pulsar se abre el **explorador nativo** para elegir carpeta y nombre.
+- Si existe, se propone la carpeta `export/` junto al ejecutable como destino inicial.
+- Si no se escribe extensión, se añade la del formato actual.
+- El nombre base se conserva y se sanea para Windows.
 - Los errores de permisos o escritura se comunican mediante aviso.
-- La build portable incluye una carpeta `export/` vacía junto al ejecutable.
 
 ### 3.7 Reinicio y atajos
 
@@ -171,13 +169,10 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 - La aplicación se abre con la ventana maximizada. Los controles nativos permiten maximizar o restaurar; el estado, la posición y el tamaño se guardan en `config.ini`.
 - Tamaño de ventana por defecto 1280 × 800; mínimo 1024 × 800.
-- Cabecera con marca, selector de idioma y botón de reinicio. Los controles de ventana son los nativos.
-- La barra lateral tiene scroll vertical cuando los ajustes no caben; la tarjeta del cuentagotas y el botón de exportar quedan fijos abajo con altura estable.
-- Panel lateral de 390 px con archivo, formato, calidad o tamaños ICO, historial de colores, cuentagotas y exportación.
-- La tarjeta lateral conserva los radios superiores y las esquinas inferiores cuadradas, con separación respecto a la cabecera y sin margen inferior: llega hasta el footer.
-- Zona principal con cabecera de vista previa, lienzo y pie de pesos.
+- Vista previa a pantalla completa con el selector de idioma y el botón de reinicio arriba a la derecha, sobre el lienzo. Los controles de ventana son los nativos.
+- Panel de ajustes a la derecha, con scroll vertical cuando no cabe. Incluye archivo, formato en cuadrícula, calidad o tamaños ICO, preprocesado, avanzado, pesos y exportación.
+- Historial y cuentagotas en una tarjeta flotante abajo a la izquierda del lienzo, con botones rápidos de invertir colores y girar 90°.
 - Pie global con estado del proyecto, versión y enlace al repositorio.
-- El cuentagotas permanece visible y se sitúa por encima del botón de exportar.
 
 ### Render bajo demanda
 
@@ -218,7 +213,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | `src/app/export.rs` | Exportación portable y nombres sin sobrescritura |
 | `src/app/session.rs` | Carga, pegado, reinicio, demo y formato |
 | `src/app/state.rs` | `SourceImage`, `RenderedResult`, `Toast` y mensajes del worker |
-| `src/app/ui/` | Componentes egui: cabecera, sidebar, color, canvas, avisos |
+| `src/app/ui/` | Componentes egui: panel derecho, color flotante, canvas, avisos |
 | `src/domain/format.rs` | Política de formatos, extensiones y badges |
 | `docs/formatos.md` | Matriz de entrada/salida y opciones avanzadas |
 | `docs/plan-formatos-y-opciones.md` | Plan de desarrollo de formatos y opciones |
@@ -276,7 +271,7 @@ Archivo local
   → hilo principal
       → texturas de egui
       → pesos, ahorro, comparador, cuentagotas
-  → export/archivo.ext
+  → ruta elegida por el usuario
 ```
 
 ### Procesamiento y concurrencia
@@ -319,10 +314,9 @@ Archivo local
 
 ### Salida
 
-- En una build: `<carpeta del ejecutable>/export/`.
-- En desarrollo: `target/release/export/`.
+- La ruta se elige en el diálogo nativo; si existe, se propone `<carpeta del ejecutable>/export/`.
 - `config.ini` se crea junto al ejecutable y guarda idioma, historial, estado maximizado, formato de salida, posición y tamaño de la ventana.
-- Los nombres no se sobrescriben.
+- El diálogo nativo gestiona la confirmación si el archivo ya existe.
 
 ### Estructura de la build
 
@@ -370,11 +364,11 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **59 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **60 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.
-- Exportación Linux verificada bajo Xvfb: el archivo aparece en `export/` junto al binario.
+- Exportación Linux verificada bajo Xvfb mediante el diálogo nativo.
 - Prueba de arranque, memoria, CPU y escalado de códecs documentada en el informe de benchmark.
 
 Comandos:

@@ -10,7 +10,7 @@ use crate::theme as T;
 use super::super::actions::AppAction;
 use super::super::{ENCODE_DELAY_MS, HunkApp, PREPROCESS_DELAY_MS};
 use super::dimension_fields::{DimensionLabels, dimension_fields};
-use super::format_picker::{FormatSelector, format_selector};
+use super::format_picker::{FormatSelector, format_grid};
 use super::widgets::small_text_button;
 
 pub(super) struct FileCard<'a> {
@@ -43,31 +43,29 @@ impl HunkApp {
             original_dimensions,
         };
 
-        egui::Panel::left("settings_panel")
+        egui::Panel::right("settings_panel")
             .resizable(false)
-            .exact_size(390.0)
+            .exact_size(340.0)
             .show_separator_line(false)
             .frame(Frame::new().fill(T::BG).inner_margin(Margin {
-                left: 30,
-                right: 0,
-                top: 14,
-                bottom: 0,
+                left: 0,
+                right: 12,
+                top: 56,
+                bottom: 16,
             }))
             .show(root, |ui| {
                 T::sidebar_frame().show(ui, |ui| {
                     ui.set_min_height(ui.available_height());
                     ui.set_width(ui.available_width());
 
-                    let export_height = 68.0;
-                    let scroll_height =
-                        (ui.available_height() - self.color_panel_height - export_height - 8.0)
-                            .max(160.0);
+                    let footer_height = 100.0;
+                    let scroll_height = (ui.available_height() - footer_height - 8.0).max(200.0);
                     egui::ScrollArea::vertical()
                         .id_salt("sidebar_scroll")
                         .auto_shrink([false, false])
                         .max_height(scroll_height)
                         .scroll_bar_visibility(
-                            egui::scroll_area::ScrollBarVisibility::AlwaysVisible,
+                            egui::scroll_area::ScrollBarVisibility::VisibleWhenNeeded,
                         )
                         .show(ui, |ui| {
                             ui.set_width((ui.available_width() - 6.0).max(0.0));
@@ -75,14 +73,10 @@ impl HunkApp {
                         });
 
                     ui.add_space(4.0);
-                    let mut color_actions = Vec::new();
-                    let color_panel = ui.scope(|ui| {
-                        color_actions = self.show_color_panel(ui);
-                    });
-                    actions.extend(color_actions);
-                    self.color_panel_height = color_panel.response.rect.height();
-                    let remaining = (ui.available_height() - export_height).max(0.0);
+                    let remaining = (ui.available_height() - footer_height).max(0.0);
                     ui.add_space(remaining);
+                    self.show_status(ui);
+                    ui.add_space(4.0);
                     self.show_export(ui, &mut actions);
                 });
             });
@@ -135,7 +129,7 @@ impl HunkApp {
         ui.label(T::eyebrow(self.t(K::OutputFormat)));
         ui.add_space(6.0);
 
-        if let Some(selection) = format_selector(
+        if let Some(selection) = format_grid(
             ui,
             FormatSelector {
                 selection: self.format_selection,
@@ -174,7 +168,6 @@ impl HunkApp {
         let width_label = self.t(K::Width);
         let height_label = self.t(K::Height);
         let keep_aspect_label = self.t(K::KeepAspect);
-        let rotate_label = self.t(K::Rotate);
         let palette_label = self.t(K::Palette);
         let colors_label = self.t(K::Colors);
         let reset_label = self.t(K::ResetOptions);
@@ -192,33 +185,6 @@ impl HunkApp {
                 ui.spacing_mut().item_spacing.y = 7.0;
 
                 ui.checkbox(&mut self.advanced.preprocess.resize_enabled, resize_label);
-
-                let rotation_before = self.advanced.preprocess.rotation;
-                ui.scope(|ui| {
-                    ui.spacing_mut().item_spacing.x = 4.0;
-                    ui.spacing_mut().button_padding.x = 5.0;
-                    ui.horizontal_wrapped(|ui| {
-                        ui.label(rotate_label);
-                        for (degrees, label) in
-                            [(0u16, "0°"), (90, "90°"), (180, "180°"), (270, "270°")]
-                        {
-                            ui.selectable_value(
-                                &mut self.advanced.preprocess.rotation,
-                                degrees,
-                                label,
-                            );
-                        }
-                    });
-                });
-                if self.advanced.preprocess.rotation != rotation_before {
-                    let delta = (self.advanced.preprocess.rotation + 360 - rotation_before) % 360;
-                    if matches!(delta, 90 | 270) {
-                        std::mem::swap(
-                            &mut self.advanced.preprocess.width,
-                            &mut self.advanced.preprocess.height,
-                        );
-                    }
-                }
 
                 if self.advanced.preprocess.resize_enabled {
                     let (rotated_width, rotated_height) = rotated_size(
@@ -285,24 +251,17 @@ impl HunkApp {
             self.advanced.preprocess = options;
         }
 
-        let dragging = dimension_response.is_some_and(|response| response.dragging);
-        let drag_stopped = dimension_response.is_some_and(|response| response.drag_stopped);
         if self.advanced.preprocess == before {
-            if drag_stopped {
-                actions.push(AppAction::PersistSettings);
-            }
             return;
         }
-        let rotation_changed = self.advanced.preprocess.rotation != before.rotation;
         let resize_toggled = self.advanced.preprocess.resize_enabled != before.resize_enabled;
         let keep_aspect_toggled = self.advanced.preprocess.keep_aspect != before.keep_aspect;
         let geometry_changed = resize_toggled
             || self.advanced.preprocess.width != before.width
             || self.advanced.preprocess.height != before.height
-            || keep_aspect_toggled
-            || rotation_changed;
+            || keep_aspect_toggled;
         if geometry_changed {
-            let immediate = reset || resize_toggled || keep_aspect_toggled || rotation_changed;
+            let immediate = reset || resize_toggled || keep_aspect_toggled;
             let delayed = dimension_response.is_some_and(|response| {
                 response.dragging
                     || (!response.committed && (response.width_changed || response.height_changed))
@@ -317,9 +276,6 @@ impl HunkApp {
             actions.push(AppAction::RequestEncode(Some(Duration::from_millis(
                 ENCODE_DELAY_MS,
             ))));
-        }
-        if !dragging || drag_stopped {
-            actions.push(AppAction::PersistSettings);
         }
     }
 
@@ -362,6 +318,7 @@ impl HunkApp {
                                 3 => "4:4:4",
                                 _ => auto_label,
                             };
+                            let current = self.advanced.jpg_subsampling;
                             egui::ComboBox::from_id_salt("jpg_subsampling")
                                 .selected_text(selected)
                                 .width(ui.available_width())
@@ -369,22 +326,22 @@ impl HunkApp {
                                     ui.selectable_value(
                                         &mut self.advanced.jpg_subsampling,
                                         0,
-                                        auto_label,
+                                        choice_text(auto_label, current == 0),
                                     );
                                     ui.selectable_value(
                                         &mut self.advanced.jpg_subsampling,
                                         1,
-                                        "4:2:0",
+                                        choice_text("4:2:0", current == 1),
                                     );
                                     ui.selectable_value(
                                         &mut self.advanced.jpg_subsampling,
                                         2,
-                                        "4:2:2",
+                                        choice_text("4:2:2", current == 2),
                                     );
                                     ui.selectable_value(
                                         &mut self.advanced.jpg_subsampling,
                                         3,
-                                        "4:4:4",
+                                        choice_text("4:4:4", current == 3),
                                     );
                                 });
                         });
@@ -392,6 +349,7 @@ impl HunkApp {
                     OutputFormat::Png => {
                         ui.horizontal(|ui| {
                             ui.label(level_label);
+                            let current = self.advanced.png_level;
                             egui::ComboBox::from_id_salt("png_level")
                                 .selected_text(match self.advanced.png_level {
                                     0 | 1 => fast_label,
@@ -403,17 +361,17 @@ impl HunkApp {
                                     ui.selectable_value(
                                         &mut self.advanced.png_level,
                                         0,
-                                        fast_label,
+                                        choice_text(fast_label, current == 0),
                                     );
                                     ui.selectable_value(
                                         &mut self.advanced.png_level,
                                         2,
-                                        balanced_label,
+                                        choice_text(balanced_label, current == 2),
                                     );
                                     ui.selectable_value(
                                         &mut self.advanced.png_level,
                                         6,
-                                        maximum_label,
+                                        choice_text(maximum_label, current == 6),
                                     );
                                 });
                         });
@@ -476,11 +434,57 @@ impl HunkApp {
         }
         apply_pending_section_scroll(ui, "advanced", &advanced_section);
         if self.advanced != before {
-            actions.push(AppAction::PersistSettings);
             actions.push(AppAction::RequestEncode(Some(Duration::from_millis(
                 ENCODE_DELAY_MS,
             ))));
         }
+    }
+
+    fn show_status(&mut self, ui: &mut egui::Ui) {
+        let source_size = self.source.as_ref().map(|source| source.file_bytes);
+        let output_size = self
+            .result
+            .as_ref()
+            .filter(|result| result.format == self.format && !self.busy())
+            .map(|result| result.size);
+
+        ui.horizontal(|ui| {
+            ui.label(T::eyebrow(self.t(K::Original)));
+            ui.label(
+                RichText::new(
+                    source_size
+                        .map(|bytes| i18n::localized_bytes(self.language, bytes))
+                        .unwrap_or_else(|| "—".to_owned()),
+                )
+                .size(10.5)
+                .color(T::TEXT),
+            );
+            T::bullet_separator(ui);
+            ui.label(T::eyebrow(self.t(K::Result)));
+            ui.label(
+                RichText::new(
+                    output_size
+                        .map(|bytes| i18n::localized_bytes(self.language, bytes))
+                        .unwrap_or_else(|| "—".to_owned()),
+                )
+                .size(10.5)
+                .color(T::ACCENT),
+            );
+            if let (Some(original), Some(output)) = (source_size, output_size)
+                && original > 0
+            {
+                let change = (1.0 - output as f64 / original as f64) * 100.0;
+                let (text, color) = if change > 0.5 {
+                    (format!("−{change:.0} %"), T::ACCENT)
+                } else if change < -0.5 {
+                    (format!("+{:.0} %", change.abs()), T::TEXT_MUTED)
+                } else {
+                    (self.t(K::EqualWeight).to_owned(), T::TEXT_MUTED)
+                };
+                ui.add_space(4.0);
+                ui.label(RichText::new(text).size(9.0).color(color));
+            }
+        });
     }
 
     pub(crate) fn show_export(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {
@@ -517,11 +521,16 @@ impl HunkApp {
             self.t(K::ExportHint)
         };
         ui.label(RichText::new(hint).size(9.0).color(T::TEXT_FAINT));
+        ui.add_space(6.0);
     }
 }
 
 fn section_heading(id: &str, title: &str) -> egui::CollapsingHeader {
     egui::CollapsingHeader::new(RichText::new(title).size(11.0).color(T::TEXT).strong()).id_salt(id)
+}
+
+fn choice_text(label: &str, selected: bool) -> RichText {
+    RichText::new(label).color(if selected { T::ACCENT_INK } else { T::TEXT })
 }
 
 const SECTION_SCROLL_FRAMES: u64 = 24;

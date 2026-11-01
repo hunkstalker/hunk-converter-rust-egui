@@ -4,7 +4,6 @@ mod dimension_fields;
 mod empty;
 mod footer;
 mod format_picker;
-mod header;
 mod history;
 mod ico_sizes;
 mod icons;

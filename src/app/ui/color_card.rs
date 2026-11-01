@@ -26,7 +26,7 @@ impl HunkApp {
         let focus_index = self.history_focus.min(entry_count.saturating_sub(1));
         self.history_focus = focus_index;
 
-        T::soft_frame().show(ui, |ui| {
+        T::floating_frame().show(ui, |ui| {
             ui.set_width(ui.available_width());
 
             ui.horizontal(|ui| {

@@ -32,7 +32,6 @@ pub(super) struct DimensionFieldsResponse {
     pub height_changed: bool,
     pub dragging: bool,
     pub committed: bool,
-    pub drag_stopped: bool,
 }
 
 pub(super) fn dimension_fields(
@@ -87,7 +86,6 @@ pub(super) fn dimension_fields(
     let mut height_changed = false;
     let mut committed = false;
     let mut dragging = false;
-    let mut drag_stopped = false;
     let mut width_text_shown = false;
     let mut height_text_shown = false;
 
@@ -154,7 +152,6 @@ pub(super) fn dimension_fields(
         if !response.dragged() {
             width_state.drag_start_value = None;
         }
-        drag_stopped |= response.drag_stopped();
         width_response = Some(response);
     }
 
@@ -202,7 +199,6 @@ pub(super) fn dimension_fields(
         if !response.dragged() {
             height_state.drag_start_value = None;
         }
-        drag_stopped |= response.drag_stopped();
         height_response = Some(response);
     }
 
@@ -284,7 +280,6 @@ pub(super) fn dimension_fields(
         height_changed,
         dragging,
         committed,
-        drag_stopped,
     }
 }
 

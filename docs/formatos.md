@@ -20,8 +20,8 @@
 - **Calidad y compresión son ejes distintos:** la calidad modifica la fidelidad
   en códecs con pérdida; la compresión empaqueta los mismos píxeles en formatos
   sin pérdida.
-- **Sin sobrescrituras:** la exportación mantiene `export/` y la creación
-  atómica de nombres únicos.
+- **Ruta elegida por el usuario:** la exportación usa el diálogo nativo y deja
+  al sistema la confirmación de sobrescritura.
 
 ## 2. Estado actual
 
@@ -51,7 +51,7 @@
 
 JPG usa MozJPEG (`mozjpeg-rs`) con progresivo y submuestreo automático: 4:2:0 hasta 79, 4:2:2 entre 80 y 89 y 4:4:4 desde 90. PNG usa OxiPNG nivel 2. WebP usa libwebp avanzado. AVIF usa libavif/AOM con YUV420, BT.601, cuantizador directo, speed y alpha quality. Los controles están expuestos en el bloque `Avanzado` y no se persisten.
 
-La salida se elige en un desplegable con modo `Automático`: conserva el formato de entrada cuando existe salida equivalente y usa WebP como fallback.
+La salida se elige en una cuadrícula de tarjetas con modo `Automático`: conserva el formato de entrada cuando existe salida equivalente y usa WebP como fallback.
 
 ### 2.3 Detección de entrada
 
@@ -197,22 +197,27 @@ idéntico al original; solo tarda más y ocupa menos.
 
 ## 6. Selector de salida y modo automático
 
-### 6.1 Desplegable
+### 6.1 Cuadrícula de tarjetas
 
-La rejilla de tarjetas se sustituye por un desplegable para ahorrar altura y
-escalar a más formatos:
+La salida se elige en una cuadrícula de tres columnas. Cada tarjeta muestra el
+nombre del formato y una pista corta; la seleccionada usa borde y relleno de
+acento.
 
 ```text
 FORMATO DE SALIDA
-┌──────────────────────────────────────┐
-│ Automático · PNG                  ▾  │
-└──────────────────────────────────────┘
+┌─────────┬─────────┬─────────┐
+│ WebP    │ JPG     │ PNG     │
+│Equilibrio│Compatible│Sin pérdida│
+├─────────┼─────────┼─────────┤
+│ AVIF    │ Auto    │ ICO     │
+│Moderno  │Según entrada│Windows│
+└─────────┴─────────┴─────────┘
 ```
 
-Cada opción del desplegable muestra nombre y una pista corta. El control cerrado
-resume el formato resuelto; el modo `Automático` explica su funcionamiento en un
-tooltip. El menú se dibuja por encima del contenido y muestra las siete opciones
-sin recortes.
+JPEG XL sigue oculto; su hueco lo ocupa `Auto`, que conserva el formato de
+entrada cuando existe salida equivalente y usa WebP como fallback. La tarjeta
+seleccionada y las opciones de `Avanzado` usan texto oscuro sobre el acento para
+mantener el contraste.
 
 ### 6.2 Estado del selector
 
@@ -363,56 +368,40 @@ aplicarse de forma fiable.
 
 ### 7.4 Persistencia
 
-Propuesta de `config.ini`:
+La persistencia de Preprocesado y Avanzado está descartada. `config.ini` solo
+guarda `[general]`, `[output]`, `[window]` y `[history]`; las claves antiguas de
+`[advanced]` se ignoran y esos bloques arrancan con sus valores por defecto.
 
-```ini
-[output]
-format=auto
-
-[advanced.png]
-compression=balanced
-filter=auto
-
-[advanced.jpg]
-background=#FFFFFF
-subsampling=420
-progressive=0
-```
-
-- Configuraciones antiguas siguen funcionando: si faltan secciones se usan los
-  valores por defecto.
 - `format=auto` es el valor inicial.
 - Los valores inválidos generan advertencia y no rompen el arranque.
 
 ## 8. UI
 
 ```text
-┌─ Panel lateral 390 px ─────────────────────┐
-│ IMAGEN                                      │
-│ demo.png · PNG · 1600 × 1000 px             │
-│                                             │
-│ FORMATO DE SALIDA                           │
-│ ┌───────────────────────────────────────┐   │
-│ │ Automático · PNG                  ▾   │   │
-│ └───────────────────────────────────────┘   │
-│ PNG · Sin pérdida · conserva transparencia  │
-│                                             │
-│ CALIDAD                              82 %   │
-│ [──────────●──────────────]                 │
-│                                             │
-│ ▸ Preprocesado                              │
-│ ▸ Avanzado                                  │
-│                                             │
-│ HISTORIAL                                   │
-│ CUENTAGOTAS                                 │
-│ [ Exportar .png ]                           │
-└─────────────────────────────────────────────┘
+┌─ Vista previa ───────────────────────┐  ┌─ Panel derecho 340 px ─┐
+│ Vista previa   Zoom 100 %   ES  Reset│  │ IMAGEN                 │
+│                                       │  │ demo.png · PNG ...     │
+│              [imagen]                 │  │ FORMATO DE SALIDA      │
+│                                       │  │ [WebP][JPG][PNG]       │
+│ ┌─ Historial/cuentagotas ─┐  [tools] │  │ [AVIF][Auto][ICO]      │
+│ └─────────────────────────┘           │  │ CALIDAD          82 %  │
+│                                       │  │ [────────●────────]    │
+│                                       │  │ ▸ Preprocesado         │
+│                                       │  │ ▸ Avanzado             │
+│                                       │  │ ORIGINAL · RESULTADO   │
+│                                       │  │ [ Exportar .webp ]     │
+└───────────────────────────────────────┘  └────────────────────────┘
+│ footer                                                                 │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-- El bloque avanzado se expande dentro de la barra lateral, no en un modal.
-- La barra lateral mantiene el scroll y el botón de exportar fijo abajo.
-- El desplegable y los controles deben funcionar a 1024×800 y con escalado
-  125–200 %.
+- El panel de ajustes está a la derecha y no llega al borde superior: encima
+  quedan el selector de idioma y `Reiniciar`.
+- El historial y el cuentagotas flotan abajo a la izquierda del lienzo.
+- Los botones rápidos de invertir y girar quedan junto a esa tarjeta, por encima
+  del footer.
+- La cuadrícula de formato y el bloque avanzado deben funcionar a 1024×800 y
+  con escalado 125–200 %.
 - El desplegable, el bloque avanzado y los grupos de opciones deben ser
   navegables con teclado y anunciar estado expandido/seleccionado.
 

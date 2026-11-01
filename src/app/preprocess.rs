@@ -12,6 +12,28 @@ use super::state::PreprocessJobResult;
 use super::ui::widgets::{resized_for_ui, upload_texture};
 
 impl HunkApp {
+    pub(crate) fn rotate_quick(&mut self, ctx: &egui::Context) {
+        if self.source.is_none() {
+            return;
+        }
+        self.advanced.preprocess.rotation = (self.advanced.preprocess.rotation + 90) % 360;
+        if self.advanced.preprocess.resize_enabled {
+            std::mem::swap(
+                &mut self.advanced.preprocess.width,
+                &mut self.advanced.preprocess.height,
+            );
+        }
+        self.request_preprocess(ctx, None);
+    }
+
+    pub(crate) fn toggle_invert(&mut self, ctx: &egui::Context) {
+        if self.source.is_none() {
+            return;
+        }
+        self.advanced.preprocess.invert = !self.advanced.preprocess.invert;
+        self.request_preprocess(ctx, None);
+    }
+
     pub(crate) fn request_preprocess(&mut self, ctx: &egui::Context, delay: Option<Duration>) {
         if self.source.is_none() {
             return;

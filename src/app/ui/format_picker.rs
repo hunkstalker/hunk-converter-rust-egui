@@ -1,4 +1,4 @@
-use eframe::egui::{self, RichText};
+use eframe::egui::{self, CornerRadius, FontId, RichText, Sense, Stroke, StrokeKind, vec2};
 
 use crate::domain::{FormatSelection, OutputFormat};
 use crate::i18n::{self, K, Lang};
@@ -11,72 +11,38 @@ pub(super) struct FormatSelector<'a> {
     pub source_format: Option<&'a str>,
 }
 
-pub(super) fn format_selector(
-    ui: &mut egui::Ui,
-    spec: FormatSelector<'_>,
-) -> Option<FormatSelection> {
+pub(super) fn format_grid(ui: &mut egui::Ui, spec: FormatSelector<'_>) -> Option<FormatSelection> {
     let FormatSelector {
         selection,
         current,
         language,
         source_format,
     } = spec;
-    let auto_label = i18n::t(language, K::FormatAuto);
-    let selected_text = match selection {
-        FormatSelection::Auto => format!("{auto_label} · {}", current.label()),
-        FormatSelection::Fixed(_) => format!(
-            "{} · {}",
-            current.label(),
-            i18n::format_hint(language, current)
-        ),
-    };
-
+    let options = [
+        FormatSelection::Fixed(OutputFormat::Webp),
+        FormatSelection::Fixed(OutputFormat::Jpg),
+        FormatSelection::Fixed(OutputFormat::Png),
+        FormatSelection::Fixed(OutputFormat::Avif),
+        FormatSelection::Auto,
+        FormatSelection::Fixed(OutputFormat::Ico),
+    ];
+    let gap = 6.0;
+    let columns = 3;
+    let width = ((ui.available_width() - gap * (columns - 1) as f32) / columns as f32).max(64.0);
     let mut choice = selection;
-    let response = egui::ComboBox::from_id_salt("output_format_selector")
-        .selected_text(RichText::new(&selected_text).size(12.0).color(T::TEXT))
-        .width(ui.available_width())
-        .height(320.0)
-        .show_ui(ui, |ui| {
-            let auto_selected = choice == FormatSelection::Auto;
-            ui.selectable_value(
-                &mut choice,
-                FormatSelection::Auto,
-                RichText::new(auto_label).color(if auto_selected {
-                    T::ACCENT_INK
-                } else {
-                    T::TEXT
-                }),
-            );
-            ui.separator();
-            for format in OutputFormat::ALL {
-                let selected = choice == FormatSelection::Fixed(format);
-                let label = format!(
-                    "{} · {}",
-                    format.label(),
-                    i18n::format_hint(language, format)
-                );
-                ui.selectable_value(
-                    &mut choice,
-                    FormatSelection::Fixed(format),
-                    RichText::new(label).color(if selected { T::ACCENT_INK } else { T::TEXT }),
-                );
-            }
-        })
-        .response;
-    let hint = if selection == FormatSelection::Auto {
-        i18n::t(language, K::FormatAutoHint)
-    } else {
-        i18n::format_hint(language, current)
-    };
-    let response = response.on_hover_text(hint);
 
-    if response.has_focus() {
-        super::widgets::paint_focus_ring(ui.painter(), response.rect, 10);
-    }
-    response.accessible_name(format!(
-        "{}: {selected_text}",
-        i18n::t(language, K::OutputFormat)
-    ));
+    ui.scope(|ui| {
+        ui.spacing_mut().item_spacing = vec2(gap, gap);
+        for row in options.chunks(columns) {
+            ui.horizontal(|ui| {
+                for option in row {
+                    if format_card(ui, *option, choice, width, language) {
+                        choice = *option;
+                    }
+                }
+            });
+        }
+    });
 
     let input_matches = source_format
         .and_then(OutputFormat::from_input_label)
@@ -90,4 +56,87 @@ pub(super) fn format_selector(
     }
 
     (choice != selection).then_some(choice)
+}
+
+fn format_card(
+    ui: &mut egui::Ui,
+    option: FormatSelection,
+    selected: FormatSelection,
+    width: f32,
+    language: Lang,
+) -> bool {
+    let (label, hint, full_hint) = match option {
+        FormatSelection::Auto => (
+            i18n::t(language, K::FormatAutoShort),
+            i18n::t(language, K::FormatAutoCardHint),
+            i18n::t(language, K::FormatAutoHint),
+        ),
+        FormatSelection::Fixed(format) => (
+            format.label(),
+            i18n::format_hint(language, format),
+            i18n::format_hint(language, format),
+        ),
+    };
+    let is_selected = option == selected;
+    let (rect, response) = ui.allocate_exact_size(vec2(width, 52.0), Sense::click());
+    let hovered = response.hovered();
+    let fill = if is_selected {
+        T::ACCENT_SOFT
+    } else if hovered {
+        T::SURFACE_3
+    } else {
+        T::SURFACE_2
+    };
+    let stroke = if is_selected {
+        Stroke::new(1.2, T::ACCENT)
+    } else if hovered {
+        Stroke::new(1.0, T::BORDER_STRONG)
+    } else {
+        Stroke::new(1.0, T::BORDER)
+    };
+    let painter = ui.painter();
+    painter.rect(
+        rect,
+        CornerRadius::same(10),
+        fill,
+        stroke,
+        StrokeKind::Inside,
+    );
+    painter.text(
+        rect.left_top() + vec2(10.0, 9.0),
+        egui::Align2::LEFT_TOP,
+        label,
+        FontId::proportional(12.0),
+        T::TEXT,
+    );
+    painter.text(
+        rect.left_top() + vec2(10.0, 27.0),
+        egui::Align2::LEFT_TOP,
+        hint,
+        FontId::proportional(9.0),
+        if is_selected {
+            T::ACCENT
+        } else {
+            T::TEXT_MUTED
+        },
+    );
+
+    if response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), rect, 10);
+    }
+    let response = response
+        .on_hover_cursor(egui::CursorIcon::PointingHand)
+        .on_hover_text(full_hint);
+    response.widget_info(|| {
+        egui::WidgetInfo::selected(
+            egui::Role::RadioButton,
+            true,
+            is_selected,
+            format!("{label} · {hint}"),
+        )
+    });
+    let clicked = response.clicked();
+    response.accessible_name(format!("{}: {}", i18n::t(language, K::OutputFormat), label));
+
+    clicked && option != selected
 }

@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use eframe::egui::{self, Align, Layout, RichText};
+use eframe::egui::{self, Align, Layout, RichText, Stroke};
 
 use crate::i18n::K;
 use crate::theme as T;
@@ -30,22 +30,32 @@ impl HunkApp {
         });
         header.response.on_hover_text(hint);
 
-        if lossy {
-            ui.add_space(3.0);
-            ui.spacing_mut().slider_width = (ui.available_width() - 8.0).max(120.0);
-            let slider = egui::Slider::new(&mut self.quality, 1..=100)
-                .show_value(false)
-                .trailing_fill(true);
-            let response = ui.add(slider).accessible_name(self.t(K::Quality));
+        ui.add_space(3.0);
+        ui.spacing_mut().slider_width = (ui.available_width() - 8.0).max(120.0);
+        let quality_label = self.t(K::Quality);
+        let slider = egui::Slider::new(&mut self.quality, 1..=100)
+            .show_value(false)
+            .trailing_fill(true);
+        ui.scope(|ui| {
+            if !lossy {
+                let visuals = ui.visuals_mut();
+                visuals.selection.bg_fill = T::SURFACE_3;
+                visuals.selection.stroke = Stroke::new(1.0, T::TEXT_DISABLED);
+                visuals.widgets.inactive.bg_fill = T::SURFACE_3;
+                visuals.widgets.inactive.fg_stroke = Stroke::new(1.0, T::TEXT_DISABLED);
+                visuals.widgets.noninteractive.bg_fill = T::SURFACE_3;
+                visuals.widgets.noninteractive.fg_stroke = Stroke::new(1.0, T::TEXT_DISABLED);
+            }
+            let response = ui.add_enabled(lossy, slider).accessible_name(quality_label);
             if response.has_focus() {
                 super::widgets::paint_focus_ring(ui.painter(), response.rect, 6);
             }
             response.clone().on_hover_text(hint);
-            if response.changed() {
+            if lossy && response.changed() {
                 actions.push(AppAction::RequestEncode(Some(Duration::from_millis(
                     ENCODE_DELAY_MS,
                 ))));
             }
-        }
+        });
     }
 }

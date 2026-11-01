@@ -8,6 +8,7 @@ pub struct PreprocessOptions {
     pub keep_aspect: bool,
     pub rotation: u16,
     pub palette_colors: Option<u16>,
+    pub invert: bool,
 }
 
 impl Default for PreprocessOptions {
@@ -19,6 +20,7 @@ impl Default for PreprocessOptions {
             keep_aspect: true,
             rotation: 0,
             palette_colors: None,
+            invert: false,
         }
     }
 }
@@ -27,6 +29,7 @@ impl PreprocessOptions {
     pub fn reset_for_source(&mut self, width: u32, height: u32) {
         self.rotation = 0;
         self.palette_colors = None;
+        self.invert = false;
         if !self.resize_enabled || self.width == 0 || self.height == 0 {
             self.width = width;
             self.height = height;
@@ -102,43 +105,52 @@ pub fn apply_geometry(source: &RgbaImage, options: &PreprocessOptions) -> RgbaIm
         _ => source.clone(),
     };
 
-    if !options.resize_enabled {
-        return rotated;
+    let mut output = if !options.resize_enabled {
+        rotated
+    } else {
+        let width = if options.width == 0 {
+            rotated.width()
+        } else {
+            options.width.min(16_384)
+        };
+        let height = if options.height == 0 {
+            rotated.height()
+        } else {
+            options.height.min(16_384)
+        };
+
+        if width == rotated.width() && height == rotated.height() {
+            rotated
+        } else {
+            let (target_width, target_height) = if options.keep_aspect {
+                let scale = (width as f32 / rotated.width() as f32)
+                    .min(height as f32 / rotated.height() as f32)
+                    .max(0.0001);
+                (
+                    (rotated.width() as f32 * scale).round().max(1.0) as u32,
+                    (rotated.height() as f32 * scale).round().max(1.0) as u32,
+                )
+            } else {
+                (width, height)
+            };
+
+            imageops::resize(
+                &rotated,
+                target_width,
+                target_height,
+                imageops::FilterType::Lanczos3,
+            )
+        }
+    };
+
+    if options.invert {
+        for pixel in output.pixels_mut() {
+            pixel[0] = 255 - pixel[0];
+            pixel[1] = 255 - pixel[1];
+            pixel[2] = 255 - pixel[2];
+        }
     }
-
-    let width = if options.width == 0 {
-        rotated.width()
-    } else {
-        options.width.min(16_384)
-    };
-    let height = if options.height == 0 {
-        rotated.height()
-    } else {
-        options.height.min(16_384)
-    };
-
-    if width == rotated.width() && height == rotated.height() {
-        return rotated;
-    }
-
-    let (target_width, target_height) = if options.keep_aspect {
-        let scale = (width as f32 / rotated.width() as f32)
-            .min(height as f32 / rotated.height() as f32)
-            .max(0.0001);
-        (
-            (rotated.width() as f32 * scale).round().max(1.0) as u32,
-            (rotated.height() as f32 * scale).round().max(1.0) as u32,
-        )
-    } else {
-        (width, height)
-    };
-
-    imageops::resize(
-        &rotated,
-        target_width,
-        target_height,
-        imageops::FilterType::Lanczos3,
-    )
+    output
 }
 
 pub fn apply_palette(source: &RgbaImage, colors: u16) -> RgbaImage {
@@ -191,6 +203,24 @@ mod tests {
         );
         assert_eq!(output.dimensions(), (8, 16));
         assert_eq!(output.get_pixel(0, 0).0[3], source.get_pixel(0, 7).0[3]);
+    }
+
+    #[test]
+    fn inverts_rgb_and_preserves_alpha() {
+        let source = source();
+        let output = apply_geometry(
+            &source,
+            &PreprocessOptions {
+                invert: true,
+                ..PreprocessOptions::default()
+            },
+        );
+        let input = source.get_pixel(3, 2).0;
+        let inverted = output.get_pixel(3, 2).0;
+        assert_eq!(inverted[0], 255 - input[0]);
+        assert_eq!(inverted[1], 255 - input[1]);
+        assert_eq!(inverted[2], 255 - input[2]);
+        assert_eq!(inverted[3], input[3]);
     }
 
     #[test]
