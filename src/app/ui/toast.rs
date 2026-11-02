@@ -42,17 +42,17 @@ impl HunkApp {
                     |ui| {
                         let galley = ui.painter().layout(
                             message,
-                            FontId::proportional(11.0),
+                            FontId::proportional(13.5),
                             text_color,
-                            420.0,
+                            560.0,
                         );
-                        let padding = vec2(16.0, 9.0);
+                        let padding = vec2(20.0, 12.0);
                         let (rect, _) =
                             ui.allocate_exact_size(galley.size() + padding * 2.0, Sense::hover());
                         let painter = ui.painter();
                         painter.rect(
                             rect,
-                            CornerRadius::same(10),
+                            CornerRadius::same(12),
                             fill,
                             Stroke::new(1.0, stroke_color),
                             StrokeKind::Inside,
