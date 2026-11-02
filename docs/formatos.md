@@ -1,6 +1,6 @@
 # Formatos de entrada, salida y opciones avanzadas
 
-> Estado: especificación de producto · Fecha: 2026-11-01
+> Estado: especificación de producto · Fecha: 2026-11-02
 > Versión de desarrollo: 1.1.0 · Selector automático validado (`t-35`) · Entrada TIFF implementada (`t-36`) · Recorte no destructivo validado (`t-46`) · Alcance 1.1: [objetivo-1.1-web.md](objetivo-1.1-web.md) · Plan histórico: [plan-formatos-y-opciones.md](plan-formatos-y-opciones.md)
 >
 > En 1.1 el selector solo ofrece JPEG, PNG, WebP, AVIF e ICO. Las filas de JPEG
@@ -367,8 +367,10 @@ aplicarse de forma fiable.
 La persistencia de Preprocesado, Avanzado y del recorte está descartada.
 `config.ini` solo guarda `[general]`, `[output]`, `[window]` y `[history]`; las
 claves antiguas de `[advanced]` se ignoran y esos bloques arrancan con sus
-valores por defecto. El recorte se aplica en memoria antes de codificar y se
-limpia al cargar otra imagen, reiniciar o girar 90°.
+valores por defecto. `[general]` incluye el lado del panel derecho o izquierdo y
+`[window]` guarda la posición del panel de color. El recorte se aplica en
+memoria antes de codificar y se limpia al cargar otra imagen, reiniciar o girar
+90°.
 
 - `format=auto` es el valor inicial.
 - Los valores inválidos generan advertencia y no rompen el arranque.
@@ -376,7 +378,7 @@ limpia al cargar otra imagen, reiniciar o girar 90°.
 ## 8. UI
 
 ```text
-┌─ Vista previa ───────────────────────┐  ┌─ Panel derecho 340 px ─┐
+┌─ Vista previa ───────────────────────┐  ┌─ Panel lateral 340 px ─┐
 │ Vista previa   Zoom 100 %   ES  Reset│  │ IMAGEN                 │
 │                                       │  │ demo.png · PNG ...     │
 │              [imagen]                 │  │ FORMATO DE SALIDA      │
@@ -393,13 +395,17 @@ limpia al cargar otra imagen, reiniciar o girar 90°.
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-- El panel de ajustes está a la derecha y no llega al borde superior: encima
-  quedan el selector de idioma y `Reiniciar`.
+- El panel de ajustes puede estar a la derecha o a la izquierda; por defecto
+  queda a la derecha y no llega al borde superior: encima quedan el selector de
+  idioma, el cambio de lado y `Reiniciar`. Solo la esquina superior interior
+  está redondeada; el lado exterior y el inferior quedan pegados sin borde.
 - El historial y el cuentagotas viven en una tarjeta flotante que se puede mover
-  con un handle y queda por encima del lienzo y del panel derecho.
+  con un handle y queda por encima del lienzo y del panel lateral. Un doble clic
+  en el handle la devuelve a su posición inicial.
 - Los botones rápidos de borrar historial, recortar, cuentagotas, invertir y
-  girar quedan en una columna junto a esa tarjeta. La columna y el desplegable
-  de recorte se colocan a la izquierda o a la derecha según el espacio libre.
+  girar quedan en una columna junto a esa tarjeta. La columna pasa al lado
+  izquierdo cuando la tarjeta cruza el centro horizontal de la ventana; el
+  desplegable de recorte se abre hacia el lado con más espacio.
 - El recorte es no destructivo: muestra el exterior atenuado, limita el
   comparador a la zona recortada y se aplica antes de codificar. Con un recorte
   aplicado, `0`/`F` encuadra el recorte y `1` lo muestra a escala real.

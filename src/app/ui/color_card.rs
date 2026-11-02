@@ -27,7 +27,19 @@ impl HunkApp {
                 ui.label(T::section_label(self.t(K::History)));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     let handle = move_handle(ui, self.t(K::MoveColorPanel));
-                    if handle.dragged() {
+                    if handle.drag_started() && self.color_panel_pos.is_none() {
+                        self.color_panel_pos = ui
+                            .ctx()
+                            .memory(|memory| {
+                                memory.area_rect(egui::Id::unique("color_panel_overlay"))
+                            })
+                            .map(|rect| rect.min);
+                    }
+                    if handle.double_clicked() {
+                        self.color_panel_pos = None;
+                        actions.push(AppAction::PersistSettings);
+                        ui.ctx().request_repaint();
+                    } else if handle.dragged() {
                         if let Some(position) = self.color_panel_pos.as_mut() {
                             let delta = ui.ctx().input(|input| input.pointer.delta());
                             *position += delta;
@@ -37,6 +49,9 @@ impl HunkApp {
                             position.y = position.y.clamp(bounds.top(), max.y.max(bounds.top()));
                         }
                         ui.ctx().request_repaint();
+                    }
+                    if handle.drag_stopped() {
+                        actions.push(AppAction::PersistSettings);
                     }
                 });
             });
@@ -239,7 +254,7 @@ impl HunkApp {
 }
 
 fn move_handle(ui: &mut egui::Ui, label: &str) -> egui::Response {
-    let (rect, response) = ui.allocate_exact_size(vec2(20.0, 20.0), Sense::drag());
+    let (rect, response) = ui.allocate_exact_size(vec2(20.0, 20.0), Sense::click_and_drag());
     let color = if response.hovered() || response.dragged() {
         T::TEXT
     } else {

@@ -1,6 +1,6 @@
 # Retomar HUNK Converter
 
-> Punto de entrada para nuevas sesiones. Última actualización: **2026-11-01**.
+> Punto de entrada para nuevas sesiones. Última actualización: **2026-11-02**.
 > Versión: **1.0.0** publicada · **1.1.0** pendiente de cierre `t-43` · Rama: **main** · Estado: **aplicación principal Rust + egui, portable**.
 
 ## 1. Qué es este proyecto
@@ -28,6 +28,8 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG; AVIF usa libavif/AOM.
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %, salvo con resize activo, que encuadra el original para mostrar el marco.
 - Recorte no destructivo implementado y validado con máscara normalizada, ocho tiradores, presets `Libre`/`Original`/`1:1`/`4:3`/`16:9`, exterior atenuado y comparador limitado al recorte. Se aplica antes de codificar, se quita con `Quitar recorte` y no se persiste. Con recorte aplicado, `0`/`F` encuadra el recorte y `1` lo centra a escala real. En ICO el botón se desactiva; el recorte aplicado se conserva al cambiar de formato.
+- Panel de ajustes conmutable entre izquierda y derecha desde los controles superiores; el lado se guarda en `config.ini`.
+- Tarjeta de color flotante movible con handle, reset por doble clic y posición persistida en `config.ini`; las herramientas y el flyout de recorte se recolocan según el centro y el espacio.
 - Cuentagotas con muestra del píxel original y códigos OKLCH/OKLAB/HEX/RGB/RGBA/HSL. El código se copia al hacer clic; con Ctrl, HEX añade la etiqueta.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
 - Arquitectura modular: dominio puro, acciones explícitas, errores tipados y UI dividida por componentes. Ver `docs/arquitectura.md`.

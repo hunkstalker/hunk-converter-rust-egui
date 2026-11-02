@@ -1,10 +1,14 @@
+use std::f32::consts::PI;
 use std::time::Duration;
 
-use eframe::egui::{self, Align, CornerRadius, Frame, Layout, Margin, RichText, Stroke, vec2};
+use eframe::egui::{
+    self, Align, CornerRadius, Frame, Layout, Margin, Rect, RichText, Stroke, pos2, vec2,
+};
 
 use crate::codec::OutputFormat;
 use crate::domain::{linked_height, rotated_size};
 use crate::i18n::{self, K};
+use crate::settings::PanelSide;
 use crate::theme as T;
 
 use super::super::actions::AppAction;
@@ -43,22 +47,42 @@ impl HunkApp {
             original_dimensions,
         };
 
-        egui::Panel::right("settings_panel")
+        let side = self.panel_side;
+        let panel = match side {
+            PanelSide::Right => egui::Panel::right("settings_panel_right"),
+            PanelSide::Left => egui::Panel::left("settings_panel_left"),
+        };
+        panel
             .resizable(false)
             .exact_size(340.0)
             .show_separator_line(false)
             .frame(Frame::new().fill(T::BG).inner_margin(Margin {
                 left: 0,
-                right: 12,
+                right: 0,
                 top: 56,
-                bottom: 16,
+                bottom: 0,
             }))
             .show(root, |ui| {
-                T::sidebar_frame().show(ui, |ui| {
+                let card_rect = ui.available_rect_before_wrap();
+                let corner = match side {
+                    PanelSide::Right => CornerRadius {
+                        nw: 18,
+                        ne: 0,
+                        sw: 0,
+                        se: 0,
+                    },
+                    PanelSide::Left => CornerRadius {
+                        nw: 0,
+                        ne: 18,
+                        sw: 0,
+                        se: 0,
+                    },
+                };
+                T::sidebar_frame(corner).show(ui, |ui| {
                     ui.set_min_height(ui.available_height());
                     ui.set_width(ui.available_width());
 
-                    let footer_height = 84.0;
+                    let footer_height = 108.0;
                     let scroll_height = (ui.available_height() - footer_height - 8.0).max(200.0);
                     egui::ScrollArea::vertical()
                         .id_salt("sidebar_scroll")
@@ -79,6 +103,7 @@ impl HunkApp {
                     ui.add_space(4.0);
                     self.show_export(ui, &mut actions);
                 });
+                paint_sidebar_border(ui, card_rect, side);
             });
         actions
     }
@@ -524,7 +549,7 @@ impl HunkApp {
         if response.clicked() && enabled {
             actions.push(AppAction::Export);
         }
-        ui.add_space(6.0);
+        ui.add_space(14.0);
     }
 }
 
@@ -644,4 +669,38 @@ fn apply_pending_section_scroll<T>(
     } else {
         ui.ctx().request_repaint();
     }
+}
+
+fn paint_sidebar_border(ui: &egui::Ui, rect: Rect, side: PanelSide) {
+    let edge = rect.shrink(0.5);
+    let radius = 18.0;
+    let mut points = Vec::with_capacity(12);
+    match side {
+        PanelSide::Right => {
+            points.push(edge.right_top());
+            points.push(pos2(edge.left() + radius, edge.top()));
+            for step in 1..=8 {
+                let angle = 1.5 * PI - (0.5 * PI) * (step as f32 / 8.0);
+                points.push(pos2(
+                    edge.left() + radius + angle.cos() * radius,
+                    edge.top() + radius + angle.sin() * radius,
+                ));
+            }
+            points.push(edge.left_bottom());
+        }
+        PanelSide::Left => {
+            points.push(edge.left_top());
+            points.push(pos2(edge.right() - radius, edge.top()));
+            for step in 1..=8 {
+                let angle = 1.5 * PI + (0.5 * PI) * (step as f32 / 8.0);
+                points.push(pos2(
+                    edge.right() - radius + angle.cos() * radius,
+                    edge.top() + radius + angle.sin() * radius,
+                ));
+            }
+            points.push(edge.right_bottom());
+        }
+    }
+    ui.painter()
+        .add(egui::Shape::line(points, Stroke::new(1.0, T::BORDER)));
 }

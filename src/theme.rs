@@ -138,11 +138,10 @@ pub fn install(ctx: &egui::Context) {
     ctx.set_style_of(egui::Theme::Dark, style);
 }
 
-pub fn sidebar_frame() -> Frame {
+pub fn sidebar_frame(corner_radius: CornerRadius) -> Frame {
     Frame::new()
         .fill(SURFACE)
-        .stroke(Stroke::new(1.0, BORDER))
-        .corner_radius(CornerRadius::same(18))
+        .corner_radius(corner_radius)
         .inner_margin(Margin::symmetric(20, 14))
 }
 

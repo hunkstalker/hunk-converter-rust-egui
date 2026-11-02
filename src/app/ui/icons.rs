@@ -116,6 +116,57 @@ pub(crate) enum QuickTool {
 pub(crate) const QUICK_TOOL_SIZE: f32 = 38.0;
 pub(crate) const QUICK_TOOL_GAP: f32 = 6.0;
 
+pub(crate) fn panel_side_button(
+    ui: &mut egui::Ui,
+    panel_on_right: bool,
+    label: &str,
+) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(vec2(64.0, 32.0), Sense::click());
+    let hovered = response.hovered();
+    let stroke = Stroke::new(1.0, if hovered { T::BORDER_STRONG } else { T::BORDER });
+    ui.painter().rect(
+        rect,
+        CornerRadius::same(10),
+        if hovered {
+            T::SURFACE_3
+        } else {
+            Color32::TRANSPARENT
+        },
+        stroke,
+        StrokeKind::Inside,
+    );
+
+    let color = if hovered { T::TEXT } else { T::TEXT_MUTED };
+    let icon = Rect::from_center_size(rect.center(), vec2(22.0, 16.0));
+    ui.painter().rect_stroke(
+        icon,
+        CornerRadius::same(3),
+        Stroke::new(1.25, color),
+        StrokeKind::Inside,
+    );
+    let bar = if panel_on_right {
+        Rect::from_min_max(
+            pos2(icon.right() - 7.0, icon.top() + 1.0),
+            pos2(icon.right() - 1.0, icon.bottom() - 1.0),
+        )
+    } else {
+        Rect::from_min_max(
+            pos2(icon.left() + 1.0, icon.top() + 1.0),
+            pos2(icon.left() + 7.0, icon.bottom() - 1.0),
+        )
+    };
+    ui.painter().rect_filled(bar, CornerRadius::same(1), color);
+
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label.to_owned()));
+    if response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), rect, 10);
+    }
+    response
+        .on_hover_cursor(CursorIcon::PointingHand)
+        .on_hover_text(label)
+        .accessible_name(label)
+}
+
 pub(crate) fn quick_tool_button(
     ui: &mut egui::Ui,
     tool: QuickTool,

@@ -45,8 +45,9 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - Vista previa a pantalla completa con el **panel de ajustes a la derecha**.
 - Formato de salida en una cuadrícula de tarjetas: WebP, JPG, PNG, AVIF, Auto e ICO.
 - Historial y cuentagotas en una tarjeta flotante que se puede mover con un handle.
-- Las herramientas rápidas y el desplegable de recorte se colocan a la derecha o a la izquierda de la tarjeta según el espacio disponible.
+- Las herramientas rápidas y el desplegable de recorte se colocan a la derecha o a la izquierda de la tarjeta; al cruzar el centro horizontal de la ventana pasan al lado izquierdo.
 - Botones rápidos **Recortar**, **Invertir colores** y **Girar 90°** junto a la tarjeta de color.
+- El panel derecho se puede mover al lado izquierdo con el botón de los controles superiores; la elección se guarda en `config.ini`.
 
 ## Cuentagotas
 
@@ -69,14 +70,14 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 - Cuando el historial está lleno, se sustituye el color no fijado más antiguo.
 - Si todos los colores están fijados, el color nuevo se muestra pero no entra al historial; aparece un aviso.
 - El botón de papelera limpia los colores no fijados.
-- La tarjeta se mueve con el handle de la cabecera. Su posición dura la sesión y no se guarda en `config.ini`.
+- La tarjeta se mueve con el handle de la cabecera; un doble clic en el handle la devuelve a su posición inicial. Su posición se guarda en `config.ini`.
 - El historial y el estado de cada candado se conservan en `config.ini`, junto al ejecutable. Al reiniciar, los colores fijados siguen fijados.
 
 ## Idiomas y configuración
 
 - Selector **ES / CA / EN** arriba a la derecha, sobre el lienzo.
 - En el primer arranque se detecta el idioma del sistema.
-- El idioma, el historial, los bloqueos, el estado maximizado, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
+- El idioma, el historial, los bloqueos, el estado maximizado, el lado del panel, la posición del panel de color, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
 - Si no se puede escribir el archivo, la aplicación sigue funcionando sin persistencia.
 
 ## Zoom y navegación
@@ -283,7 +284,7 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 │   │   ├── export.rs       Exportación mediante diálogo nativo
 │   │   ├── session.rs      Carga, pegado, reinicio y formato
 │   │   ├── state.rs        SourceImage, RenderedResult, CropRect y Toast
-│   │   └── ui/             Panel derecho, color flotante, preview y widgets
+│   │   └── ui/             Panel lateral, color flotante, preview y widgets
 │   ├── codec/              WebP, JPG, PNG, AVIF, JPEG XL, ICO, SVG y TIFF
 │   ├── domain/             Formatos, recorte, color, historial y errores tipados
 │   ├── settings/           config.ini, idioma, historial y maximizado

@@ -5,7 +5,7 @@ use crate::domain::color::parse_hex_rgba;
 use crate::domain::history::{HISTORY_LIMIT, HistoryEntry};
 use crate::i18n::Lang;
 
-use super::{AdvancedSettings, ConfigLoad, ConfigWarning, Settings, WindowState};
+use super::{AdvancedSettings, ConfigLoad, ConfigWarning, PanelSide, Settings, WindowState};
 
 pub(super) fn read(path: &Path) -> Result<ConfigLoad, crate::domain::ConfigError> {
     let text =
@@ -21,6 +21,8 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
         language: Lang::detect(),
         history: Vec::new(),
         maximized: true,
+        panel_side: PanelSide::Right,
+        color_panel_pos: None,
         output_format: FormatSelection::Auto,
         advanced: AdvancedSettings::default(),
         window: WindowState::default(),
@@ -28,6 +30,10 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
     let mut warnings = Vec::new();
     let mut section = String::new();
     let mut maximized_seen = false;
+    let mut color_panel_x = None;
+    let mut color_panel_y = None;
+    let mut color_panel_x_line = None;
+    let mut color_panel_y_line = None;
 
     for (index, raw_line) in text.lines().enumerate() {
         let line_number = index + 1;
@@ -57,6 +63,14 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
         } else if section == "general" && key == "maximized" {
             settings.maximized = parse_bool(value);
             maximized_seen = true;
+        } else if section == "general" && key == "panel_side" {
+            match PanelSide::from_code(value) {
+                Some(side) => settings.panel_side = side,
+                None => warnings.push(ConfigWarning::new(
+                    line_number,
+                    format!("lado del panel desconocido: {value}"),
+                )),
+            }
         } else if section == "general" && key == "fullscreen" && !maximized_seen {
             settings.maximized = parse_bool(value);
         } else if section == "output" && key == "format" {
@@ -94,6 +108,22 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
                         settings.window.width = parsed;
                     } else {
                         settings.window.height = parsed;
+                    }
+                }
+                "color_panel_x" | "color_panel_y" => {
+                    let Some(parsed) = parse_coordinate(value) else {
+                        warnings.push(ConfigWarning::new(
+                            line_number,
+                            format!("posición del panel de color no válida: {value}"),
+                        ));
+                        continue;
+                    };
+                    if key == "color_panel_x" {
+                        color_panel_x = Some(parsed);
+                        color_panel_x_line = Some(line_number);
+                    } else {
+                        color_panel_y = Some(parsed);
+                        color_panel_y_line = Some(line_number);
                     }
                 }
                 _ => {}
@@ -145,14 +175,28 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
         }
     }
 
+    match (color_panel_x, color_panel_y) {
+        (Some(x), Some(y)) => settings.color_panel_pos = Some((x, y)),
+        (Some(_), None) => warnings.push(ConfigWarning::new(
+            color_panel_x_line.unwrap_or_default(),
+            "falta color_panel_y",
+        )),
+        (None, Some(_)) => warnings.push(ConfigWarning::new(
+            color_panel_y_line.unwrap_or_default(),
+            "falta color_panel_x",
+        )),
+        (None, None) => {}
+    }
+
     ConfigLoad { settings, warnings }
 }
 
 pub(super) fn serialize(settings: &Settings) -> String {
     let mut text = format!(
-        "[general]\nlanguage={}\nmaximized={}\n\n[output]\nformat={}\n\n[window]\n",
+        "[general]\nlanguage={}\nmaximized={}\npanel_side={}\n\n[output]\nformat={}\n\n[window]\n",
         settings.language.code(),
         u8::from(settings.maximized),
+        settings.panel_side.code(),
         settings.output_format.code(),
     );
     if let Some(x) = settings.window.x {
@@ -162,11 +206,13 @@ pub(super) fn serialize(settings: &Settings) -> String {
         text.push_str(&format!("y={y}\n"));
     }
     text.push_str(&format!(
-        "width={}\nheight={}\n\n[history]\ncount={}\n",
-        settings.window.width,
-        settings.window.height,
-        settings.history.len()
+        "width={}\nheight={}\n",
+        settings.window.width, settings.window.height
     ));
+    if let Some((x, y)) = settings.color_panel_pos {
+        text.push_str(&format!("color_panel_x={x}\ncolor_panel_y={y}\n"));
+    }
+    text.push_str(&format!("\n[history]\ncount={}\n", settings.history.len()));
     for (index, entry) in settings.history.iter().take(HISTORY_LIMIT).enumerate() {
         text.push_str(&format!(
             "color{}={}|{}\n",

@@ -1,6 +1,6 @@
 # Proyecto — HUNK Converter
 
-> Documento vivo. Última actualización: 2026-11-01.
+> Documento vivo. Última actualización: 2026-11-02.
 > Versión actual: **1.0.0** publicada · Versión en preparación: **1.1.0** · Estado: **aplicación principal Rust + egui, portable y funcional**.
 
 ## 1. Visión
@@ -111,7 +111,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 - Selector **ES / CA / EN** junto al botón de reinicio.
 - En el primer arranque se detecta el idioma del sistema con `sys-locale`.
-- La preferencia, el historial, los bloqueos, el estado maximizado, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
+- La preferencia, el historial, los bloqueos, el estado maximizado, el lado del panel, la posición del panel de color, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
 - Si el archivo no es escribible, la app sigue funcionando sin persistencia.
 
 ### 3.6 Exportación
@@ -176,7 +176,8 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 - Tamaño de ventana por defecto 1280 × 800; mínimo 1024 × 800.
 - Vista previa a pantalla completa con el selector de idioma y el botón de reinicio arriba a la derecha, sobre el lienzo. Los controles de ventana son los nativos.
 - Panel de ajustes a la derecha, con scroll vertical cuando no cabe. Incluye archivo, formato en cuadrícula, calidad o tamaños ICO, preprocesado, avanzado, pesos y exportación.
-- Historial y cuentagotas en una tarjeta flotante movible con handle, con botones rápidos de recortar, invertir colores y girar 90°. Las herramientas y el desplegable de recorte se recolocan a izquierda o derecha según el espacio.
+- Historial y cuentagotas en una tarjeta flotante movible con handle, posición persistida y reset por doble clic, con botones rápidos de recortar, invertir colores y girar 90°. Las herramientas y el desplegable de recorte se recolocan a izquierda o derecha según el centro y el espacio.
+- Panel lateral conmutable entre izquierda y derecha, con botón en los controles superiores y lado persistido en `config.ini`.
 - Pie global con estado del proyecto, versión y enlace al repositorio.
 
 ### Render bajo demanda
@@ -219,7 +220,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | `src/app/export.rs` | Diálogo nativo y escritura del resultado |
 | `src/app/session.rs` | Carga, pegado, reinicio, demo y formato |
 | `src/app/state.rs` | `SourceImage`, `RenderedResult`, `CropRect`, `Toast` y mensajes del worker |
-| `src/app/ui/` | Componentes egui: panel derecho, color flotante, canvas, avisos |
+| `src/app/ui/` | Componentes egui: panel lateral, color flotante, canvas, avisos |
 | `src/domain/crop.rs` | `CropRect`, presets de proporción y recorte de píxeles |
 | `src/domain/format.rs` | Política de formatos, extensiones y badges |
 | `docs/formatos.md` | Matriz de entrada/salida y opciones avanzadas |
@@ -322,7 +323,7 @@ Archivo local
 ### Salida
 
 - La ruta se elige en el diálogo nativo; si existe, se propone `<carpeta del ejecutable>/export/`.
-- `config.ini` se crea junto al ejecutable y guarda idioma, historial, estado maximizado, formato de salida, posición y tamaño de la ventana.
+- `config.ini` se crea junto al ejecutable y guarda idioma, historial, estado maximizado, lado del panel, posición del panel de color, formato de salida, posición y tamaño de la ventana.
 - El diálogo nativo gestiona la confirmación si el archivo ya existe.
 
 ### Estructura de la build

@@ -6,11 +6,44 @@ use crate::i18n::Lang;
 
 mod ini;
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum PanelSide {
+    #[default]
+    Right,
+    Left,
+}
+
+impl PanelSide {
+    pub fn code(self) -> &'static str {
+        match self {
+            Self::Right => "right",
+            Self::Left => "left",
+        }
+    }
+
+    pub fn from_code(code: &str) -> Option<Self> {
+        match code.trim().to_ascii_lowercase().as_str() {
+            "right" | "derecha" => Some(Self::Right),
+            "left" | "izquierda" => Some(Self::Left),
+            _ => None,
+        }
+    }
+
+    pub fn toggled(self) -> Self {
+        match self {
+            Self::Right => Self::Left,
+            Self::Left => Self::Right,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Settings {
     pub language: Lang,
     pub history: Vec<HistoryEntry>,
     pub maximized: bool,
+    pub panel_side: PanelSide,
+    pub color_panel_pos: Option<(f32, f32)>,
     pub output_format: FormatSelection,
     pub advanced: AdvancedSettings,
     pub window: WindowState,
@@ -72,6 +105,8 @@ impl Default for Settings {
             language: Lang::detect(),
             history: Vec::new(),
             maximized: true,
+            panel_side: PanelSide::Right,
+            color_panel_pos: None,
             output_format: FormatSelection::Auto,
             advanced: AdvancedSettings::default(),
             window: WindowState::default(),
@@ -212,6 +247,8 @@ mod tests {
                 HistoryEntry::new([179, 142, 117, 255], false),
             ],
             maximized: false,
+            panel_side: PanelSide::Left,
+            color_panel_pos: Some((640.0, 280.0)),
             output_format: FormatSelection::Fixed(crate::domain::OutputFormat::Avif),
             advanced: AdvancedSettings::default(),
             window: WindowState {
@@ -224,6 +261,16 @@ mod tests {
         let outcome = ini::parse(&ini::serialize(&settings));
         assert_eq!(outcome.settings, settings);
         assert!(outcome.warnings.is_empty());
+
+        let default = ini::parse("");
+        assert_eq!(default.settings.panel_side, PanelSide::Right);
+        assert_eq!(default.settings.color_panel_pos, None);
+        let invalid = ini::parse("[general]\npanel_side=arriba\n");
+        assert_eq!(invalid.settings.panel_side, PanelSide::Right);
+        assert_eq!(invalid.warnings.len(), 1);
+        let partial = ini::parse("[window]\ncolor_panel_x=100\n");
+        assert_eq!(partial.settings.color_panel_pos, None);
+        assert_eq!(partial.warnings.len(), 1);
     }
 }
 

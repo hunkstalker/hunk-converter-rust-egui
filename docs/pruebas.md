@@ -1,6 +1,6 @@
 # Pruebas y automatización
 
-> Estado: 2026-11-01 · `t-45` y `t-46` completadas; pendiente el cierre `t-43`
+> Estado: 2026-11-02 · `t-45` y `t-46` completadas; pendiente el cierre `t-43`
 
 ## 1. Capas
 

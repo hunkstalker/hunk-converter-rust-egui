@@ -81,6 +81,16 @@ macro_rules! catalogue {
 catalogue! {
     Reset => ("Reiniciar", "Reinicia", "Reset"),
     Language => ("Idioma", "Idioma", "Language"),
+    PanelToLeft => (
+        "Mover el panel a la izquierda",
+        "Mou el panell a l'esquerra",
+        "Move panel to the left"
+    ),
+    PanelToRight => (
+        "Mover el panel a la derecha",
+        "Mou el panell a la dreta",
+        "Move panel to the right"
+    ),
     OpenRepository => (
         "Abrir el repositorio en el navegador",
         "Obre el repositori al navegador",
@@ -160,7 +170,11 @@ catalogue! {
         "Press the eyedropper and choose a pixel."
     ),
     History => ("HISTORIAL", "HISTORIAL", "HISTORY"),
-    MoveColorPanel => ("Arrastrar para mover", "Arrossega per moure", "Drag to move"),
+    MoveColorPanel => (
+        "Arrastrar para mover · doble clic para restablecer",
+        "Arrossega per moure · doble clic per restablir",
+        "Drag to move · double-click to reset"
+    ),
     ClearHistory => ("Limpiar recientes", "Neteja els recents", "Clear recent"),
     HistoryFull => (
         "Historial lleno: libera un color para guardarlo.",

@@ -1,6 +1,6 @@
 # Arquitectura de HUNK Converter
 
-> Estado: aceptada · Fecha: 2026-11-01 · Versión: 1.1.0 en preparación
+> Estado: aceptada · Fecha: 2026-11-02 · Versión: 1.1.0 en preparación
 
 ## 1. Contexto
 
@@ -214,6 +214,7 @@ guardado se registran en `stderr`.
 [general]
 language=es
 maximized=1
+panel_side=right
 
 [output]
 format=auto
@@ -223,6 +224,8 @@ x=120
 y=80
 width=1280
 height=800
+color_panel_x=640
+color_panel_y=280
 
 [history]
 count=2
@@ -237,15 +240,18 @@ Decisiones:
 - Al llenarse el historial se sustituye el color libre más antiguo.
 - `maximized` sustituye al antiguo `fullscreen`; el valor antiguo se acepta
   para no romper configuraciones existentes.
+- `[general] panel_side` guarda `right` o `left`; las configuraciones antiguas
+  sin esa clave arrancan con el panel a la derecha.
 - `[output]` guarda `auto` o el formato fijo elegido en el selector de salida.
 - `[advanced]` no se escribe. Las claves antiguas de opciones avanzadas o
   preprocesado se ignoran al cargar y esos bloques vuelven a sus valores por
   defecto en cada sesión.
 - El recorte tampoco se persiste: vive en memoria, se aplica antes de codificar
   y se limpia al cargar otra imagen, reiniciar o girar 90°.
-- `[window]` guarda posición y tamaño de la ventana cuando no está maximizada.
-  Al restaurar se usa la posición guardada; el sistema operativo la corrige si
-  el monitor ya no existe.
+- `[window]` guarda posición y tamaño de la ventana cuando no está maximizada,
+  además de la posición del panel de color (`color_panel_x`/`color_panel_y`).
+  Al restaurar se usa la posición guardada; el sistema operativo corrige la
+  ventana si el monitor ya no existe.
 - El parser devuelve advertencias con número de línea para entradas inválidas,
   en lugar de ignorarlas en silencio.
 - La persistencia de bloqueos está cubierta por pruebas de ida y vuelta.

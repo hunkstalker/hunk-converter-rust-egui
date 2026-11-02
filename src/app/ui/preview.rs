@@ -5,6 +5,7 @@ use eframe::egui::{
 
 use crate::codec::OutputFormat;
 use crate::i18n::{self, K, Lang};
+use crate::settings::PanelSide;
 use crate::theme as T;
 
 use super::super::HunkApp;
@@ -13,7 +14,7 @@ use super::super::state::CropPreset;
 use super::canvas::CanvasContext;
 use super::icons::{
     EyedropperButton, QUICK_TOOL_GAP, QUICK_TOOL_SIZE, QuickTool, eyedropper_button,
-    quick_tool_button,
+    panel_side_button, quick_tool_button,
 };
 
 const QUICK_TOOLS_GAP: f32 = 8.0;
@@ -99,13 +100,6 @@ impl HunkApp {
                 });
                 let panel_rect = color_panel.response.rect;
                 self.color_panel_size = panel_rect.size();
-                if self.color_panel_pos.is_none() {
-                    self.color_panel_pos = Some(pos2(
-                        content_rect.left() + 56.0,
-                        (content_rect.bottom() - 92.0 - panel_rect.height())
-                            .max(content_rect.top()),
-                    ));
-                }
 
                 let (tools_pos, tools_on_left) = quick_tools_position(panel_rect, content_rect);
                 let mut crop_button_rect = None;
@@ -388,13 +382,26 @@ impl HunkApp {
             actions.push(AppAction::PersistSettings);
             actions.push(AppAction::RequestRepaint);
         }
+
+        if self.source.is_some() {
+            let label = match self.panel_side {
+                PanelSide::Right => self.t(K::PanelToLeft),
+                PanelSide::Left => self.t(K::PanelToRight),
+            };
+            let response = panel_side_button(ui, self.panel_side == PanelSide::Right, label);
+            if response.clicked() {
+                self.panel_side = self.panel_side.toggled();
+                actions.push(AppAction::PersistSettings);
+                actions.push(AppAction::RequestRepaint);
+            }
+        }
     }
 }
 
 fn quick_tools_position(panel: Rect, content: Rect) -> (egui::Pos2, bool) {
-    let right_room = content.right() - panel.right() - QUICK_TOOLS_GAP;
-    let left_room = panel.left() - content.left() - QUICK_TOOLS_GAP;
-    let tools_on_left = right_room < QUICK_TOOL_SIZE && left_room > right_room;
+    // Las herramientas cambian al lado izquierdo en cuanto el panel cruza el
+    // centro horizontal de la aplicación, sin esperar al borde derecho.
+    let tools_on_left = panel.left() >= content.center().x;
     let x = if tools_on_left {
         panel.left() - QUICK_TOOLS_GAP - QUICK_TOOL_SIZE
     } else {
@@ -449,6 +456,11 @@ mod tests {
         let (default_pos, on_left) = quick_tools_position(default_panel, content());
         assert!(!on_left);
         assert_eq!(default_pos, pos2(364.0, 715.0));
+
+        let midpoint_panel = Rect::from_min_size(pos2(640.0, 356.0), vec2(300.0, 473.0));
+        let (midpoint_pos, on_left) = quick_tools_position(midpoint_panel, content());
+        assert!(on_left);
+        assert_eq!(midpoint_pos, pos2(594.0, 615.0));
 
         let right_panel = Rect::from_min_size(pos2(958.0, 356.0), vec2(300.0, 473.0));
         let (right_pos, on_left) = quick_tools_position(right_panel, content());

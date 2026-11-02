@@ -42,6 +42,7 @@ pub struct HunkApp {
     history_focus: usize,
     history_focus_pending: bool,
     maximized: bool,
+    panel_side: settings::PanelSide,
     native_maximized_seen: bool,
     sample_pending_history: bool,
     format: OutputFormat,
@@ -112,6 +113,7 @@ impl HunkApp {
             history_focus: 0,
             history_focus_pending: false,
             maximized: settings.maximized,
+            panel_side: settings.panel_side,
             native_maximized_seen: false,
             sample_pending_history: false,
             format: match settings.output_format {
@@ -130,7 +132,7 @@ impl HunkApp {
             crop_preset: CropPreset::Free,
             crop_drag: None,
             view_content: None,
-            color_panel_pos: None,
+            color_panel_pos: settings.color_panel_pos.map(|(x, y)| egui::pos2(x, y)),
             color_panel_size: egui::vec2(300.0, 500.0),
             split: 0.5,
             zoom: FIT_ZOOM,
@@ -188,6 +190,8 @@ impl HunkApp {
             language: self.language,
             history: self.history.clone(),
             maximized: self.maximized,
+            panel_side: self.panel_side,
+            color_panel_pos: self.color_panel_pos.map(|pos| (pos.x, pos.y)),
             output_format: self.format_selection,
             advanced: self.advanced.clone(),
             window: settings::WindowState {
