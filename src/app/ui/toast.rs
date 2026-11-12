@@ -1,8 +1,6 @@
 use std::time::{Duration, Instant};
 
-use eframe::egui::{
-    self, Align2, Color32, CornerRadius, FontId, Id, Sense, Stroke, StrokeKind, vec2,
-};
+use eframe::egui::{self, Align2, CornerRadius, FontId, Id, Sense, Stroke, StrokeKind, vec2};
 
 use crate::theme as T;
 
@@ -19,16 +17,16 @@ impl HunkApp {
             return;
         }
         let remaining = toast.until - now;
-        let text_color = if toast.error { T::DANGER } else { T::TEXT };
+        let text_color = if toast.error { T::danger() } else { T::text() };
         let fill = if toast.error {
-            Color32::from_rgb(42, 24, 26)
+            T::toast_error_bg()
         } else {
-            T::SURFACE_3
+            T::surface_3()
         };
         let stroke_color = if toast.error {
-            Color32::from_rgba_unmultiplied(255, 126, 126, 140)
+            T::toast_error_border()
         } else {
-            T::BORDER_STRONG
+            T::border_strong()
         };
         let message = toast.message.clone();
 

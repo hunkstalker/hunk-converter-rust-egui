@@ -368,7 +368,8 @@ La persistencia de Preprocesado, Avanzado y del recorte está descartada.
 `config.ini` solo guarda `[general]`, `[output]`, `[window]` y `[history]`; las
 claves antiguas de `[advanced]` se ignoran y esos bloques arrancan con sus
 valores por defecto. `[general]` incluye el lado del panel derecho o izquierdo y
-`[window]` guarda la posición del panel de color. El recorte se aplica en
+el perfil de color (`theme=dark|light`); `[window]` guarda la posición del panel
+de color. El recorte se aplica en
 memoria antes de codificar y se limpia al cargar otra imagen, reiniciar o girar
 90°.
 

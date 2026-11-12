@@ -25,7 +25,8 @@
 - colocación de las herramientas y del flyout de recorte según el espacio;
 - expresiones de tamaño `1600x2`, `1600/4`, `1600*2`, `1600-200`, límites y errores;
 - proporción enlazada y dimensiones rotadas;
-- opciones avanzadas y preprocesado sin persistencia; `config.ini` solo guarda idioma, historial, formato y ventana;
+- perfiles de color `dark`/`light`, búsqueda por identificador y alternancia;
+- opciones avanzadas y preprocesado sin persistencia; `config.ini` guarda idioma, perfil de color, historial, formato, panel y ventana;
 - rechazo de imágenes de más de 16 384 px por lado;
 - rechazo de archivos de más de 200 MB antes de leerlos;
 - error controlado con archivos corruptos.
@@ -58,7 +59,7 @@ La regla es que **ninguna funcionalidad de carga, codificación, configuración 
 exportación** dependa de una validación manual. Lo manual queda para lo visual y
 lo específico de plataforma.
 
-Estado actual: **70 pruebas**, incluidas las expresiones de tamaño, la
+Estado actual: **72 pruebas**, incluidas las expresiones de tamaño, la
 proporción enlazada, la conversión OKLab/OKLCH, el recorte antes de codificar,
 los presets de proporción y el copiado completo con Ctrl. La interacción de
 arrastre, el marco del canvas y los tiradores del recorte se validan visualmente.

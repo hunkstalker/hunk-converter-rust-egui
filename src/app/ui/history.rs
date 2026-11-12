@@ -31,9 +31,9 @@ pub(crate) fn paint_history_swatch(painter: &egui::Painter, rect: Rect, swatch: 
             Stroke::new(
                 if entry.locked { 1.8 } else { 1.0 },
                 if entry.locked {
-                    T::ACCENT
+                    T::accent()
                 } else {
-                    T::BORDER_STRONG
+                    T::border_strong()
                 },
             ),
             StrokeKind::Inside,
@@ -42,7 +42,7 @@ pub(crate) fn paint_history_swatch(painter: &egui::Painter, rect: Rect, swatch: 
             painter.rect_stroke(
                 rect.expand(2.0),
                 CornerRadius::same(9),
-                Stroke::new(2.0, T::ACCENT),
+                Stroke::new(2.0, T::accent()),
                 StrokeKind::Outside,
             );
         }
@@ -53,8 +53,8 @@ pub(crate) fn paint_history_swatch(painter: &egui::Painter, rect: Rect, swatch: 
         painter.rect(
             rect,
             radius,
-            T::SURFACE_2,
-            Stroke::new(1.0, T::BORDER),
+            T::surface_2(),
+            Stroke::new(1.0, T::border()),
             StrokeKind::Inside,
         );
     }
@@ -62,29 +62,29 @@ pub(crate) fn paint_history_swatch(painter: &egui::Painter, rect: Rect, swatch: 
 
 pub(crate) fn paint_lock_badge(painter: &egui::Painter, rect: Rect) {
     let center = rect.right_bottom() + vec2(-6.0, -6.0);
-    painter.circle_filled(center, 6.0, Color32::from_black_alpha(190));
+    painter.circle_filled(center, 6.0, T::lock_badge());
     let body = Rect::from_center_size(center + vec2(0.0, 1.0), vec2(5.5, 4.0));
-    painter.rect_filled(body, CornerRadius::same(1), T::ACCENT);
+    painter.rect_filled(body, CornerRadius::same(1), T::accent());
     let shackle = Rect::from_center_size(center + vec2(0.0, -1.8), vec2(3.2, 3.2));
     painter.line_segment(
         [
             pos2(shackle.left(), shackle.center().y),
             pos2(shackle.left(), shackle.top()),
         ],
-        Stroke::new(0.9, T::ACCENT),
+        Stroke::new(0.9, T::accent()),
     );
     painter.line_segment(
         [
             pos2(shackle.left(), shackle.top()),
             pos2(shackle.right(), shackle.top()),
         ],
-        Stroke::new(0.9, T::ACCENT),
+        Stroke::new(0.9, T::accent()),
     );
     painter.line_segment(
         [
             pos2(shackle.right(), shackle.top()),
             pos2(shackle.right(), shackle.center().y),
         ],
-        Stroke::new(0.9, T::ACCENT),
+        Stroke::new(0.9, T::accent()),
     );
 }

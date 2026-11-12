@@ -15,7 +15,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 
 ## 2. Estado actual
 
-- Interfaz en español, catalán e inglés, con detección del idioma del sistema y tema oscuro propio.
+- Interfaz en español, catalán e inglés, con detección del idioma del sistema y perfiles de color oscuro y claro.
 - Carga por arrastre, selector nativo, argumento de línea de comandos o `Ctrl+V` desde el portapapeles.
 - Entrada: PNG, JPG, WebP, AVIF, BMP, TGA, TIFF y SVG. La orientación EXIF de JPG/WebP y la orientación TIFF se aplican al cargar. TIFF se limita a la primera página y a 8 bits RGB/RGBA/gris.
 - Salida de 1.1: WebP, AVIF, JPG, PNG e ICO. JPEG XL sale del selector.
@@ -29,11 +29,12 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %, salvo con resize activo, que encuadra el original para mostrar el marco.
 - Recorte no destructivo implementado y validado con máscara normalizada, ocho tiradores, presets `Libre`/`Original`/`1:1`/`4:3`/`16:9`, exterior atenuado y comparador limitado al recorte. Se aplica antes de codificar, se quita con `Quitar recorte` y no se persiste. Con recorte aplicado, `0`/`F` encuadra el recorte y `1` lo centra a escala real. En ICO el botón se desactiva; el recorte aplicado se conserva al cambiar de formato.
 - Panel de ajustes conmutable entre izquierda y derecha desde los controles superiores; el lado se guarda en `config.ini`.
+- Perfiles de color **oscuro** y **claro** con un registro central en `src/theme.rs`. El botón sol/luna, a la izquierda del botón de panel, cambia el perfil y lo guarda en `config.ini` como `theme=dark|light`. La barra nativa sigue el tema del SO; el perfil solo cambia el contenido.
 - Tarjeta de color flotante movible con handle, reset por doble clic y posición persistida en `config.ini`; las herramientas y el flyout de recorte se recolocan según el centro y el espacio.
 - Cuentagotas con muestra del píxel original y códigos OKLCH/OKLAB/HEX/RGB/RGBA/HSL. El código se copia al hacer clic; con Ctrl, HEX añade la etiqueta.
 - Historial de 21 colores en tres filas: selección con clic izquierdo, bloqueo con clic derecho y limpieza de no fijados. Los bloqueos persisten entre sesiones.
 - Arquitectura modular: dominio puro, acciones explícitas, errores tipados y UI dividida por componentes. Ver `docs/arquitectura.md`.
-- Idioma, historial, bloqueos, estado maximizado, formato de salida, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. Las opciones de Preprocesado y Avanzado no se guardan y vuelven a sus valores por defecto al reiniciar.
+- Idioma, perfil de color, historial, bloqueos, estado maximizado, formato de salida, posición y tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. Las opciones de Preprocesado y Avanzado no se guardan y vuelven a sus valores por defecto al reiniciar.
 - La aplicación se abre con la ventana maximizada; los controles nativos permiten maximizar o restaurar.
 - Icono de máscara de gas y marca **HUNK Converter / IMAGE TOOLBOX**.
 - Pie con enlace directo a `github.com/hunkstalker/hunk-converter-rust-egui`, abierto en el navegador.
@@ -43,7 +44,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **70 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **72 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; **1.1.0** pendiente de cerrar `t-43` (benchmark final, CI y release). No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
@@ -87,7 +88,7 @@ Builds portables:
 ## 4. Decisiones que no se deben romper
 
 - **Portapapeles:** `Ctrl+V` intenta leer una imagen del portapapeles y sustituye la imagen actual; si no hay imagen, no hace nada.
-- **Idioma:** `config.ini` guarda el idioma (es/ca/en), el historial, el estado maximizado y la geometría de la ventana; en el primer arranque se detecta el idioma del sistema.
+- **Idioma:** `config.ini` guarda el idioma (es/ca/en), el perfil de color, el historial, el estado maximizado y la geometría de la ventana; en el primer arranque se detecta el idioma del sistema.
 - **Historial:** 21 colores máximo; al llenarse se sustituye el no fijado más antiguo. Los fijados nunca se reemplazan. Si todos están fijados, el color nuevo no se guarda y se avisa. El bloqueo se persiste en `config.ini` con `colorN=#RRGGBBAA|1`.
 - **Arquitectura:** `domain` no conoce egui ni ficheros; `ui` devuelve `AppAction` para los efectos de aplicación; `app` es el único que toca disco, workers y configuración. No introducir Clean Architecture completa ni un trait por códec.
 - **Errores:** usar enums tipados y `i18n::present_error`; no volver a `Result<_, String>` ni a comparar mensajes en español.
@@ -109,7 +110,7 @@ Builds portables:
 - **Reinicio:** restablece formato, calidad, tamaños y muestra de color.
 - **Privacidad:** sin red, cuentas ni telemetría.
 - **Render:** no añadir animaciones permanentes ni bucles de repintado innecesarios. Cualquier animación debe justificar sus frames.
-- **Tema:** todo el estilo vive en `src/theme.rs`; mantener la paleta y jerarquía.
+- **Tema:** todo el estilo vive en `src/theme.rs` como registro de perfiles (`dark`, `light`). La UI consume la paleta activa mediante `T::bg()`, `T::text()`, etc.; no añadir ramas por tema en los componentes ni colores hardcodeados. `sync_window_theme` está desactivado: la decoración nativa sigue al SO y el perfil solo afecta al contenido.
 
 ## 5. Estructura
 
@@ -119,7 +120,7 @@ src/app/                     Shell, acciones, estado y componentes egui
 src/app/ui/                  Panel derecho, color flotante, canvas, avisos
 src/domain/                  Formatos, color, historial, exportación y errores
 src/codec/                   WebP, JPG, PNG, AVIF, JPEG XL, ICO, SVG y TIFF
-src/settings/                config.ini, idioma, historial, formato y maximizado
+src/settings/                config.ini, idioma, tema, historial, formato y maximizado
 src/i18n.rs                  Traducciones es/ca/en y errores tipados
 src/demo.rs                  Imagen sintética para demos/capturas
 src/theme.rs                 Tema egui

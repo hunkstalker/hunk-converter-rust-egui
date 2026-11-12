@@ -111,7 +111,8 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 - Selector **ES / CA / EN** junto al botón de reinicio.
 - En el primer arranque se detecta el idioma del sistema con `sys-locale`.
-- La preferencia, el historial, los bloqueos, el estado maximizado, el lado del panel, la posición del panel de color, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
+- Botón de sol/luna a la izquierda del botón de panel. Alterna los perfiles **oscuro** y **claro**; el icono muestra el modo activo y el tooltip la acción. La barra nativa de la ventana sigue el tema del SO; el perfil solo cambia el contenido.
+- La preferencia, el perfil de color (`theme=dark|light`), el historial, los bloqueos, el estado maximizado, el lado del panel, la posición del panel de color, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable.
 - Si el archivo no es escribible, la app sigue funcionando sin persistencia.
 
 ### 3.6 Exportación
@@ -237,7 +238,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 | `src/settings/mod.rs` | `Settings`, ruta y guardado de `config.ini` |
 | `src/settings/ini.rs` | Parser/serializador INI, compatibilidad y avisos |
 | `src/i18n.rs` | Traducciones es/ca/en y presentación de errores tipados |
-| `src/theme.rs` | Paleta, tipografía, estilos y frames |
+| `src/theme.rs` | Perfiles de color, paleta activa, tipografía, estilos y frames |
 | `src/demo.rs` | Imagen sintética para demos y capturas |
 | `src/bin/bench.rs` | Benchmark de códecs y memoria |
 | `src/bin/make_demo.rs` | Generador de imágenes de prueba |
@@ -323,7 +324,7 @@ Archivo local
 ### Salida
 
 - La ruta se elige en el diálogo nativo; si existe, se propone `<carpeta del ejecutable>/export/`.
-- `config.ini` se crea junto al ejecutable y guarda idioma, historial, estado maximizado, lado del panel, posición del panel de color, formato de salida, posición y tamaño de la ventana.
+- `config.ini` se crea junto al ejecutable y guarda idioma, perfil de color, historial, estado maximizado, lado del panel, posición del panel de color, formato de salida, posición y tamaño de la ventana.
 - El diálogo nativo gestiona la confirmación si el archivo ya existe.
 
 ### Estructura de la build
@@ -372,7 +373,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **70 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste, navegación por teclado y zona de agarre del comparador.
+- **72 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, perfiles de color y contraste WCAG de ambos, nombres de exportación, rutas portables, geometría de ventana, selección de formato, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

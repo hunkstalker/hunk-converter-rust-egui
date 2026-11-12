@@ -50,10 +50,10 @@ pub(super) fn dimension_fields(
     let label_font = FontId::proportional(T::SMALL_TEXT_SIZE);
     let width_label =
         ui.painter()
-            .layout_no_wrap(labels.width.to_owned(), label_font.clone(), T::TEXT_MUTED);
+            .layout_no_wrap(labels.width.to_owned(), label_font.clone(), T::text_muted());
     let height_label =
         ui.painter()
-            .layout_no_wrap(labels.height.to_owned(), label_font, T::TEXT_MUTED);
+            .layout_no_wrap(labels.height.to_owned(), label_font, T::text_muted());
     let available = ui.available_width();
     let gap = 8.0;
     let field_width = ((available - width_label.size().x - height_label.size().x - gap * 3.0)
@@ -227,12 +227,12 @@ pub(super) fn dimension_fields(
     ui.painter().galley(
         width_label_rect.left_top() + vec2(0.0, (FIELD_HEIGHT - width_label.size().y) * 0.5),
         width_label,
-        T::TEXT_MUTED,
+        T::text_muted(),
     );
     ui.painter().galley(
         height_label_rect.left_top() + vec2(0.0, (FIELD_HEIGHT - height_label.size().y) * 0.5),
         height_label,
-        T::TEXT_MUTED,
+        T::text_muted(),
     );
 
     if !width_state.editing || !width_text_shown {
@@ -259,7 +259,7 @@ pub(super) fn dimension_fields(
         ui.painter().rect_stroke(
             width_rect,
             CornerRadius::same(8),
-            Stroke::new(1.2, T::DANGER),
+            Stroke::new(1.2, T::danger()),
             StrokeKind::Inside,
         );
     }
@@ -267,7 +267,7 @@ pub(super) fn dimension_fields(
         ui.painter().rect_stroke(
             height_rect,
             CornerRadius::same(8),
-            Stroke::new(1.2, T::DANGER),
+            Stroke::new(1.2, T::danger()),
             StrokeKind::Inside,
         );
     }
@@ -298,8 +298,8 @@ fn show_editor(
             .font(FontId::proportional(12.5))
             .align(Align2::RIGHT_CENTER)
             .margin(Margin::symmetric(6, 4))
-            .background_color(T::BG_SOFT)
-            .text_color(T::TEXT),
+            .background_color(T::bg_soft())
+            .text_color(T::text()),
     );
     state.buffer = buffer;
     if state.focus_pending {
@@ -357,13 +357,17 @@ fn paint_field(
 ) {
     let hovered = response.is_some_and(|response| response.hovered());
     let focused = response.is_some_and(|response| response.has_focus());
-    let fill = if hovered { T::SURFACE_3 } else { T::BG_SOFT };
-    let border = if error {
-        T::DANGER
-    } else if focused {
-        T::ACCENT
+    let fill = if hovered {
+        T::surface_3()
     } else {
-        T::BORDER
+        T::bg_soft()
+    };
+    let border = if error {
+        T::danger()
+    } else if focused {
+        T::accent()
+    } else {
+        T::border()
     };
     ui.painter().rect_filled(rect, CornerRadius::same(8), fill);
     ui.painter().rect_stroke(
@@ -377,7 +381,7 @@ fn paint_field(
         Align2::RIGHT_CENTER,
         value.to_string(),
         FontId::proportional(12.5),
-        T::TEXT,
+        T::text(),
     );
     if let Some(response) = response {
         response.widget_info(|| {

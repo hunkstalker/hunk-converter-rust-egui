@@ -56,7 +56,7 @@ impl HunkApp {
             .resizable(false)
             .exact_size(340.0)
             .show_separator_line(false)
-            .frame(Frame::new().fill(T::BG).inner_margin(Margin {
+            .frame(Frame::new().fill(T::bg()).inner_margin(Margin {
                 left: 0,
                 right: 0,
                 top: 56,
@@ -129,7 +129,7 @@ impl HunkApp {
                 egui::Label::new(
                     RichText::new(display_name)
                         .size(T::SMALL_TEXT_SIZE)
-                        .color(T::TEXT)
+                        .color(T::text())
                         .strong(),
                 )
                 .wrap(),
@@ -146,7 +146,7 @@ impl HunkApp {
                 i18n::localized_bytes(self.language, card.file_bytes)
             ))
             .size(T::SMALL_TEXT_SIZE)
-            .color(T::TEXT_MUTED),
+            .color(T::text_muted()),
         );
         ui.add_space(10.0);
         let response =
@@ -489,7 +489,7 @@ impl HunkApp {
                         .unwrap_or_else(|| "—".to_owned()),
                 )
                 .size(T::SMALL_TEXT_SIZE)
-                .color(T::TEXT),
+                .color(T::text()),
             );
             T::bullet_separator(ui);
             ui.label(T::section_label(self.t(K::Result)));
@@ -500,18 +500,18 @@ impl HunkApp {
                         .unwrap_or_else(|| "—".to_owned()),
                 )
                 .size(T::SMALL_TEXT_SIZE)
-                .color(T::ACCENT),
+                .color(T::accent()),
             );
             if let (Some(original), Some(output)) = (source_size, output_size)
                 && original > 0
             {
                 let change = (1.0 - output as f64 / original as f64) * 100.0;
                 let (text, color) = if change > 0.5 {
-                    (format!("−{change:.0} %"), T::ACCENT)
+                    (format!("−{change:.0} %"), T::accent())
                 } else if change < -0.5 {
-                    (format!("+{:.0} %", change.abs()), T::TEXT_MUTED)
+                    (format!("+{:.0} %", change.abs()), T::text_muted())
                 } else {
-                    (self.t(K::EqualWeight).to_owned(), T::TEXT_MUTED)
+                    (self.t(K::EqualWeight).to_owned(), T::text_muted())
                 };
                 ui.add_space(2.0);
                 ui.label(RichText::new(text).size(T::SMALL_TEXT_SIZE).color(color));
@@ -529,16 +529,16 @@ impl HunkApp {
             RichText::new(&label)
                 .size(13.0)
                 .color(if enabled {
-                    T::ACCENT_INK
+                    T::accent_ink()
                 } else {
-                    T::TEXT_DISABLED
+                    T::text_disabled()
                 })
                 .strong(),
         )
-        .fill(if enabled { T::ACCENT } else { T::SURFACE_3 })
+        .fill(if enabled { T::accent() } else { T::surface_3() })
         .stroke(Stroke::new(
             1.0,
-            if enabled { T::ACCENT } else { T::BORDER },
+            if enabled { T::accent() } else { T::border() },
         ))
         .corner_radius(CornerRadius::same(12))
         .min_size(vec2(ui.available_width(), 43.0));
@@ -554,7 +554,8 @@ impl HunkApp {
 }
 
 fn section_heading(id: &str, title: &str) -> egui::CollapsingHeader {
-    egui::CollapsingHeader::new(RichText::new(title).size(11.0).color(T::TEXT).strong()).id_salt(id)
+    egui::CollapsingHeader::new(RichText::new(title).size(11.0).color(T::text()).strong())
+        .id_salt(id)
 }
 
 fn fitted_filename(ui: &egui::Ui, name: &str, width: f32) -> String {
@@ -562,7 +563,7 @@ fn fitted_filename(ui: &egui::Ui, name: &str, width: f32) -> String {
     let font = egui::FontId::proportional(T::SMALL_TEXT_SIZE);
     let measure = |text: &str| {
         ui.painter()
-            .layout_no_wrap(text.to_owned(), font.clone(), T::TEXT)
+            .layout_no_wrap(text.to_owned(), font.clone(), T::text())
             .size()
             .x
     };
@@ -631,7 +632,7 @@ fn fitted_filename(ui: &egui::Ui, name: &str, width: f32) -> String {
 }
 
 fn choice_text(label: &str, selected: bool) -> RichText {
-    RichText::new(label).color(if selected { T::ACCENT_INK } else { T::TEXT })
+    RichText::new(label).color(if selected { T::accent_ink() } else { T::text() })
 }
 
 const SECTION_SCROLL_FRAMES: u64 = 24;
@@ -702,5 +703,5 @@ fn paint_sidebar_border(ui: &egui::Ui, rect: Rect, side: PanelSide) {
         }
     }
     ui.painter()
-        .add(egui::Shape::line(points, Stroke::new(1.0, T::BORDER)));
+        .add(egui::Shape::line(points, Stroke::new(1.0, T::border())));
 }

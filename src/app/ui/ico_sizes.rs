@@ -14,19 +14,21 @@ impl HunkApp {
         ui.horizontal_wrapped(|ui| {
             for (index, size) in ICO_SIZES.iter().enumerate() {
                 let selected = self.ico_selected[index];
-                let button = egui::Button::new(
-                    RichText::new(size.to_string())
-                        .size(10.5)
-                        .color(if selected { T::ACCENT } else { T::TEXT_MUTED }),
-                )
+                let button = egui::Button::new(RichText::new(size.to_string()).size(10.5).color(
+                    if selected {
+                        T::accent()
+                    } else {
+                        T::text_muted()
+                    },
+                ))
                 .fill(if selected {
-                    T::ACCENT_SOFT
+                    T::accent_soft()
                 } else {
-                    T::SURFACE_2
+                    T::surface_2()
                 })
                 .stroke(Stroke::new(
                     1.0,
-                    if selected { T::ACCENT } else { T::BORDER },
+                    if selected { T::accent() } else { T::border() },
                 ))
                 .corner_radius(CornerRadius::same(8))
                 .min_size(vec2(42.0, 26.0));
@@ -49,7 +51,7 @@ impl HunkApp {
         ui.label(
             RichText::new(self.t(K::IcoCentered))
                 .size(9.5)
-                .color(T::TEXT_FAINT),
+                .color(T::text_faint()),
         );
     }
 }

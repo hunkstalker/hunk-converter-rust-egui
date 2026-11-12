@@ -14,7 +14,7 @@ use super::super::state::CropPreset;
 use super::canvas::CanvasContext;
 use super::icons::{
     EyedropperButton, QUICK_TOOL_GAP, QUICK_TOOL_SIZE, QuickTool, eyedropper_button,
-    panel_side_button, quick_tool_button,
+    panel_side_button, quick_tool_button, theme_toggle_button,
 };
 
 const QUICK_TOOLS_GAP: f32 = 8.0;
@@ -30,7 +30,7 @@ impl HunkApp {
         let mut actions = Vec::new();
         let ctx = root.ctx().clone();
         egui::CentralPanel::default()
-            .frame(Frame::new().fill(T::BG).inner_margin(Margin {
+            .frame(Frame::new().fill(T::bg()).inner_margin(Margin {
                 left: 20,
                 right: 16,
                 top: 8,
@@ -38,7 +38,11 @@ impl HunkApp {
             }))
             .show(root, |ui| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new(self.t(K::Preview)).size(20.0).color(T::TEXT));
+                    ui.label(
+                        RichText::new(self.t(K::Preview))
+                            .size(20.0)
+                            .color(T::text()),
+                    );
                     ui.add_space(4.0);
                     if self.format != OutputFormat::Ico {
                         ui.add_space(6.0);
@@ -48,9 +52,9 @@ impl HunkApp {
                             self.zoom * self.fit_scale * 100.0
                         };
                         let zoom_color = if (actual_percent - 100.0).abs() < 0.5 {
-                            T::ACCENT
+                            T::accent()
                         } else {
-                            T::TEXT_FAINT
+                            T::text_faint()
                         };
                         ui.allocate_ui_with_layout(
                             vec2(88.0, 26.0),
@@ -231,8 +235,8 @@ impl HunkApp {
 
     fn show_crop_presets(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {
         egui::Frame::new()
-            .fill(T::SURFACE)
-            .stroke(Stroke::new(1.0, T::BORDER))
+            .fill(T::surface())
+            .stroke(Stroke::new(1.0, T::border()))
             .corner_radius(CornerRadius::same(12))
             .inner_margin(Margin::same(10))
             .show(ui, |ui| {
@@ -254,15 +258,19 @@ impl HunkApp {
                             let selected = self.crop_preset == preset;
                             let button = egui::Button::new(
                                 RichText::new(self.t(label)).size(10.5).color(if selected {
-                                    T::ACCENT_INK
+                                    T::accent_ink()
                                 } else {
-                                    T::TEXT
+                                    T::text()
                                 }),
                             )
-                            .fill(if selected { T::ACCENT } else { T::SURFACE_2 })
+                            .fill(if selected {
+                                T::accent()
+                            } else {
+                                T::surface_2()
+                            })
                             .stroke(Stroke::new(
                                 1.0,
-                                if selected { T::ACCENT } else { T::BORDER },
+                                if selected { T::accent() } else { T::border() },
                             ))
                             .corner_radius(CornerRadius::same(8))
                             .min_size(vec2(0.0, 26.0));
@@ -278,11 +286,11 @@ impl HunkApp {
                     let apply = egui::Button::new(
                         RichText::new(self.t(K::CropApply))
                             .size(11.0)
-                            .color(T::ACCENT_INK)
+                            .color(T::accent_ink())
                             .strong(),
                     )
-                    .fill(T::ACCENT)
-                    .stroke(Stroke::new(1.0, T::ACCENT))
+                    .fill(T::accent())
+                    .stroke(Stroke::new(1.0, T::accent()))
                     .corner_radius(CornerRadius::same(8))
                     .min_size(vec2(100.0, 28.0));
                     if ui.add(apply).clicked() && self.apply_crop() {
@@ -292,10 +300,10 @@ impl HunkApp {
                     let cancel = egui::Button::new(
                         RichText::new(self.t(K::CropCancel))
                             .size(11.0)
-                            .color(T::TEXT_MUTED),
+                            .color(T::text_muted()),
                     )
-                    .fill(T::SURFACE_2)
-                    .stroke(Stroke::new(1.0, T::BORDER))
+                    .fill(T::surface_2())
+                    .stroke(Stroke::new(1.0, T::border()))
                     .corner_radius(CornerRadius::same(8))
                     .min_size(vec2(100.0, 28.0));
                     if ui.add(cancel).clicked() {
@@ -308,10 +316,10 @@ impl HunkApp {
                     let remove = egui::Button::new(
                         RichText::new(self.t(K::RemoveCrop))
                             .size(10.5)
-                            .color(T::DANGER),
+                            .color(T::danger()),
                     )
-                    .fill(T::SURFACE_2)
-                    .stroke(Stroke::new(1.0, T::BORDER))
+                    .fill(T::surface_2())
+                    .stroke(Stroke::new(1.0, T::border()))
                     .corner_radius(CornerRadius::same(8))
                     .min_size(vec2(ui.available_width(), 26.0));
                     if ui.add(remove).clicked() && self.remove_crop() {
@@ -323,6 +331,7 @@ impl HunkApp {
     }
 
     pub(crate) fn show_top_controls(&mut self, ui: &mut egui::Ui, actions: &mut Vec<AppAction>) {
+        ui.spacing_mut().item_spacing.x = 8.0;
         if self.source.is_some() {
             let reset_width = Lang::ALL
                 .iter()
@@ -331,7 +340,7 @@ impl HunkApp {
                         .layout_no_wrap(
                             i18n::t(*lang, K::Reset).to_owned(),
                             egui::FontId::proportional(11.5),
-                            T::TEXT_MUTED,
+                            T::text_muted(),
                         )
                         .size()
                         .x
@@ -340,10 +349,10 @@ impl HunkApp {
             let reset = egui::Button::new(
                 RichText::new(self.t(K::Reset))
                     .size(11.5)
-                    .color(T::TEXT_MUTED),
+                    .color(T::text_muted()),
             )
             .fill(egui::Color32::TRANSPARENT)
-            .stroke(Stroke::new(1.0, T::BORDER))
+            .stroke(Stroke::new(1.0, T::border()))
             .corner_radius(CornerRadius::same(10))
             .min_size(vec2(reset_width + 28.0, 32.0));
             let response = ui.add(reset);
@@ -360,16 +369,16 @@ impl HunkApp {
             .selected_text(
                 RichText::new(language.short())
                     .size(11.0)
-                    .color(T::TEXT_MUTED),
+                    .color(T::text_muted()),
             )
             .width(64.0)
             .show_ui(ui, |ui| {
                 for option in Lang::ALL {
                     let selected = language == option;
                     let text = RichText::new(option.name()).color(if selected {
-                        T::ACCENT_INK
+                        T::accent_ink()
                     } else {
-                        T::TEXT
+                        T::text()
                     });
                     ui.selectable_value(&mut language, option, text);
                 }
@@ -394,6 +403,20 @@ impl HunkApp {
                 actions.push(AppAction::PersistSettings);
                 actions.push(AppAction::RequestRepaint);
             }
+        }
+
+        let light = self.theme.eq_ignore_ascii_case("light");
+        let theme_label = self.t(if light {
+            K::ThemeToDark
+        } else {
+            K::ThemeToLight
+        });
+        if theme_toggle_button(ui, light, theme_label).clicked() {
+            let next = T::toggled_profile_id(&self.theme);
+            self.theme = next.to_owned();
+            T::apply(ui.ctx(), next);
+            actions.push(AppAction::PersistSettings);
+            actions.push(AppAction::RequestRepaint);
         }
     }
 }

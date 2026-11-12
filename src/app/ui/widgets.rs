@@ -16,12 +16,20 @@ pub(crate) fn secondary_text_button(ui: &mut egui::Ui, label: &str) -> egui::Res
     let font = FontId::proportional(11.5);
     let galley = ui
         .painter()
-        .layout_no_wrap(label.to_owned(), font, T::TEXT_MUTED);
+        .layout_no_wrap(label.to_owned(), font, T::text_muted());
     let size = vec2(galley.size().x + 28.0, 32.0);
     let (rect, response) = ui.allocate_exact_size(size, Sense::click());
     let hovered = response.hovered();
-    let fill = if hovered { T::SURFACE_3 } else { T::SURFACE_2 };
-    let border = if hovered { T::BORDER_STRONG } else { T::BORDER };
+    let fill = if hovered {
+        T::surface_3()
+    } else {
+        T::surface_2()
+    };
+    let border = if hovered {
+        T::border_strong()
+    } else {
+        T::border()
+    };
     ui.painter().rect(
         rect,
         CornerRadius::same(12),
@@ -32,7 +40,7 @@ pub(crate) fn secondary_text_button(ui: &mut egui::Ui, label: &str) -> egui::Res
     ui.painter().galley(
         rect.center() - galley.size() * 0.5,
         galley,
-        if hovered { T::TEXT } else { T::TEXT_MUTED },
+        if hovered { T::text() } else { T::text_muted() },
     );
     response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label.to_owned()));
     if response.has_focus() {
@@ -52,14 +60,14 @@ pub(crate) fn paint_focus_ring(painter: &egui::Painter, rect: Rect, radius: u8) 
     painter.rect_stroke(
         rect.expand(2.0),
         CornerRadius::same(radius.saturating_add(2)),
-        Stroke::new(2.0, T::ACCENT),
+        Stroke::new(2.0, T::accent()),
         StrokeKind::Outside,
     );
 }
 
 pub(crate) fn hline(ui: &mut egui::Ui) {
     let (rect, _) = ui.allocate_exact_size(vec2(ui.available_width(), 1.0), Sense::hover());
-    ui.painter().rect_filled(rect, 0.0, T::BORDER);
+    ui.painter().rect_filled(rect, 0.0, T::border());
 }
 
 pub(crate) fn clipboard_png_size(image: &RgbaImage) -> u64 {
@@ -124,9 +132,9 @@ pub(crate) fn paint_checker(painter: &egui::Painter, rect: Rect) {
         for column in 0..columns {
             let min = rect.min + vec2(column as f32 * cell, row as f32 * cell);
             let color = if (row + column) % 2 == 0 {
-                T::CHECKER_A
+                T::checker_a()
             } else {
-                T::CHECKER_B
+                T::checker_b()
             };
             clipped.rect_filled(Rect::from_min_size(min, vec2(cell, cell)), 0.0, color);
         }

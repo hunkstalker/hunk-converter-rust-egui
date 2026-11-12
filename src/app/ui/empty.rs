@@ -12,7 +12,7 @@ impl HunkApp {
         egui::CentralPanel::default()
             .frame(
                 Frame::new()
-                    .fill(T::BG)
+                    .fill(T::bg())
                     .inner_margin(Margin::symmetric(30, 18)),
             )
             .show(root, |ui| {
@@ -42,23 +42,23 @@ impl HunkApp {
                             ui.label(
                                 RichText::new(self.t(K::EmptyTitle))
                                     .size(34.0)
-                                    .color(T::TEXT),
+                                    .color(T::text()),
                             );
                             ui.add_space(12.0);
                             ui.label(
                                 RichText::new(self.t(K::EmptySubtitle))
                                     .size(12.5)
-                                    .color(T::TEXT_MUTED),
+                                    .color(T::text_muted()),
                             );
                             ui.add_space(22.0);
                             let choose = egui::Button::new(
                                 RichText::new(self.t(K::SelectImage))
                                     .size(13.5)
-                                    .color(T::ACCENT_INK)
+                                    .color(T::accent_ink())
                                     .strong(),
                             )
-                            .fill(T::ACCENT)
-                            .stroke(Stroke::new(1.0, T::ACCENT))
+                            .fill(T::accent())
+                            .stroke(Stroke::new(1.0, T::accent()))
                             .corner_radius(CornerRadius::same(12))
                             .min_size(vec2(230.0, 44.0));
                             let response = ui.add(choose);
@@ -72,14 +72,14 @@ impl HunkApp {
                             ui.label(
                                 RichText::new("PNG · JPG · WEBP · AVIF · BMP · TGA · TIFF · SVG")
                                     .size(9.0)
-                                    .color(T::TEXT_FAINT)
+                                    .color(T::text_faint())
                                     .strong(),
                             );
                             ui.add_space(2.0);
                             ui.label(
                                 RichText::new(self.t(K::PrivacyNote))
                                     .size(9.5)
-                                    .color(T::TEXT_FAINT),
+                                    .color(T::text_faint()),
                             );
                         });
                     });

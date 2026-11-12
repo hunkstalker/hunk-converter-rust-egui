@@ -67,7 +67,7 @@ settings/                   persistencia de config.ini
   └── ini.rs
 
 i18n.rs                     textos es/ca/en y presentación de errores
-theme.rs                    paleta, tipografía y estilos
+theme.rs                    perfiles de color, paleta activa, tipografía y estilos
 demo.rs                     imagen sintética para desarrollo
 ```
 
@@ -203,8 +203,9 @@ guardado se registran en `stderr`.
   navegación por flechas y el historial un único tab stop.
 - El cuentagotas admite un cursor de muestra por teclado y confirma con
   `Enter`; `Esc` lo cancela sin perder el foco del lienzo.
-- La paleta de texto informativo cumple contraste AA y una prueba automática
-  comprueba los pares de colores del tema.
+- La paleta de texto informativo cumple contraste AA en todos los perfiles y
+  una prueba automática comprueba los pares de colores de `dark` y `light`,
+  incluido el toast de error.
 
 ## 6. Persistencia y bloqueos
 
@@ -215,6 +216,7 @@ guardado se registran en `stderr`.
 language=es
 maximized=1
 panel_side=right
+theme=dark
 
 [output]
 format=auto
@@ -242,6 +244,13 @@ Decisiones:
   para no romper configuraciones existentes.
 - `[general] panel_side` guarda `right` o `left`; las configuraciones antiguas
   sin esa clave arrancan con el panel a la derecha.
+- `[general] theme` guarda el identificador del perfil de color (`dark` o
+  `light`); sin la clave se usa `dark`. Los perfiles viven en `src/theme.rs`
+  como registro de `ThemeProfile` y la UI solo consume la paleta activa, así
+  que añadir un perfil nuevo no requiere ramas en los componentes.
+- `sync_window_theme` está desactivado: la decoración nativa (barra de título y
+  bordes) la gestiona el SO. El perfil de HUNK solo cambia el contenido de la
+  ventana.
 - `[output]` guarda `auto` o el formato fijo elegido en el selector de salida.
 - `[advanced]` no se escribe. Las claves antiguas de opciones avanzadas o
   preprocesado se ignoran al cargar y esos bloques vuelven a sus valores por
@@ -261,8 +270,10 @@ Decisiones:
 La suite cubre:
 
 - reglas del historial y bloqueos;
-- ida y vuelta de `config.ini`, incluidos colores fijados, formato de salida y geometría de ventana;
-- compatibilidad con `fullscreen`;
+- ida y vuelta de `config.ini`, incluidos colores fijados, formato de salida, perfil de color y geometría de ventana;
+- compatibilidad con `fullscreen` y con configuraciones sin `theme`;
+- registro de perfiles de color, búsqueda por identificador y alternancia `dark`/`light`;
+- contraste WCAG de ambos perfiles de color;
 - advertencias de configuración inválida;
 - política de formatos;
 - nombres de exportación saneados; el diálogo nativo gestiona la sobrescritura;
@@ -282,9 +293,9 @@ La suite cubre:
 - recorte antes de codificar, presets de proporción y conversión a píxeles;
 - colocación de las herramientas y del flyout de recorte según el espacio;
 - códigos de color;
-- contraste WCAG y navegación por teclado.
+- contraste WCAG de cada perfil y navegación por teclado.
 
-Estado actual: **70 pruebas**, `cargo fmt --check` y
+Estado actual: **72 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas

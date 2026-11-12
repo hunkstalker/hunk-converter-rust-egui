@@ -227,8 +227,8 @@ impl HunkApp {
                         anchor: pos2(icon_rect.right() - 10.0, icon_rect.top() + 10.0),
                         align: Align2::RIGHT_TOP,
                         text: i18n::ico_badge(self.language, result.frame_count).as_str(),
-                        background: T::ACCENT,
-                        foreground: T::ACCENT_INK,
+                        background: T::accent(),
+                        foreground: T::accent_ink(),
                     },
                 );
             } else {
@@ -237,7 +237,7 @@ impl HunkApp {
                     Align2::CENTER_CENTER,
                     self.t(K::GeneratingIcon),
                     FontId::proportional(13.0),
-                    T::TEXT_FAINT,
+                    T::text_faint(),
                 );
             }
             return actions;
@@ -600,13 +600,13 @@ impl HunkApp {
             );
 
             if split_x >= visible.left() && split_x <= visible.right() && visible.height() > 24.0 {
-                let line_color = Color32::from_rgba_unmultiplied(255, 255, 255, 210);
+                let line_color = T::split_line();
                 canvas.line_segment(
                     [
                         pos2(split_x, visible.top()),
                         pos2(split_x, visible.bottom()),
                     ],
-                    Stroke::new(3.0, Color32::from_black_alpha(80)),
+                    Stroke::new(3.0, T::split_shadow()),
                 );
                 canvas.line_segment(
                     [
@@ -616,22 +616,18 @@ impl HunkApp {
                     Stroke::new(1.2, line_color),
                 );
                 let center = pos2(split_x, visible.center().y);
-                canvas.circle_filled(center, 18.0, Color32::from_black_alpha(100));
-                canvas.circle_filled(center, 16.0, T::BG_SOFT);
-                canvas.circle_stroke(
-                    center,
-                    16.0,
-                    Stroke::new(1.2, Color32::from_white_alpha(150)),
-                );
+                canvas.circle_filled(center, 18.0, T::split_shadow());
+                canvas.circle_filled(center, 16.0, T::split_handle_bg());
+                canvas.circle_stroke(center, 16.0, Stroke::new(1.2, T::split_handle_ring()));
                 for direction in [-1.0_f32, 1.0] {
                     let tip = center + vec2(direction * 9.5, 0.0);
                     canvas.line_segment(
                         [center + vec2(direction * 4.0, -4.5), tip],
-                        Stroke::new(1.4, T::TEXT),
+                        Stroke::new(1.4, T::text()),
                     );
                     canvas.line_segment(
                         [tip, center + vec2(direction * 4.0, 4.5)],
-                        Stroke::new(1.4, T::TEXT),
+                        Stroke::new(1.4, T::text()),
                     );
                 }
             }
@@ -642,7 +638,7 @@ impl HunkApp {
                 Align2::CENTER_CENTER,
                 self.t(K::PreparingResult),
                 FontId::proportional(13.0),
-                T::TEXT_FAINT,
+                T::text_faint(),
             );
         }
 
@@ -669,7 +665,7 @@ impl HunkApp {
                 canvas.rect_stroke(
                     original_rect,
                     CornerRadius::same(2),
-                    Stroke::new(1.0, Color32::from_rgba_unmultiplied(200, 244, 109, 150)),
+                    Stroke::new(1.0, T::reference_frame()),
                     StrokeKind::Inside,
                 );
             }
@@ -683,12 +679,8 @@ impl HunkApp {
             let ratio_y = sample_y as f32 / source_height.saturating_sub(1).max(1) as f32;
             let marker =
                 image_rect.min + vec2(ratio_x * image_rect.width(), ratio_y * image_rect.height());
-            canvas.circle_stroke(
-                marker,
-                8.0,
-                Stroke::new(3.0, Color32::from_black_alpha(180)),
-            );
-            canvas.circle_stroke(marker, 8.0, Stroke::new(1.2, Color32::WHITE));
+            canvas.circle_stroke(marker, 8.0, Stroke::new(3.0, T::sample_shadow()));
+            canvas.circle_stroke(marker, 8.0, Stroke::new(1.2, T::sample_ring()));
             canvas.circle_filled(
                 marker,
                 3.0,
@@ -710,8 +702,8 @@ impl HunkApp {
                 anchor: badge_rect.left_top() + vec2(10.0, 10.0),
                 align: Align2::LEFT_TOP,
                 text: self.format.badge(),
-                background: T::ACCENT,
-                foreground: T::ACCENT_INK,
+                background: T::accent(),
+                foreground: T::accent_ink(),
             },
         );
         paint_badge(
@@ -720,8 +712,8 @@ impl HunkApp {
                 anchor: badge_rect.right_top() + vec2(-10.0, 10.0),
                 align: Align2::RIGHT_TOP,
                 text: self.t(K::Original),
-                background: Color32::from_rgba_unmultiplied(10, 13, 16, 225),
-                foreground: T::TEXT,
+                background: T::original_badge_bg(),
+                foreground: T::original_badge_fg(),
             },
         );
         actions
@@ -913,7 +905,7 @@ fn paint_crop_shade(painter: &egui::Painter, image_rect: Rect, crop_rect: Rect, 
     if crop.width() <= 0.0 || crop.height() <= 0.0 {
         return;
     }
-    let color = Color32::from_black_alpha(155);
+    let color = T::crop_shade();
     let pieces = [
         Rect::from_min_max(image.min, pos2(image.max.x, crop.top())),
         Rect::from_min_max(pos2(image.left(), crop.bottom()), image.max),
@@ -935,9 +927,9 @@ fn paint_crop_shade(painter: &egui::Painter, image_rect: Rect, crop_rect: Rect, 
 
 fn paint_crop_border(painter: &egui::Painter, crop_rect: Rect, editing: bool) {
     let (width, color) = if editing {
-        (1.6, T::ACCENT)
+        (1.6, T::accent())
     } else {
-        (1.0, Color32::from_white_alpha(180))
+        (1.0, T::crop_border())
     };
     painter.rect_stroke(
         crop_rect,
@@ -948,7 +940,7 @@ fn paint_crop_border(painter: &egui::Painter, crop_rect: Rect, editing: bool) {
 }
 
 fn paint_crop_thirds(painter: &egui::Painter, crop_rect: Rect) {
-    let color = Color32::from_white_alpha(70);
+    let color = T::crop_thirds();
     for factor in [1.0 / 3.0, 2.0 / 3.0] {
         let x = crop_rect.left() + crop_rect.width() * factor;
         let y = crop_rect.top() + crop_rect.height() * factor;
@@ -976,11 +968,11 @@ fn paint_crop_handles(painter: &egui::Painter, crop_rect: Rect) {
     ];
     for position in positions {
         let handle = Rect::from_center_size(position, vec2(9.0, 9.0));
-        painter.rect_filled(handle, CornerRadius::same(2), T::ACCENT);
+        painter.rect_filled(handle, CornerRadius::same(2), T::accent());
         painter.rect_stroke(
             handle,
             CornerRadius::same(2),
-            Stroke::new(1.0, T::ACCENT_INK),
+            Stroke::new(1.0, T::accent_ink()),
             StrokeKind::Inside,
         );
     }

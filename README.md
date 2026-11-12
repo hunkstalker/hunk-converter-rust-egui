@@ -8,7 +8,9 @@ La interfaz solo repinta cuando hay actividad. No mantiene un bucle de render co
 
 Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexión a internet.
 
-![Editor de HUNK Converter](docs/hunk-converter-editor.png)
+| Tema oscuro | Tema claro |
+| --- | --- |
+| ![Editor en tema oscuro](docs/hunk-converter-editor.png) | ![Editor en tema claro](docs/hunk-converter-editor-claro.png) |
 
 ## Características
 
@@ -28,6 +30,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - **Códigos simultáneos:** OKLCH, OKLAB, HEX, RGB, RGBA y HSL. Al hacer clic en un código se copia su valor; con Ctrl, HEX copia `HEX#...` para conservar la etiqueta.
 - **Historial de colores:** 21 colores en tres filas de siete, con bloqueo y limpieza.
 - **Idiomas:** español, catalán e inglés, con detección del sistema y preferencia guardada.
+- **Perfiles de color:** tema oscuro y tema claro con la misma jerarquía visual. El botón de sol/luna de los controles superiores cambia el perfil y lo guarda en `config.ini`. La barra nativa de la ventana sigue el tema del sistema operativo; el perfil solo afecta al contenido.
 - **Ventana maximizada:** se abre maximizada; los controles nativos permiten maximizar o restaurar y el estado se guarda.
 - **Exportación ICO** con selección de 16, 32, 48, 64, 128 y 256 px en un solo archivo.
 - **Icono nativo:** ventana, `.exe` de Windows, `.app` de macOS y lanzador `.desktop` de Linux.
@@ -48,6 +51,7 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - Las herramientas rápidas y el desplegable de recorte se colocan a la derecha o a la izquierda de la tarjeta; al cruzar el centro horizontal de la ventana pasan al lado izquierdo.
 - Botones rápidos **Recortar**, **Invertir colores** y **Girar 90°** junto a la tarjeta de color.
 - El panel derecho se puede mover al lado izquierdo con el botón de los controles superiores; la elección se guarda en `config.ini`.
+- Los controles superiores comparten altura y separación: `[tema] [panel] [ES] [Reiniciar]`. El icono muestra el modo activo —luna en oscuro, sol en claro— y el tooltip indica la acción. La barra de la ventana no cambia con el perfil: la dibuja el sistema operativo.
 
 ## Cuentagotas
 
@@ -77,7 +81,7 @@ La muestra se toma del píxel original, no del resultado recompimido, y conserva
 
 - Selector **ES / CA / EN** arriba a la derecha, sobre el lienzo.
 - En el primer arranque se detecta el idioma del sistema.
-- El idioma, el historial, los bloqueos, el estado maximizado, el lado del panel, la posición del panel de color, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
+- El idioma, el perfil de color (`theme=dark|light`), el historial, los bloqueos, el estado maximizado, el lado del panel, la posición del panel de color, el formato de salida y la posición/tamaño de la ventana se guardan en `config.ini`, junto al ejecutable. La ventana usa los controles nativos del sistema.
 - Si no se puede escribir el archivo, la aplicación sigue funcionando sin persistencia.
 
 ## Zoom y navegación
@@ -253,7 +257,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 70 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantificador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, historial y bloqueos, configuración, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 72 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantificador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, historial y bloqueos, configuración, perfiles de color y su ida y vuelta en `config.ini`, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste de todos los perfiles y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 
@@ -287,11 +291,11 @@ La versión Rust/egui se comparó con el prototipo Godot antes de migrar. En el 
 │   │   └── ui/             Panel lateral, color flotante, preview y widgets
 │   ├── codec/              WebP, JPG, PNG, AVIF, JPEG XL, ICO, SVG y TIFF
 │   ├── domain/             Formatos, recorte, color, historial y errores tipados
-│   ├── settings/           config.ini, idioma, historial y maximizado
+│   ├── settings/           config.ini, idioma, tema, historial y maximizado
 │   ├── bin/                Benchmarks, muestra y generador de icono
 │   ├── demo.rs             Imagen sintética para capturas
 │   ├── i18n.rs             Textos en español, catalán e inglés
-│   └── theme.rs            Tema visual
+│   └── theme.rs            Perfiles de color, paleta dinámica y estilos
 ├── tests/                  Matriz de integración de formatos y límites
 ├── proyecto.md             Documento vivo
 ├── todo.md                 Tareas pendientes

@@ -91,6 +91,16 @@ catalogue! {
         "Mou el panell a la dreta",
         "Move panel to the right"
     ),
+    ThemeToLight => (
+        "Cambiar a modo claro",
+        "Canvia al mode clar",
+        "Switch to light mode"
+    ),
+    ThemeToDark => (
+        "Cambiar a modo oscuro",
+        "Canvia al mode fosc",
+        "Switch to dark mode"
+    ),
     OpenRepository => (
         "Abrir el repositorio en el navegador",
         "Obre el repositori al navegador",

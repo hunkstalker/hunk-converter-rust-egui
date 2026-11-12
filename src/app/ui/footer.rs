@@ -10,7 +10,7 @@ impl HunkApp {
         egui::Panel::bottom("footer")
             .frame(
                 eframe::egui::Frame::new()
-                    .fill(T::BG)
+                    .fill(T::bg())
                     .inner_margin(Margin::symmetric(30, 9)),
             )
             .show(ui, |ui| {
@@ -18,14 +18,14 @@ impl HunkApp {
                     ui.label(
                         RichText::new(format!("HUNK Converter · v{}", env!("CARGO_PKG_VERSION")))
                             .size(T::SMALL_TEXT_SIZE)
-                            .color(T::TEXT_FAINT),
+                            .color(T::text_faint()),
                     );
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         let response = ui
                             .hyperlink_to(
                                 RichText::new("github.com/hunkstalker/hunk-converter-rust-egui")
                                     .size(T::SMALL_TEXT_SIZE)
-                                    .color(T::TEXT_MUTED),
+                                    .color(T::text_muted()),
                                 "https://github.com/hunkstalker/hunk-converter-rust-egui",
                             )
                             .on_hover_text(self.t(K::OpenRepository));

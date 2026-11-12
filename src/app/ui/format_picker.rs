@@ -51,7 +51,7 @@ pub(super) fn format_grid(ui: &mut egui::Ui, spec: FormatSelector<'_>) -> Option
         ui.label(
             RichText::new(i18n::t(language, K::RecompressWarning))
                 .size(T::SMALL_TEXT_SIZE)
-                .color(T::WARNING),
+                .color(T::warning()),
         );
     }
 
@@ -81,18 +81,18 @@ fn format_card(
     let (rect, response) = ui.allocate_exact_size(vec2(width, 52.0), Sense::click());
     let hovered = response.hovered();
     let fill = if is_selected {
-        T::ACCENT_SOFT
+        T::accent_soft()
     } else if hovered {
-        T::SURFACE_3
+        T::surface_3()
     } else {
-        T::SURFACE_2
+        T::surface_2()
     };
     let stroke = if is_selected {
-        Stroke::new(1.2, T::ACCENT)
+        Stroke::new(1.2, T::accent())
     } else if hovered {
-        Stroke::new(1.0, T::BORDER_STRONG)
+        Stroke::new(1.0, T::border_strong())
     } else {
-        Stroke::new(1.0, T::BORDER)
+        Stroke::new(1.0, T::border())
     };
     let painter = ui.painter();
     painter.rect(
@@ -107,7 +107,7 @@ fn format_card(
         egui::Align2::LEFT_TOP,
         label,
         FontId::proportional(T::SMALL_TEXT_SIZE),
-        T::TEXT,
+        T::text(),
     );
     painter.text(
         rect.left_top() + vec2(10.0, 27.0),
@@ -115,9 +115,9 @@ fn format_card(
         hint,
         FontId::proportional(9.0),
         if is_selected {
-            T::ACCENT
+            T::accent()
         } else {
-            T::TEXT_MUTED
+            T::text_muted()
         },
     );
 

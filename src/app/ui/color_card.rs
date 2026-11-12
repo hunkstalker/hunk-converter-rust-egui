@@ -197,7 +197,7 @@ impl HunkApp {
                     painter.rect_stroke(
                         rect,
                         CornerRadius::same(5),
-                        Stroke::new(1.0, T::BORDER_STRONG),
+                        Stroke::new(1.0, T::border_strong()),
                         StrokeKind::Inside,
                     );
                 });
@@ -224,7 +224,7 @@ impl HunkApp {
                         ui.label(
                             RichText::new(label)
                                 .size(T::SMALL_TEXT_SIZE)
-                                .color(T::TEXT_FAINT)
+                                .color(T::text_faint())
                                 .strong(),
                         );
                         if clickable {
@@ -241,7 +241,7 @@ impl HunkApp {
                             ui.label(
                                 RichText::new(&value)
                                     .font(FontId::monospace(T::SMALL_TEXT_SIZE))
-                                    .color(T::TEXT_DISABLED),
+                                    .color(T::text_disabled()),
                             );
                         }
                         ui.end_row();
@@ -256,9 +256,9 @@ impl HunkApp {
 fn move_handle(ui: &mut egui::Ui, label: &str) -> egui::Response {
     let (rect, response) = ui.allocate_exact_size(vec2(20.0, 20.0), Sense::click_and_drag());
     let color = if response.hovered() || response.dragged() {
-        T::TEXT
+        T::text()
     } else {
-        T::TEXT_FAINT
+        T::text_faint()
     };
     let center = rect.center();
     for offset_x in [-3.5, 3.5] {
@@ -284,9 +284,9 @@ fn move_handle(ui: &mut egui::Ui, label: &str) -> egui::Response {
 
 fn code_value(ui: &mut egui::Ui, value: &str, enabled: bool) -> egui::Response {
     let color = if enabled {
-        T::TEXT_MUTED
+        T::text_muted()
     } else {
-        T::TEXT_DISABLED
+        T::text_disabled()
     };
     let galley = ui.painter().layout_no_wrap(
         value.to_owned(),
@@ -304,10 +304,10 @@ fn code_value(ui: &mut egui::Ui, value: &str, enabled: bool) -> egui::Response {
     );
     if enabled && response.hovered() {
         ui.painter()
-            .rect_filled(rect, CornerRadius::same(5), T::SURFACE_3);
+            .rect_filled(rect, CornerRadius::same(5), T::surface_3());
     }
     let text_color = if enabled && response.hovered() {
-        T::TEXT
+        T::text()
     } else {
         color
     };

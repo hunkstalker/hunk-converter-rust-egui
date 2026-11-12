@@ -21,25 +21,25 @@ pub(crate) fn eyedropper_button(ui: &mut egui::Ui, spec: EyedropperButton<'_>) -
     let (rect, response) = ui.allocate_exact_size(vec2(38.0, 38.0), Sense::click_and_drag());
     let hovered = enabled && response.hovered();
     let fill = if active && enabled {
-        T::ACCENT
+        T::accent()
     } else if hovered {
-        T::SURFACE_3
+        T::surface_3()
     } else {
-        T::SURFACE_2
+        T::surface_2()
     };
     let border = if active && enabled {
-        T::ACCENT
+        T::accent()
     } else if hovered {
-        T::BORDER_STRONG
+        T::border_strong()
     } else {
-        T::BORDER
+        T::border()
     };
     let icon = if !enabled {
-        T::TEXT_DISABLED
+        T::text_disabled()
     } else if active {
-        T::ACCENT_INK
+        T::accent_ink()
     } else {
-        T::TEXT_MUTED
+        T::text_muted()
     };
 
     let painter = ui.painter();
@@ -116,19 +116,30 @@ pub(crate) enum QuickTool {
 pub(crate) const QUICK_TOOL_SIZE: f32 = 38.0;
 pub(crate) const QUICK_TOOL_GAP: f32 = 6.0;
 
+pub(crate) const TOP_CONTROL_WIDTH: f32 = 64.0;
+pub(crate) const TOP_CONTROL_HEIGHT: f32 = 32.0;
+
 pub(crate) fn panel_side_button(
     ui: &mut egui::Ui,
     panel_on_right: bool,
     label: &str,
 ) -> egui::Response {
-    let (rect, response) = ui.allocate_exact_size(vec2(64.0, 32.0), Sense::click());
+    let (rect, response) =
+        ui.allocate_exact_size(vec2(TOP_CONTROL_WIDTH, TOP_CONTROL_HEIGHT), Sense::click());
     let hovered = response.hovered();
-    let stroke = Stroke::new(1.0, if hovered { T::BORDER_STRONG } else { T::BORDER });
+    let stroke = Stroke::new(
+        1.0,
+        if hovered {
+            T::border_strong()
+        } else {
+            T::border()
+        },
+    );
     ui.painter().rect(
         rect,
         CornerRadius::same(10),
         if hovered {
-            T::SURFACE_3
+            T::surface_3()
         } else {
             Color32::TRANSPARENT
         },
@@ -136,7 +147,7 @@ pub(crate) fn panel_side_button(
         StrokeKind::Inside,
     );
 
-    let color = if hovered { T::TEXT } else { T::TEXT_MUTED };
+    let color = if hovered { T::text() } else { T::text_muted() };
     let icon = Rect::from_center_size(rect.center(), vec2(22.0, 16.0));
     ui.painter().rect_stroke(
         icon,
@@ -167,6 +178,91 @@ pub(crate) fn panel_side_button(
         .accessible_name(label)
 }
 
+pub(crate) fn theme_toggle_button(ui: &mut egui::Ui, light: bool, label: &str) -> egui::Response {
+    let (rect, response) =
+        ui.allocate_exact_size(vec2(TOP_CONTROL_WIDTH, TOP_CONTROL_HEIGHT), Sense::click());
+    let hovered = response.hovered();
+    let stroke = Stroke::new(
+        1.0,
+        if hovered {
+            T::border_strong()
+        } else {
+            T::border()
+        },
+    );
+    ui.painter().rect(
+        rect,
+        CornerRadius::same(10),
+        if hovered {
+            T::surface_3()
+        } else {
+            Color32::TRANSPARENT
+        },
+        stroke,
+        StrokeKind::Inside,
+    );
+
+    let color = if hovered { T::text() } else { T::text_muted() };
+    if light {
+        paint_sun_icon(ui.painter(), rect.center(), color);
+    } else {
+        paint_moon_icon(ui.painter(), rect.center(), color);
+    }
+
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, label.to_owned()));
+    if response.has_focus() {
+        super::widgets::paint_focus_ring(ui.painter(), rect, 10);
+    }
+    response
+        .on_hover_cursor(CursorIcon::PointingHand)
+        .on_hover_text(label)
+        .accessible_name(label)
+}
+
+fn paint_sun_icon(painter: &egui::Painter, center: egui::Pos2, color: Color32) {
+    painter.circle_filled(center, 3.4, color);
+    for index in 0..8 {
+        let angle = index as f32 * PI / 4.0;
+        let direction = vec2(angle.cos(), angle.sin());
+        painter.line_segment(
+            [center + direction * 5.6, center + direction * 7.4],
+            Stroke::new(1.4, color),
+        );
+    }
+}
+
+fn paint_moon_icon(painter: &egui::Painter, center: egui::Pos2, color: Color32) {
+    const STEPS: usize = 18;
+    let outer_radius = 7.4;
+    let inner_radius = 6.6;
+    let inner_center = center + vec2(2.9, 0.0);
+    let outer_from = 64.0_f32.to_radians();
+    let outer_to = 296.0_f32.to_radians();
+    let inner_from = 84.0_f32.to_radians();
+    let inner_to = 276.0_f32.to_radians();
+
+    let mut mesh = egui::Mesh::default();
+    for step in 0..=STEPS {
+        let t = step as f32 / STEPS as f32;
+        let outer_angle = outer_from + (outer_to - outer_from) * t;
+        let inner_angle = inner_from + (inner_to - inner_from) * t;
+        mesh.colored_vertex(
+            center + vec2(outer_angle.cos(), outer_angle.sin()) * outer_radius,
+            color,
+        );
+        mesh.colored_vertex(
+            inner_center + vec2(inner_angle.cos(), inner_angle.sin()) * inner_radius,
+            color,
+        );
+        if step < STEPS {
+            let index = step as u32 * 2;
+            mesh.add_triangle(index, index + 1, index + 2);
+            mesh.add_triangle(index + 1, index + 3, index + 2);
+        }
+    }
+    painter.add(egui::Shape::mesh(mesh));
+}
+
 pub(crate) fn quick_tool_button(
     ui: &mut egui::Ui,
     tool: QuickTool,
@@ -184,25 +280,25 @@ pub(crate) fn quick_tool_button(
     );
     let hovered = enabled && response.hovered();
     let fill = if active && enabled {
-        T::ACCENT
+        T::accent()
     } else if hovered {
-        T::SURFACE_3
+        T::surface_3()
     } else {
-        T::SURFACE_2
+        T::surface_2()
     };
     let border = if active && enabled {
-        T::ACCENT
+        T::accent()
     } else if hovered {
-        T::BORDER_STRONG
+        T::border_strong()
     } else {
-        T::BORDER
+        T::border()
     };
     let icon = if !enabled {
-        T::TEXT_DISABLED
+        T::text_disabled()
     } else if active {
-        T::ACCENT_INK
+        T::accent_ink()
     } else {
-        T::TEXT_MUTED
+        T::text_muted()
     };
     ui.painter().rect(
         rect,

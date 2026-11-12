@@ -25,7 +25,11 @@ impl HunkApp {
                 } else {
                     self.t(K::Lossless).to_owned()
                 };
-                ui.label(RichText::new(value).size(T::SMALL_TEXT_SIZE).color(T::TEXT));
+                ui.label(
+                    RichText::new(value)
+                        .size(T::SMALL_TEXT_SIZE)
+                        .color(T::text()),
+                );
             });
         });
         header.response.on_hover_text(hint);
@@ -39,12 +43,12 @@ impl HunkApp {
         ui.scope(|ui| {
             if !lossy {
                 let visuals = ui.visuals_mut();
-                visuals.selection.bg_fill = T::SURFACE_3;
-                visuals.selection.stroke = Stroke::new(1.0, T::TEXT_DISABLED);
-                visuals.widgets.inactive.bg_fill = T::SURFACE_3;
-                visuals.widgets.inactive.fg_stroke = Stroke::new(1.0, T::TEXT_DISABLED);
-                visuals.widgets.noninteractive.bg_fill = T::SURFACE_3;
-                visuals.widgets.noninteractive.fg_stroke = Stroke::new(1.0, T::TEXT_DISABLED);
+                visuals.selection.bg_fill = T::surface_3();
+                visuals.selection.stroke = Stroke::new(1.0, T::text_disabled());
+                visuals.widgets.inactive.bg_fill = T::surface_3();
+                visuals.widgets.inactive.fg_stroke = Stroke::new(1.0, T::text_disabled());
+                visuals.widgets.noninteractive.bg_fill = T::surface_3();
+                visuals.widgets.noninteractive.fg_stroke = Stroke::new(1.0, T::text_disabled());
             }
             let response = ui.add_enabled(lossy, slider).accessible_name(quality_label);
             if response.has_focus() {

@@ -43,6 +43,7 @@ pub struct HunkApp {
     history_focus_pending: bool,
     maximized: bool,
     panel_side: settings::PanelSide,
+    theme: String,
     native_maximized_seen: bool,
     sample_pending_history: bool,
     format: OutputFormat,
@@ -86,7 +87,7 @@ pub struct HunkApp {
 
 impl HunkApp {
     pub fn new(cc: &eframe::CreationContext<'_>, settings: settings::Settings) -> Self {
-        T::install(&cc.egui_ctx);
+        T::install(&cc.egui_ctx, &settings.theme);
 
         let brand_icon = ui::widgets::load_texture_from_png(
             &cc.egui_ctx,
@@ -114,6 +115,7 @@ impl HunkApp {
             history_focus_pending: false,
             maximized: settings.maximized,
             panel_side: settings.panel_side,
+            theme: settings.theme,
             native_maximized_seen: false,
             sample_pending_history: false,
             format: match settings.output_format {
@@ -191,6 +193,7 @@ impl HunkApp {
             history: self.history.clone(),
             maximized: self.maximized,
             panel_side: self.panel_side,
+            theme: self.theme.clone(),
             color_panel_pos: self.color_panel_pos.map(|pos| (pos.x, pos.y)),
             output_format: self.format_selection,
             advanced: self.advanced.clone(),
@@ -501,7 +504,7 @@ impl eframe::App for HunkApp {
     }
 
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
-        T::BG.to_normalized_gamma_f32()
+        T::bg().to_normalized_gamma_f32()
     }
 
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {

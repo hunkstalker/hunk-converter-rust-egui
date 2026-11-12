@@ -22,6 +22,7 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
         history: Vec::new(),
         maximized: true,
         panel_side: PanelSide::Right,
+        theme: crate::theme::DEFAULT_PROFILE_ID.to_owned(),
         color_panel_pos: None,
         output_format: FormatSelection::Auto,
         advanced: AdvancedSettings::default(),
@@ -69,6 +70,14 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
                 None => warnings.push(ConfigWarning::new(
                     line_number,
                     format!("lado del panel desconocido: {value}"),
+                )),
+            }
+        } else if section == "general" && key == "theme" {
+            match crate::theme::profile(value) {
+                Some(profile) => settings.theme = profile.id.to_owned(),
+                None => warnings.push(ConfigWarning::new(
+                    line_number,
+                    format!("perfil de tema desconocido: {value}"),
                 )),
             }
         } else if section == "general" && key == "fullscreen" && !maximized_seen {
@@ -193,10 +202,11 @@ pub(super) fn parse(text: &str) -> ConfigLoad {
 
 pub(super) fn serialize(settings: &Settings) -> String {
     let mut text = format!(
-        "[general]\nlanguage={}\nmaximized={}\npanel_side={}\n\n[output]\nformat={}\n\n[window]\n",
+        "[general]\nlanguage={}\nmaximized={}\npanel_side={}\ntheme={}\n\n[output]\nformat={}\n\n[window]\n",
         settings.language.code(),
         u8::from(settings.maximized),
         settings.panel_side.code(),
+        settings.theme,
         settings.output_format.code(),
     );
     if let Some(x) = settings.window.x {
@@ -334,6 +344,21 @@ format=jxl
         );
         assert_eq!(loaded.settings.output_format, FormatSelection::Auto);
         assert_eq!(loaded.warnings.len(), 1);
+    }
+
+    #[test]
+    fn theme_profile_round_trips_and_unknown_profiles_fall_back_to_dark() {
+        let loaded = parse("[general]\ntheme=light\n");
+        assert_eq!(loaded.settings.theme, "light");
+        assert!(loaded.warnings.is_empty());
+        assert!(serialize(&loaded.settings).contains("theme=light"));
+
+        let loaded = parse("[general]\ntheme=sepia\n");
+        assert_eq!(loaded.settings.theme, crate::theme::DEFAULT_PROFILE_ID);
+        assert_eq!(loaded.warnings.len(), 1);
+
+        let old_config = parse("[general]\nlanguage=es\n");
+        assert_eq!(old_config.settings.theme, crate::theme::DEFAULT_PROFILE_ID);
     }
 
     #[test]
