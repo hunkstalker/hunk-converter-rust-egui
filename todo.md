@@ -8,4 +8,4 @@
 
 **Descripción:** Repetir el benchmark final, regenerar capturas, actualizar documentación, validar builds y preparar la release 1.1.
 
-**Estado:** AVIF, resize/UI y recorte validados. Quedan el benchmark final, la validación de los artefactos MSVC/macOS del CI y el push/tag. No etiquetar `v1.1.0` hasta completar el cierre.
+**Estado:** AVIF, resize/UI y recorte validados. Benchmark final completado el 2026-11-13. Quedan la validación de los artefactos MSVC/macOS del CI y el push/tag. No etiquetar `v1.1.0` hasta completar el cierre.

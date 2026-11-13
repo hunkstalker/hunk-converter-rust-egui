@@ -22,7 +22,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Selector de salida en cuadrícula de tarjetas con modo Automático implementado y validado.
 - Objetivo 1.1: salida web JPEG/PNG/WebP/AVIF + ICO; entrada amplia JPEG/PNG/WebP/AVIF/SVG/BMP/TGA/TIFF; preprocesado de redimensionado, rotación y reducción de paleta. TIFF de entrada forma parte de 1.1. Ver `docs/objetivo-1.1-web.md`.
 - Camino único de 1.1.0: **bloque 1** entrada TIFF/AVIF + benchmark; **bloque 2** paridad con Squoosh (MozJPEG, OxiPNG, WebP/AVIF avanzados, preprocesado y UI). Sin release intermedia.
-- Benchmark HUNK vs Squoosh: WebP empata, JPEG queda en paridad práctica (2,5× más rápido), PNG comprime igual o mejor (3,2× más rápido) y AVIF queda en paridad práctica (0,994× mediana a igual SSIM, 1,82× más rápido en UI). Ver `docs/benchmark-squoosh-2026-10-31.md`.
+- Benchmark final HUNK vs Squoosh (2026-11-13): WebP empata, JPEG queda en paridad práctica (3,07× más rápido a q75), PNG comprime igual o mejor (3,28× más rápido) y AVIF queda en paridad práctica (0,995× mediana a igual SSIM, 1,91× más rápido en UI). Ver `docs/benchmark-squoosh-2026-10-31.md` y `docs/benchmark-squoosh-2026-11-13-final.tsv`.
 - Preprocesado: resize Lanczos3 con proporción enlazada, marco del original en el canvas, rotación 90/180/270 y paleta 2–256 colores con alfa. Los campos aceptan arrastre vertical y expresiones como `1600/4`; el cálculo corre en un worker con debounce.
 - Opciones avanzadas implementadas sin persistencia: JPG progresivo/submuestreo, PNG nivel/interlazado, WebP lossless/method/alfa, AVIF speed/alfa y preprocesado. Se reinician en cada sesión. Resize/UI validados en la revisión incremental.
 - Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG; AVIF usa libavif/AOM.
@@ -47,7 +47,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
 - **73 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
-- Versión **1.0.0** publicada; **1.1.0** pendiente de cerrar `t-43` (benchmark final, CI y release). No etiquetar todavía.
+- Versión **1.0.0** publicada; **1.1.0** pendiente de cerrar `t-43` (benchmark final completado; quedan validación del CI, push y tag). No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.
 
 ## 3. Comandos
@@ -144,7 +144,7 @@ t-completadas.md            Tareas cerradas
 - Evidencia: todas las notas de `notes/`, incluida la migración.
 - **Regla:** si el usuario pregunta qué tareas hay, devolver toda la información de cada tarea pendiente de `todo.md`: identificador `t-N`, título y descripción completa. Al cerrar una tarea, moverla a `t-completadas.md` y actualizar este archivo.
 
-Siguiente paso: **cerrar `t-43`**: repetir el benchmark final, validar los artefactos MSVC/macOS del CI y preparar el push/tag. No etiquetar v1.1.0 hasta completar ese cierre.
+Siguiente paso: **cerrar `t-43`**: benchmark final completado; quedan validar los artefactos MSVC/macOS del CI y preparar el push/tag. No etiquetar v1.1.0 hasta completar ese cierre.
 
 ## 7. Benchmarks y límites
 
@@ -152,7 +152,7 @@ Los informes completos están en `docs/benchmark-2026-10-28.md` y
 `docs/benchmark-squoosh-2026-10-31.md`.
 
 - La versión Rust es mucho más pequeña que el prototipo Godot, arranca antes, usa menos RAM y es más rápida codificando.
-- Frente a Squoosh, WebP empata en tamaño y es 2,3–2,8× más rápido; JPEG queda en paridad práctica y 2,5× más rápido; PNG comprime igual o mejor y 3,2× más rápido; AVIF queda en paridad práctica (0,994× mediana a igual SSIM) y es 1,82× más rápido en UI.
+- Frente a Squoosh, WebP empata en tamaño y es 2,62–2,84× más rápido; JPEG queda en paridad práctica y 3,07× más rápido a q75; PNG comprime igual o mejor y 3,28× más rápido; AVIF queda en paridad práctica (0,995× mediana a igual SSIM) y es 1,91× más rápido en UI.
 - La CPU en reposo del prototipo Godot medida bajo llvmpipe no representa un equipo con GPU, pero sí evidencia el repintado continuo.
 - El benchmark frente a Squoosh usa SSIMULACRA2 y mide WebP, JPEG, PNG y AVIF; el icono se reserva para tamaño, alfa y velocidad.
 

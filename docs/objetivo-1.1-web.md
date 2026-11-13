@@ -126,13 +126,13 @@ Estado tras `t-39`: WebP cumple con paridad exacta, JPEG queda en paridad
 práctica (±0,5 % mediana) y PNG comprime igual o mejor.
 
 Estado tras `t-44`: AVIF usa `libavif`/AOM con YUV420, BT.601 y cuantizador
-directo. A igual SSIMULACRA2, el tamaño mediano es **0,994×** frente a Squoosh
-(0,704–1,069), la UI queda entre **0,705× y 0,960×** y la velocidad es **1,82×**
-en UI y **4,58×** de mediana. La puerta de AVIF se cumple.
+directo. El benchmark final de `t-43` confirma un tamaño mediano de **0,995×**
+frente a Squoosh (0,705–1,069), la UI entre **0,705× y 0,960×** y una velocidad
+de **1,91×** en UI y **4,64×** de mediana. La puerta de AVIF se cumple.
 
-**1.1.0 sigue sin publicarse** hasta cerrar `t-43`: benchmark final, validación
-de los artefactos del CI y release. Las revisiones incrementales de AVIF, UI,
-resize y recorte ya están completadas. El bloqueo ya no es AVIF.
+**1.1.0 sigue sin publicarse** hasta cerrar los últimos puntos de `t-43`:
+validación de los artefactos del CI, push y tag. El benchmark final ya está
+completado; las revisiones de AVIF, UI, resize y recorte también.
 
 ## 4. Encoders de referencia
 
