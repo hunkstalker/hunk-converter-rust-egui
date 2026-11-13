@@ -15,12 +15,24 @@
 | --- | --- | --- |
 | Linux Debian x86_64 | `ubuntu-22.04` | `hunk-converter-<versión>-linux-x86_64.tar.gz` |
 | Windows 10/11 x86_64 | `windows-latest` | `hunk-converter-<versión>-windows-x86_64.zip` |
-| macOS universal | `macos-14` | `hunk-converter-<versión>-macos-universal.tar.gz` |
+| macOS universal | `macos-15` | `hunk-converter-<versión>-macos-universal.tar.gz` |
 
 La build Linux se compila en Ubuntu 22.04 y requiere glibc 2.35 o superior
 (Debian 12+, Ubuntu 22.04+). La build de macOS contiene un binario universal
 `arm64 + x86_64`; no está firmada ni notarizada. Windows se compila con MSVC y
 se distribuye como carpeta portable comprimida. La entrega Linux incluye un lanzador `.desktop` y el icono PNG; la entrega macOS es un `.app` con `icon.icns`.
+
+El job de pruebas también se fija a `ubuntu-22.04`. Las imágenes más nuevas
+traen un NASM que ya no expone `-Ox` y hacen fallar la detección de AOM 3.11 en
+`libaom-sys`. Mantener pruebas y build Linux en la misma base evita esa deriva.
+
+macOS usa `macos-15`: GitHub retiró `macos-14` y los jobs quedaban cancelados
+con `The configuration 'macos-14-arm64-us-default' is not supported`.
+
+El job macOS compila NASM **2.16.01** desde fuente. La fórmula actual de Homebrew
+instala NASM 3.x, que ya no expone `-Ox` y hace fallar la detección de AOM 3.11
+en `libaom-sys`. Se instala en `$RUNNER_TEMP` y se añade al `PATH` antes de
+compilar.
 
 ## Caché
 

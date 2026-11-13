@@ -98,6 +98,11 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 `rust-toolchain.toml` instala Rust 1.99.1 la primera vez que ejecutes `cargo`.
 No hacen falta librerías X11: eframe usa Cocoa/Metal en macOS.
 
+Si `brew install nasm` instala NASM 3.x, `libaom-sys` puede fallar con
+`Unsupported nasm: multipass optimization not supported`. El CI compila NASM
+2.16.01 desde fuente por ese motivo; para desarrollo local sirve cualquier NASM
+2.16.x anterior a la serie 3.
+
 ## 5. Windows manual
 
 1. Instala **Visual Studio Build Tools** con el workload
