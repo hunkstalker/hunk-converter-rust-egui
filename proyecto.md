@@ -164,7 +164,7 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 ### Estados
 
-1. **Vacío:** tarjeta central con ilustración, acción principal y formatos admitidos.
+1. **Vacío:** canvas principal con ilustración, acción principal, formatos admitidos y las opciones de soltar, `Ctrl+V` o seleccionar archivo. El panel lateral y el panel de color siguen visibles: el formato y la calidad se pueden configurar, y el historial se puede consultar; el cuentagotas y las herramientas de imagen permanecen ocultos.
 2. **Editando:** panel lateral de ajustes + comparador + metadatos.
 3. **Procesando:** se mantiene la última vista válida, aparece un indicador y se bloquea la exportación.
 4. **Listo:** comparador, peso y ahorro actualizados; exportación disponible.
@@ -175,7 +175,8 @@ El alcance vigente de 1.1 está en [docs/objetivo-1.1-web.md](docs/objetivo-1.1-
 
 - La aplicación se abre con la ventana maximizada. Los controles nativos permiten maximizar o restaurar; el estado, la posición y el tamaño se guardan en `config.ini`.
 - Tamaño de ventana por defecto 1280 × 800; mínimo 1024 × 800.
-- Vista previa a pantalla completa con el selector de idioma y el botón de reinicio arriba a la derecha, sobre el lienzo. Los controles de ventana son los nativos.
+- Canvas principal con el selector de idioma, el botón de tema y el de reinicio arriba a la derecha. Los controles de ventana son los nativos.
+- Sin imagen, el canvas muestra el estado vacío integrado, el panel lateral permite configurar el formato y el panel de color mantiene el historial. Las herramientas que dependen de píxeles se activan al cargar una imagen.
 - Panel de ajustes a la derecha, con scroll vertical cuando no cabe. Incluye archivo, formato en cuadrícula, calidad o tamaños ICO, preprocesado, avanzado, pesos y exportación.
 - Historial y cuentagotas en una tarjeta flotante movible con handle, posición persistida y reset por doble clic, con botones rápidos de recortar, invertir colores y girar 90°. Las herramientas y el desplegable de recorte se recolocan a izquierda o derecha según el centro y el espacio.
 - Panel lateral conmutable entre izquierda y derecha, con botón en los controles superiores y lado persistido en `config.ini`.
@@ -373,7 +374,7 @@ Resumen del contexto de referencia:
 
 ## 9. Pruebas y verificación
 
-- **72 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, perfiles de color y contraste WCAG de ambos, nombres de exportación, rutas portables, geometría de ventana, selección de formato, navegación por teclado y zona de agarre del comparador.
+- **73 pruebas Rust**: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantizador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, calidad, transparencia, aplanado JPG, ICO, códigos de color, carga SVG, historial, bloqueos, configuración, perfiles de color y contraste WCAG de ambos, nombres de exportación, rutas portables, geometría de ventana, selección de formato, navegación por teclado y zona de agarre del comparador.
 - `cargo fmt --all -- --check` limpio.
 - `cargo clippy --all-targets -- -D warnings` limpio.
 - CI de Godot histórica en el repositorio archivado; CI de Rust con builds Linux, Windows y macOS en este repositorio.

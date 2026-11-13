@@ -20,6 +20,9 @@ impl HunkApp {
     }
 
     pub(crate) fn request_encode(&mut self, ctx: &egui::Context, delay: Option<Duration>) {
+        if self.source.is_none() {
+            return;
+        }
         self.revision = self.revision.wrapping_add(1);
         self.pending_since = Some(Instant::now() + delay.unwrap_or(Duration::ZERO));
         self.screenshot_at = None;

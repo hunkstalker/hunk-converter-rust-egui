@@ -18,30 +18,37 @@ use super::format_picker::{FormatSelector, format_grid};
 use super::widgets::secondary_text_button;
 
 pub(super) struct FileCard<'a> {
-    pub texture: egui::TextureId,
-    pub name: &'a str,
-    pub format: &'a str,
-    pub file_bytes: u64,
-    pub dimensions: (u32, u32),
-    pub original_dimensions: (u32, u32),
+    pub texture: Option<egui::TextureId>,
+    pub name: Option<&'a str>,
+    pub format: Option<&'a str>,
+    pub file_bytes: Option<u64>,
+    pub dimensions: Option<(u32, u32)>,
+    pub original_dimensions: Option<(u32, u32)>,
 }
 
 impl HunkApp {
     pub(crate) fn show_sidebar(&mut self, root: &mut egui::Ui) -> Vec<AppAction> {
         let mut actions = Vec::new();
-        let Some(source) = self.source.as_ref() else {
-            return actions;
-        };
-        let texture = source.texture.id();
-        let name = source.name.clone();
-        let format = source.format.clone();
-        let file_bytes = source.file_bytes;
-        let dimensions = self.crop_output_dimensions(source.width, source.height);
-        let original_dimensions = source.original.dimensions();
+        let texture = self
+            .source
+            .as_ref()
+            .map(|source| source.texture.id())
+            .or_else(|| self.brand_icon.as_ref().map(|icon| icon.id()));
+        let name = self.source.as_ref().map(|source| source.name.clone());
+        let format = self.source.as_ref().map(|source| source.format.clone());
+        let file_bytes = self.source.as_ref().map(|source| source.file_bytes);
+        let dimensions = self
+            .source
+            .as_ref()
+            .map(|source| self.crop_output_dimensions(source.width, source.height));
+        let original_dimensions = self
+            .source
+            .as_ref()
+            .map(|source| source.original.dimensions());
         let card = FileCard {
             texture,
-            name: &name,
-            format: &format,
+            name: name.as_deref(),
+            format: format.as_deref(),
             file_bytes,
             dimensions,
             original_dimensions,
@@ -117,40 +124,65 @@ impl HunkApp {
         ui.label(T::section_label(self.t(K::Image)));
         ui.add_space(5.0);
         ui.horizontal(|ui| {
-            ui.add(
-                egui::Image::new((card.texture, vec2(48.0, 48.0)))
-                    .corner_radius(CornerRadius::same(9)),
-            );
+            if let Some(texture) = card.texture {
+                ui.add(
+                    egui::Image::new((texture, vec2(48.0, 48.0)))
+                        .corner_radius(CornerRadius::same(9)),
+                );
+            } else {
+                let (rect, _) = ui.allocate_exact_size(vec2(48.0, 48.0), egui::Sense::hover());
+                ui.painter().rect(
+                    rect,
+                    CornerRadius::same(9),
+                    T::surface_2(),
+                    Stroke::new(1.0, T::border()),
+                    egui::StrokeKind::Inside,
+                );
+            }
             ui.add_space(4.0);
             let text_width = ui.available_width().max(40.0);
-            let display_name = fitted_filename(ui, card.name, text_width);
+            let (display_name, color) = match card.name {
+                Some(name) => (fitted_filename(ui, name, text_width), T::text()),
+                None => (self.t(K::NoImage).to_owned(), T::text_muted()),
+            };
             let response = ui.add_sized(
                 [text_width, 48.0],
                 egui::Label::new(
                     RichText::new(display_name)
                         .size(T::SMALL_TEXT_SIZE)
-                        .color(T::text())
+                        .color(color)
                         .strong(),
                 )
                 .wrap(),
             );
-            response.on_hover_text(card.name);
+            if let Some(name) = card.name {
+                response.on_hover_text(name);
+            }
         });
         ui.add_space(4.0);
-        ui.label(
-            RichText::new(format!(
+        let metadata = match (card.format, card.dimensions, card.file_bytes) {
+            (Some(format), Some(dimensions), Some(bytes)) => format!(
                 "{} · {} × {} px · {}",
-                card.format,
-                card.dimensions.0,
-                card.dimensions.1,
-                i18n::localized_bytes(self.language, card.file_bytes)
-            ))
-            .size(T::SMALL_TEXT_SIZE)
-            .color(T::text_muted()),
+                format,
+                dimensions.0,
+                dimensions.1,
+                i18n::localized_bytes(self.language, bytes)
+            ),
+            _ => "—".to_owned(),
+        };
+        ui.label(
+            RichText::new(metadata)
+                .size(T::SMALL_TEXT_SIZE)
+                .color(T::text_muted()),
         );
         ui.add_space(10.0);
+        let change_label = if card.name.is_some() {
+            self.t(K::Change)
+        } else {
+            self.t(K::SelectImage)
+        };
         let response =
-            secondary_text_button(ui, self.t(K::Change)).on_hover_text(self.t(K::ChangeTooltip));
+            secondary_text_button(ui, change_label).on_hover_text(self.t(K::ChangeTooltip));
         if response.clicked() {
             actions.push(AppAction::OpenFileDialog);
         }
@@ -166,7 +198,7 @@ impl HunkApp {
                 selection: self.format_selection,
                 current: self.format,
                 language: self.language,
-                source_format: Some(card.format),
+                source_format: card.format,
             },
         ) {
             let changed = self.set_format_selection(selection);
@@ -190,7 +222,7 @@ impl HunkApp {
     fn show_preprocess(
         &mut self,
         ui: &mut egui::Ui,
-        original_dimensions: (u32, u32),
+        original_dimensions: Option<(u32, u32)>,
         actions: &mut Vec<AppAction>,
     ) {
         let before = self.advanced.preprocess.clone();
@@ -215,12 +247,21 @@ impl HunkApp {
                 ui.set_max_width(inner_width);
                 ui.spacing_mut().item_spacing.y = 7.0;
 
-                ui.checkbox(&mut self.advanced.preprocess.resize_enabled, resize_label);
+                let mut resize_enabled = self.advanced.preprocess.resize_enabled;
+                let resize_response = ui.add_enabled(
+                    original_dimensions.is_some(),
+                    egui::Checkbox::new(&mut resize_enabled, resize_label),
+                );
+                if resize_response.changed() {
+                    self.advanced.preprocess.resize_enabled = resize_enabled;
+                }
 
-                if self.advanced.preprocess.resize_enabled {
+                if self.advanced.preprocess.resize_enabled
+                    && let Some((original_width, original_height)) = original_dimensions
+                {
                     let (rotated_width, rotated_height) = rotated_size(
-                        original_dimensions.0,
-                        original_dimensions.1,
+                        original_width,
+                        original_height,
                         self.advanced.preprocess.rotation,
                     );
                     if self.advanced.preprocess.width == 0 {
@@ -278,7 +319,9 @@ impl HunkApp {
         apply_pending_section_scroll(ui, "preprocess", &preprocess_section);
         if reset {
             let mut options = crate::domain::PreprocessOptions::default();
-            options.reset_for_source(original_dimensions.0, original_dimensions.1);
+            if let Some((width, height)) = original_dimensions {
+                options.reset_for_source(width, height);
+            }
             self.advanced.preprocess = options;
         }
 

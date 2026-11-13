@@ -28,6 +28,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - Calidad 1–100 para WebP/JPG/AVIF; PNG sin pérdida; JPG usa MozJPEG y aplana sobre blanco; PNG usa OxiPNG; AVIF usa libavif/AOM.
 - Comparador visual con divisor, damero, zoom continuo (rueda, pinza o atajos), modo 1:1, ajuste a ventana y paneo con clic derecho. La imagen se abre al 100 %, salvo con resize activo, que encuadra el original para mostrar el marco.
 - Recorte no destructivo implementado y validado con máscara normalizada, ocho tiradores, presets `Libre`/`Original`/`1:1`/`4:3`/`16:9`, exterior atenuado y comparador limitado al recorte. Se aplica antes de codificar, se quita con `Quitar recorte` y no se persiste. Con recorte aplicado, `0`/`F` encuadra el recorte y `1` lo centra a escala real. En ICO el botón se desactiva; el recorte aplicado se conserva al cambiar de formato.
+- Estado vacío integrado en el canvas: sin imagen se muestra el mensaje para soltar, pegar con `Ctrl+V` o seleccionar un archivo. El panel lateral permite configurar formato y calidad, y el panel de color mantiene el historial; cuentagotas, recorte, inversión y giro permanecen ocultos hasta cargar una imagen.
 - Panel de ajustes conmutable entre izquierda y derecha desde los controles superiores; el lado se guarda en `config.ini`.
 - Perfiles de color **oscuro** y **claro** con un registro central en `src/theme.rs`. El botón sol/luna, a la izquierda del botón de panel, cambia el perfil y lo guarda en `config.ini` como `theme=dark|light`. La barra nativa sigue el tema del SO; el perfil solo cambia el contenido.
 - Tarjeta de color flotante movible con handle, reset por doble clic y posición persistida en `config.ini`; las herramientas y el flyout de recorte se recolocan según el centro y el espacio.
@@ -44,7 +45,7 @@ El prototipo Godot original está archivado en la carpeta hermana `../Prototipo/
 - **Render bajo demanda:** sin repintado de UI cuando la ventana está quieta.
 - **Accesibilidad:** AccessKit activo, foco visible, navegación completa por teclado y contraste WCAG AA.
 - Builds portables de Linux, Windows 10/11 y macOS universal; assets y fuente embebidos.
-- **72 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
+- **73 pruebas Rust** (unitarias e integración), clippy y formato limpios. Ver `docs/pruebas.md`.
 - CI de Rust en GitHub Actions: pruebas en `main` y PR, builds solo en tags o ejecución manual, caché de Cargo y release automática al empujar un tag.
 - Versión **1.0.0** publicada; **1.1.0** pendiente de cerrar `t-43` (benchmark final, CI y release). No etiquetar todavía.
 - Benchmark comparativo completo en `docs/benchmark-2026-10-28.md`.

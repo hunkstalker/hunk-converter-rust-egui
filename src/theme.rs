@@ -24,8 +24,6 @@ pub struct Palette {
     pub text_faint: Color32,
     pub text_disabled: Color32,
     pub accent: Color32,
-    pub accent_hover: Color32,
-    pub accent_pressed: Color32,
     pub accent_ink: Color32,
     pub accent_soft: Color32,
     pub warning: Color32,
@@ -72,8 +70,6 @@ pub const DARK: Palette = Palette {
     text_faint: Color32::from_rgb(132, 144, 156),
     text_disabled: Color32::from_rgb(103, 115, 127),
     accent: Color32::from_rgb(200, 244, 109),
-    accent_hover: Color32::from_rgb(216, 255, 144),
-    accent_pressed: Color32::from_rgb(180, 226, 87),
     accent_ink: Color32::from_rgb(17, 23, 11),
     accent_soft: Color32::from_rgb(27, 41, 24),
     warning: Color32::from_rgb(255, 190, 122),
@@ -114,8 +110,6 @@ pub const LIGHT: Palette = Palette {
     text_faint: Color32::from_rgb(52, 61, 52),
     text_disabled: Color32::from_rgb(96, 106, 96),
     accent: Color32::from_rgb(66, 88, 22),
-    accent_hover: Color32::from_rgb(76, 99, 28),
-    accent_pressed: Color32::from_rgb(55, 74, 18),
     accent_ink: Color32::from_rgb(247, 248, 238),
     accent_soft: Color32::from_rgb(230, 236, 201),
     warning: Color32::from_rgb(138, 90, 0),
@@ -163,29 +157,11 @@ pub fn profile(id: &str) -> Option<&'static ThemeProfile> {
         .find(|profile| profile.id.eq_ignore_ascii_case(id.trim()))
 }
 
-pub fn active_profile() -> &'static ThemeProfile {
+fn palette() -> &'static Palette {
     &PROFILES[ACTIVE_PROFILE
         .load(Ordering::Relaxed)
         .min(PROFILES.len().saturating_sub(1))]
-}
-
-pub fn palette() -> &'static Palette {
-    &active_profile().palette
-}
-
-pub fn is_light() -> bool {
-    active_profile().id == "light"
-}
-
-pub fn set_profile(id: &str) -> bool {
-    let Some(index) = PROFILES
-        .iter()
-        .position(|profile| profile.id.eq_ignore_ascii_case(id.trim()))
-    else {
-        return false;
-    };
-    ACTIVE_PROFILE.store(index, Ordering::Relaxed);
-    true
+    .palette
 }
 
 pub fn toggled_profile_id(current: &str) -> &'static str {
@@ -220,8 +196,6 @@ palette_accessors! {
     text_faint => text_faint,
     text_disabled => text_disabled,
     accent => accent,
-    accent_hover => accent_hover,
-    accent_pressed => accent_pressed,
     accent_ink => accent_ink,
     accent_soft => accent_soft,
     warning => warning,
@@ -411,24 +385,12 @@ pub fn floating_frame() -> Frame {
         })
 }
 
-pub fn card_frame() -> Frame {
-    Frame::new()
-        .fill(surface())
-        .stroke(Stroke::new(1.0, border()))
-        .corner_radius(CornerRadius::same(20))
-        .inner_margin(Margin::same(18))
-}
-
 pub fn soft_frame() -> Frame {
     Frame::new()
         .fill(surface_soft())
         .stroke(Stroke::new(1.0, border()))
         .corner_radius(CornerRadius::same(12))
         .inner_margin(Margin::symmetric(12, 10))
-}
-
-pub fn muted(size: f32) -> egui::RichText {
-    egui::RichText::new("").size(size).color(text_muted())
 }
 
 pub fn eyebrow(text: &str) -> egui::RichText {
@@ -443,10 +405,6 @@ pub fn section_label(text: &str) -> egui::RichText {
         .size(SMALL_TEXT_SIZE)
         .color(text_faint())
         .strong()
-}
-
-pub fn section_title(title: &str) -> egui::RichText {
-    egui::RichText::new(title).size(17.0).color(self::text())
 }
 
 pub fn bullet_separator(ui: &mut egui::Ui) {

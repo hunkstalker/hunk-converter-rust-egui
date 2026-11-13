@@ -23,6 +23,7 @@
 - recorte antes de codificar: dimensiones del resultado y píxeles exactos tras decodificar;
 - presets de proporción `1:1`, `4:3` y `16:9`, conversión a píxeles y redondeo de bordes;
 - colocación de las herramientas y del flyout de recorte según el espacio;
+- reserva estable del contenido del canvas vacío según el lado del panel;
 - expresiones de tamaño `1600x2`, `1600/4`, `1600*2`, `1600-200`, límites y errores;
 - proporción enlazada y dimensiones rotadas;
 - perfiles de color `dark`/`light`, búsqueda por identificador y alternancia;
@@ -59,7 +60,7 @@ La regla es que **ninguna funcionalidad de carga, codificación, configuración 
 exportación** dependa de una validación manual. Lo manual queda para lo visual y
 lo específico de plataforma.
 
-Estado actual: **72 pruebas**, incluidas las expresiones de tamaño, la
+Estado actual: **73 pruebas**, incluidas las expresiones de tamaño, la
 proporción enlazada, la conversión OKLab/OKLCH, el recorte antes de codificar,
 los presets de proporción y el copiado completo con Ctrl. La interacción de
 arrastre, el marco del canvas y los tiradores del recorte se validan visualmente.

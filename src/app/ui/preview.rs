@@ -24,6 +24,8 @@ const QUICK_TOOLS_HEIGHT: f32 =
 const CROP_PRESETS_GAP: f32 = 8.0;
 const CROP_PRESETS_WIDTH: f32 = 250.0;
 const CROP_PRESETS_HEIGHT: f32 = 140.0;
+const COLOR_PANEL_WIDTH: f32 = 300.0;
+const COLOR_PANEL_MARGIN: f32 = 56.0;
 
 impl HunkApp {
     pub(crate) fn show_preview(&mut self, root: &mut egui::Ui) -> Vec<AppAction> {
@@ -44,7 +46,7 @@ impl HunkApp {
                             .color(T::text()),
                     );
                     ui.add_space(4.0);
-                    if self.format != OutputFormat::Ico {
+                    if self.source.is_some() && self.format != OutputFormat::Ico {
                         ui.add_space(6.0);
                         let actual_percent = if self.actual_size {
                             100.0
@@ -77,17 +79,23 @@ impl HunkApp {
                 let canvas_height = ui.available_height().max(240.0);
                 let size = vec2(ui.available_width(), canvas_height);
                 let (rect, _) = ui.allocate_exact_size(size, Sense::hover());
-                let response = ui.interact(
-                    rect,
-                    egui::Id::unique(super::canvas::CANVAS_ID),
-                    Sense::click_and_drag(),
-                );
-                actions.extend(self.paint_canvas(CanvasContext {
-                    ui,
-                    rect,
-                    response: &response,
-                    ctx: &ctx,
-                }));
+
+                let has_image = self.source.is_some();
+                if has_image {
+                    let response = ui.interact(
+                        rect,
+                        egui::Id::unique(super::canvas::CANVAS_ID),
+                        Sense::click_and_drag(),
+                    );
+                    actions.extend(self.paint_canvas(CanvasContext {
+                        ui,
+                        rect,
+                        response: &response,
+                        ctx: &ctx,
+                    }));
+                } else {
+                    self.paint_empty_canvas(ui, rect);
+                }
 
                 let content_rect = ctx.content_rect();
                 let mut color_area = egui::Area::new(egui::Id::unique("color_panel_overlay"))
@@ -95,128 +103,147 @@ impl HunkApp {
                     .constrain_to(content_rect);
                 if let Some(position) = self.color_panel_pos {
                     color_area = color_area.fixed_pos(position);
+                } else if self.panel_side == PanelSide::Right {
+                    color_area =
+                        color_area.anchor(Align2::LEFT_BOTTOM, vec2(COLOR_PANEL_MARGIN, -92.0));
                 } else {
-                    color_area = color_area.anchor(Align2::LEFT_BOTTOM, vec2(56.0, -92.0));
+                    color_area =
+                        color_area.anchor(Align2::RIGHT_BOTTOM, vec2(-COLOR_PANEL_MARGIN, -92.0));
                 }
                 let color_panel = color_area.show(&ctx, |ui| {
-                    ui.set_width(300.0);
+                    ui.set_width(COLOR_PANEL_WIDTH);
                     actions.extend(self.show_color_panel(ui));
                 });
                 let panel_rect = color_panel.response.rect;
                 self.color_panel_size = panel_rect.size();
 
-                let (tools_pos, tools_on_left) = quick_tools_position(panel_rect, content_rect);
-                let mut crop_button_rect = None;
-                egui::Area::new(egui::Id::unique("canvas_quick_tools"))
-                    .fixed_pos(tools_pos)
-                    .order(Order::Foreground)
-                    .constrain_to(content_rect)
-                    .show(&ctx, |ui| {
-                        ui.set_width(QUICK_TOOL_SIZE);
-                        ui.spacing_mut().item_spacing.y = QUICK_TOOL_GAP;
-                        let icon_mode = self.format == OutputFormat::Ico;
-                        let crop_editing = self.crop_edit.is_some();
+                if !has_image {
+                    let empty_rect = empty_content_rect(rect, self.panel_side);
+                    actions.extend(self.show_empty_canvas_content(ui, empty_rect));
+                }
 
-                        let has_unlocked = self.history.iter().any(|entry| !entry.locked);
-                        let clear_label = self.t(K::ClearHistory);
-                        if quick_tool_button(ui, QuickTool::Trash, false, has_unlocked, clear_label)
-                            .clicked()
-                        {
-                            actions.push(AppAction::ClearHistory);
-                        }
-
-                        let crop_label = self.t(K::Crop);
-                        let crop_response = quick_tool_button(
-                            ui,
-                            QuickTool::Crop,
-                            crop_editing,
-                            !icon_mode,
-                            crop_label,
-                        );
-                        let crop_response = if icon_mode {
-                            crop_response.on_hover_text(self.t(K::CropUnavailableIco))
-                        } else {
-                            crop_response
-                        };
-                        if crop_response.clicked() {
-                            self.toggle_crop();
-                        }
-                        crop_button_rect = Some(crop_response.rect);
-                        let crop_editing = self.crop_edit.is_some();
-
-                        let eyedropper = eyedropper_button(
-                            ui,
-                            EyedropperButton {
-                                active: self.eyedropper_active,
-                                enabled: !icon_mode && !crop_editing,
-                                label: self.t(K::Eyedropper),
-                            },
-                        );
-                        let eyedropper_hint = if icon_mode {
-                            self.t(K::EyedropperUnavailable)
-                        } else if self.eyedropper_active {
-                            self.t(K::DisableEyedropper)
-                        } else {
-                            self.t(K::EnableEyedropper)
-                        };
-                        let eyedropper = eyedropper.on_hover_text(eyedropper_hint);
-                        if !icon_mode && !crop_editing {
-                            if eyedropper.drag_started() {
-                                self.eyedropper_active = true;
-                                actions.push(AppAction::RequestRepaint);
-                            } else if eyedropper.clicked()
-                                || (self.eyedropper_active
-                                    && eyedropper.clicked_by(egui::PointerButton::Secondary))
-                            {
-                                self.eyedropper_active = !self.eyedropper_active;
-                                actions.push(AppAction::RequestRepaint);
-                            }
-                            if self.eyedropper_active {
-                                ui.ctx().memory_mut(|memory| {
-                                    memory
-                                        .request_focus(egui::Id::unique(super::canvas::CANVAS_ID));
-                                });
-                            }
-                        }
-
-                        let invert_label = self.t(K::InvertColors);
-                        let invert_active = self.advanced.preprocess.invert;
-                        if quick_tool_button(
-                            ui,
-                            QuickTool::Invert,
-                            invert_active,
-                            !crop_editing,
-                            invert_label,
-                        )
-                        .clicked()
-                        {
-                            actions.push(AppAction::ToggleInvert);
-                        }
-                        let rotate_label = self.t(K::RotateQuick);
-                        if quick_tool_button(
-                            ui,
-                            QuickTool::Rotate,
-                            false,
-                            !crop_editing,
-                            rotate_label,
-                        )
-                        .clicked()
-                        {
-                            actions.push(AppAction::RotateQuick);
-                        }
-                    });
-
-                if let Some(anchor) = crop_button_rect
-                    && self.crop_edit.is_some()
-                {
-                    let presets_pos = crop_presets_position(anchor, content_rect, tools_on_left);
-                    egui::Area::new(egui::Id::unique("crop_presets"))
-                        .fixed_pos(presets_pos)
+                if has_image {
+                    let (tools_pos, tools_on_left) = quick_tools_position(panel_rect, content_rect);
+                    let mut crop_button_rect = None;
+                    egui::Area::new(egui::Id::unique("canvas_quick_tools"))
+                        .fixed_pos(tools_pos)
                         .order(Order::Foreground)
                         .constrain_to(content_rect)
                         .show(&ctx, |ui| {
-                            self.show_crop_presets(ui, &mut actions);
+                            ui.set_width(QUICK_TOOL_SIZE);
+                            ui.spacing_mut().item_spacing.y = QUICK_TOOL_GAP;
+                            let icon_mode = self.format == OutputFormat::Ico;
+                            let crop_editing = self.crop_edit.is_some();
+
+                            let has_unlocked = self.history.iter().any(|entry| !entry.locked);
+                            let clear_label = self.t(K::ClearHistory);
+                            if quick_tool_button(
+                                ui,
+                                QuickTool::Trash,
+                                false,
+                                has_unlocked,
+                                clear_label,
+                            )
+                            .clicked()
+                            {
+                                actions.push(AppAction::ClearHistory);
+                            }
+
+                            let crop_label = self.t(K::Crop);
+                            let crop_response = quick_tool_button(
+                                ui,
+                                QuickTool::Crop,
+                                crop_editing,
+                                !icon_mode,
+                                crop_label,
+                            );
+                            let crop_response = if icon_mode {
+                                crop_response.on_hover_text(self.t(K::CropUnavailableIco))
+                            } else {
+                                crop_response
+                            };
+                            if crop_response.clicked() {
+                                self.toggle_crop();
+                            }
+                            crop_button_rect = Some(crop_response.rect);
+                            let crop_editing = self.crop_edit.is_some();
+
+                            let eyedropper = eyedropper_button(
+                                ui,
+                                EyedropperButton {
+                                    active: self.eyedropper_active,
+                                    enabled: !icon_mode && !crop_editing,
+                                    label: self.t(K::Eyedropper),
+                                },
+                            );
+                            let eyedropper_hint = if icon_mode {
+                                self.t(K::EyedropperUnavailable)
+                            } else if self.eyedropper_active {
+                                self.t(K::DisableEyedropper)
+                            } else {
+                                self.t(K::EnableEyedropper)
+                            };
+                            let eyedropper = eyedropper.on_hover_text(eyedropper_hint);
+                            if !icon_mode && !crop_editing {
+                                if eyedropper.drag_started() {
+                                    self.eyedropper_active = true;
+                                    actions.push(AppAction::RequestRepaint);
+                                } else if eyedropper.clicked()
+                                    || (self.eyedropper_active
+                                        && eyedropper.clicked_by(egui::PointerButton::Secondary))
+                                {
+                                    self.eyedropper_active = !self.eyedropper_active;
+                                    actions.push(AppAction::RequestRepaint);
+                                }
+                                if self.eyedropper_active {
+                                    ui.ctx().memory_mut(|memory| {
+                                        memory.request_focus(egui::Id::unique(
+                                            super::canvas::CANVAS_ID,
+                                        ));
+                                    });
+                                }
+                            }
+
+                            let invert_label = self.t(K::InvertColors);
+                            let invert_active = self.advanced.preprocess.invert;
+                            if quick_tool_button(
+                                ui,
+                                QuickTool::Invert,
+                                invert_active,
+                                !crop_editing,
+                                invert_label,
+                            )
+                            .clicked()
+                            {
+                                actions.push(AppAction::ToggleInvert);
+                            }
+                            let rotate_label = self.t(K::RotateQuick);
+                            if quick_tool_button(
+                                ui,
+                                QuickTool::Rotate,
+                                false,
+                                !crop_editing,
+                                rotate_label,
+                            )
+                            .clicked()
+                            {
+                                actions.push(AppAction::RotateQuick);
+                            }
                         });
+
+                    if let Some(anchor) = crop_button_rect
+                        && self.crop_edit.is_some()
+                    {
+                        let presets_pos =
+                            crop_presets_position(anchor, content_rect, tools_on_left);
+                        egui::Area::new(egui::Id::unique("crop_presets"))
+                            .fixed_pos(presets_pos)
+                            .order(Order::Foreground)
+                            .constrain_to(content_rect)
+                            .show(&ctx, |ui| {
+                                self.show_crop_presets(ui, &mut actions);
+                            });
+                    }
                 }
 
                 egui::Area::new(egui::Id::unique("top_controls_overlay"))
@@ -392,17 +419,15 @@ impl HunkApp {
             actions.push(AppAction::RequestRepaint);
         }
 
-        if self.source.is_some() {
-            let label = match self.panel_side {
-                PanelSide::Right => self.t(K::PanelToLeft),
-                PanelSide::Left => self.t(K::PanelToRight),
-            };
-            let response = panel_side_button(ui, self.panel_side == PanelSide::Right, label);
-            if response.clicked() {
-                self.panel_side = self.panel_side.toggled();
-                actions.push(AppAction::PersistSettings);
-                actions.push(AppAction::RequestRepaint);
-            }
+        let label = match self.panel_side {
+            PanelSide::Right => self.t(K::PanelToLeft),
+            PanelSide::Left => self.t(K::PanelToRight),
+        };
+        let response = panel_side_button(ui, self.panel_side == PanelSide::Right, label);
+        if response.clicked() {
+            self.panel_side = self.panel_side.toggled();
+            actions.push(AppAction::PersistSettings);
+            actions.push(AppAction::RequestRepaint);
         }
 
         let light = self.theme.eq_ignore_ascii_case("light");
@@ -418,6 +443,23 @@ impl HunkApp {
             actions.push(AppAction::PersistSettings);
             actions.push(AppAction::RequestRepaint);
         }
+    }
+}
+
+fn empty_content_rect(canvas: Rect, panel_side: PanelSide) -> Rect {
+    // Reserva el hueco del panel de color por defecto. No usa su posición real:
+    // mover el panel no debe desplazar el mensaje del canvas.
+    let margin = 24.0;
+    let reserved = COLOR_PANEL_MARGIN + COLOR_PANEL_WIDTH + margin;
+    match panel_side {
+        PanelSide::Right => Rect::from_min_max(
+            pos2(canvas.left() + reserved, canvas.top() + margin),
+            canvas.max - vec2(margin, margin),
+        ),
+        PanelSide::Left => Rect::from_min_max(
+            canvas.min + vec2(margin, margin),
+            pos2(canvas.right() - reserved, canvas.bottom() - margin),
+        ),
     }
 }
 
@@ -489,6 +531,20 @@ mod tests {
         let (right_pos, on_left) = quick_tools_position(right_panel, content());
         assert!(on_left);
         assert_eq!(right_pos, pos2(912.0, 615.0));
+    }
+
+    #[test]
+    fn empty_content_reserves_the_default_color_panel_side() {
+        let canvas = Rect::from_min_size(pos2(20.0, 57.0), vec2(920.0, 886.0));
+
+        assert_eq!(
+            empty_content_rect(canvas, PanelSide::Right),
+            Rect::from_min_max(pos2(400.0, 81.0), pos2(916.0, 919.0))
+        );
+        assert_eq!(
+            empty_content_rect(canvas, PanelSide::Left),
+            Rect::from_min_max(pos2(44.0, 81.0), pos2(560.0, 919.0))
+        );
     }
 
     #[test]

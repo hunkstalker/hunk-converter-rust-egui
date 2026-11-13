@@ -492,12 +492,8 @@ impl eframe::App for HunkApp {
 
         let mut actions = Vec::new();
         self.show_footer(ui);
-        if self.source.is_some() {
-            actions.extend(self.show_sidebar(ui));
-            actions.extend(self.show_preview(ui));
-        } else {
-            actions.extend(self.show_empty(ui));
-        }
+        actions.extend(self.show_sidebar(ui));
+        actions.extend(self.show_preview(ui));
         self.apply_actions(&ctx, actions);
         self.show_toast(&ctx);
         self.maybe_screenshot(&ctx);

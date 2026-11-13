@@ -112,7 +112,13 @@ catalogue! {
         "Converteix, comprimeix, retalla i exporta sense sortir del teu equip.",
         "Convert, compress, crop and export without leaving your computer."
     ),
+    EmptyHint => (
+        "Arrastra una imagen aquí o pégala con Ctrl+V.",
+        "Arrossega una imatge aquí o enganxa-la amb Ctrl+V.",
+        "Drag an image here or paste it with Ctrl+V."
+    ),
     SelectImage => ("Seleccionar una imagen", "Selecciona una imatge", "Select an image"),
+    NoImage => ("Sin imagen", "Sense imatge", "No image"),
     PrivacyNote => (
         "Nada se sube a internet. Nada sale de esta ventana.",
         "Res no es puja a internet. Res no surt d'aquesta finestra.",
@@ -157,28 +163,6 @@ catalogue! {
         "Activa el comptagotes · també pots arrossegar fins a la imatge",
         "Enable eyedropper · you can also drag onto the image"
     ),
-    EyedropperIcoHint => (
-        "Cambia a cualquier formato de imagen para muestrear.",
-        "Canvia a qualsevol format d'imatge per mostrejar.",
-        "Switch to any image format to sample."
-    ),
-    SampleCapturedChoose => (
-        "Muestra capturada · elige otro píxel.",
-        "Mostra capturada · tria un altre píxel.",
-        "Sample captured · choose another pixel."
-    ),
-    SampleClickOrDrag => (
-        "Haz clic o arrastra sobre la imagen.",
-        "Fes clic o arrossega sobre la imatge.",
-        "Click or drag over the image."
-    ),
-    SampleCaptured => ("Muestra capturada.", "Mostra capturada.", "Sample captured."),
-    SampleFromHistory => ("Color del historial.", "Color de l'historial.", "Color from history."),
-    EyedropperIdle => (
-        "Pulsa el cuentagotas y elige un píxel.",
-        "Prem el comptagotes i tria un píxel.",
-        "Press the eyedropper and choose a pixel."
-    ),
     History => ("HISTORIAL", "HISTORIAL", "HISTORY"),
     MoveColorPanel => (
         "Arrastrar para mover · doble clic para restablecer",
@@ -197,39 +181,9 @@ catalogue! {
     ColorLockHover => ("clic derecho para fijar", "clic dret per fixar", "right-click to pin"),
     ColorUnlockHover => ("clic derecho para liberar", "clic dret per alliberar", "right-click to unpin"),
     ColorUseHover => ("clic para usar", "clic per usar", "click to use"),
-    Copy => ("Copiar", "Copia", "Copy"),
-    Copied => ("Copiado", "Copiat", "Copied"),
     Export => ("Exportar", "Exporta", "Export"),
-    ExportHint => (
-        "Elige la ruta al exportar.  Ctrl+S",
-        "Tria la ruta en exportar.  Ctrl+S",
-        "Choose the path when exporting.  Ctrl+S"
-    ),
     SaveImageAs => ("Guardar imagen como", "Desa la imatge com", "Save image as"),
-    Calculating => ("Calculando el resultado…", "Calculant el resultat…", "Calculating result…"),
     Preview => ("Vista previa", "Vista prèvia", "Preview"),
-    ComparatorDivider => (
-        "Divisor del comparador",
-        "Divisor del comparador",
-        "Comparison divider"
-    ),
-    DividerZoomHint => (
-        "Arrastra el divisor · rueda para zoom",
-        "Arrossega el divisor · roda per fer zoom",
-        "Drag the divider · wheel to zoom"
-    ),
-    PanZoomHint => (
-        "Rueda: zoom · clic derecho: mover",
-        "Roda: zoom · clic dret: moure",
-        "Wheel: zoom · right-click: pan"
-    ),
-    EyedropperActiveHint => (
-        "Cuentagotas activo · haz clic o arrastra sobre la imagen",
-        "Comptagotes actiu · fes clic o arrossega sobre la imatge",
-        "Eyedropper active · click or drag over the image"
-    ),
-    IcoGeneratedView => ("Vista del icono generado", "Vista de la icona generada", "Generated icon view"),
-    Processing => ("Procesando…", "Processant…", "Processing…"),
     PreparingResult => ("Preparando resultado…", "Preparant el resultat…", "Preparing result…"),
     GeneratingIcon => ("Generando icono…", "Generant la icona…", "Generating icon…"),
     Original => ("ORIGINAL", "ORIGINAL", "ORIGINAL"),
@@ -306,7 +260,6 @@ catalogue! {
         "Arrossega amunt o avall per ajustar; clic per escriure una expressió com 1600/4.",
         "Drag up or down to adjust; click to type an expression such as 1600/4."
     ),
-    Rotate => ("Rotación", "Rotació", "Rotation"),
     RotateQuick => ("Girar 90°", "Gira 90°", "Rotate 90°"),
     Crop => ("Recortar", "Retalla", "Crop"),
     CropFree => ("Libre", "Lliure", "Free"),
@@ -325,7 +278,6 @@ catalogue! {
     InvertColors => ("Invertir colores", "Inverteix els colors", "Invert colors"),
     Palette => ("Reducir paleta", "Redueix la paleta", "Reduce palette"),
     Colors => ("Colores", "Colors", "Colors"),
-    FormatAuto => ("Automático", "Automàtic", "Automatic"),
     FormatAutoShort => ("Auto", "Auto", "Auto"),
     FormatAutoCardHint => ("Según entrada", "Segons entrada", "From input"),
     FormatAutoHint => (

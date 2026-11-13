@@ -45,7 +45,8 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 
 ## Interfaz
 
-- Vista previa a pantalla completa con el **panel de ajustes a la derecha**.
+- Canvas principal. Sin imagen muestra el estado vacío dentro del propio lienzo, con arrastrar y soltar, `Ctrl+V` o selector de archivo. El panel lateral y el panel de color siguen visibles: permiten configurar formato y calidad, y consultar el historial de colores. El cuentagotas y las herramientas de imagen permanecen ocultos hasta cargar una imagen.
+- Con una imagen, vista previa con el **panel de ajustes a la derecha**.
 - Formato de salida en una cuadrícula de tarjetas: WebP, JPG, PNG, AVIF, Auto e ICO.
 - Historial y cuentagotas en una tarjeta flotante que se puede mover con un handle.
 - Las herramientas rápidas y el desplegable de recorte se colocan a la derecha o a la izquierda de la tarjeta; al cruzar el centro horizontal de la ventana pasan al lado izquierdo.
@@ -54,6 +55,8 @@ Todo el procesamiento ocurre en tu ordenador: no hay cuentas, subidas ni conexi�
 - Los controles superiores comparten altura y separación: `[tema] [panel] [ES] [Reiniciar]`. El icono muestra el modo activo —luna en oscuro, sol en claro— y el tooltip indica la acción. La barra de la ventana no cambia con el perfil: la dibuja el sistema operativo.
 
 ## Cuentagotas
+
+El panel de color se muestra desde el inicio: sin imagen solo enseña el historial y los códigos vacíos. El cuentagotas se activa al cargar una imagen.
 
 1. Carga una imagen.
 2. Pulsa el **icono de cuentagotas** en la tarjeta flotante inferior izquierda.
@@ -125,9 +128,9 @@ conserva y se puede quitar al volver a otro formato.
 
 ## Capturas
 
-| Inicio | Vista ICO |
+| Canvas vacío | Vista ICO |
 | --- | --- |
-| ![Pantalla de inicio](docs/hunk-converter-inicio.png) | ![Vista de icono](docs/hunk-converter-ico.png) |
+| ![Canvas vacío](docs/hunk-converter-inicio.png) | ![Vista de icono](docs/hunk-converter-ico.png) |
 
 Las capturas usan imágenes de muestra generadas por el propio proyecto.
 
@@ -257,7 +260,7 @@ cargo clippy --all-targets -- -D warnings
 cargo fmt --all -- --check
 ```
 
-La suite cubre 72 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantificador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, historial y bloqueos, configuración, perfiles de color y su ida y vuelta en `config.ini`, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste de todos los perfiles y navegación por teclado. También se ejecuta en GitHub Actions.
+La suite cubre 73 pruebas: codificación WebP/JPG/PNG/AVIF con AOM/JPEG XL, JPG progresivo y submuestreo automático, PNG sin pérdida con OxiPNG, WebP lossless/method/alfa, AVIF YUV420/cuantificador/alfa, preprocesado y opciones avanzadas sin persistencia, orientación EXIF y TIFF, compresiones TIFF, entrada TIFF de una página, matriz de entradas PNG/JPG/WebP/AVIF/BMP/TGA/TIFF/SVG, límites y errores, recorte antes de codificar, presets de proporción y conversión a píxeles, colocación del panel de color y del flyout, historial y bloqueos, configuración, perfiles de color y su ida y vuelta en `config.ini`, calidad, transparencia, aplanado JPG, estructura ICO, códigos de color, rasterización SVG, nombres de exportación, rutas portables, geometría de ventana, selección de formato, contraste de todos los perfiles y navegación por teclado. También se ejecuta en GitHub Actions.
 
 Al empujar un tag de versión, el workflow de release compila Linux Debian x86_64, Windows 10/11 x86_64 y macOS universal, y publica los artefactos y sus checksums en GitHub. Ver [`docs/ci.md`](docs/ci.md).
 

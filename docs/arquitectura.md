@@ -292,10 +292,11 @@ La suite cubre:
 - estructura ICO;
 - recorte antes de codificar, presets de proporción y conversión a píxeles;
 - colocación de las herramientas y del flyout de recorte según el espacio;
+- reserva estable del contenido del canvas vacío según el lado del panel;
 - códigos de color;
 - contraste WCAG de cada perfil y navegación por teclado.
 
-Estado actual: **72 pruebas**, `cargo fmt --check` y
+Estado actual: **73 pruebas**, `cargo fmt --check` y
 `cargo clippy --all-targets -- -D warnings` limpios.
 
 ## 8. Decisiones deliberadamente descartadas
